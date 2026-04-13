@@ -1,0 +1,496 @@
+[3/31/26, 8:05:06 AM] Saul: hola hermosxs, què tal si hacemos un jueguito breve para el mundial de futbol? algo como la polla de futbol? algo que hagamos rapido y que luego del mundial muera
+[3/31/26, 8:05:25 AM] Saul: mi familia juega disque la Polla, apostando chichiguas, pero la maneja un primo con una tabla de excel
+[3/31/26, 8:05:26 AM] Saul: jaja
+[3/31/26, 8:05:47 AM] Saul: me avisan si les suena
+[3/31/26, 8:05:48 AM] Saul: picos
+[3/31/26, 8:09:04 AM] Sergio Orozco: Me suena como se hace esa monda
+[3/31/26, 8:09:09 AM] Sergio Orozco: Yo la hacía en papel
+[4/1/26, 6:32:07 AM] Jhon: La polla le sonó de una a Sergio
+[4/1/26, 6:32:24 AM] Jhon: La quiniela le dicen en España paño confundir
+[4/1/26, 6:32:33 AM] Jhon: Hagamos esa verga
+[4/1/26, 6:36:58 AM] Sergio Orozco: Jajajajajajajajja
+[4/1/26, 6:37:06 AM] Sergio Orozco: App ?
+[4/1/26, 6:37:10 AM] Sergio Orozco: O web ?
+[4/1/26, 6:39:53 AM] Saul: pollas, vergas, etc
+[4/1/26, 6:39:58 AM] Saul: ustedes dos no tienen arreglo
+[4/1/26, 6:40:54 AM] Saul: PWA dirìa yo, web, algo como si fuera una polla entre tìos y primos, o un juego entre amigos de la oficina, mas ese estilo, nada super pro, pa eso esta la app de FIFA
+[4/1/26, 6:41:16 AM] Saul: Pero ojo, hay que ganar platica jajaj, mi familia se esta creciendo
+[4/1/26, 6:41:28 AM] Saul: asi sean chichiguas, pero nuestro tiempo es valioso amigxs
+[4/1/26, 6:47:02 AM] Jhon: Y han visto como manejan lo de la plata las que ya existen o todo es de palabra y ya?
+[4/1/26, 6:48:29 AM] Saul: Nosotros no manejaríamos la transacción ni los premios
+[4/1/26, 6:48:59 AM] Saul: Me refiero es que podemos tener una versión gratiniana para unos 4 jugadores y otra pagando si son más, por dar un ejemplo
+[4/1/26, 6:50:21 AM] Saul: Por ejemplo mi familia crearía una Polla ( o liga) y alguien la administra y agrega personas pa que participen…
+[4/1/26, 6:53:59 AM] Jhon: https://web.quiniel.com/ 
+
+Algo así
+[4/1/26, 6:55:50 AM] Saul: si, pero mas bacancita, mas cool y que no sea App pa evitar friccion, pero es el mismo principio si
+[4/1/26, 6:55:54 AM] Saul: no sè què opinan
+[4/1/26, 6:58:35 AM] Jhon: Sisi, pero estoy buscando referencias pa “copiar” jaja
+[4/1/26, 6:58:56 AM] Jhon: Y para no hacer lo mismo y que sea más cuca
+‎[4/1/26, 7:05:45 AM] Saul: aca una breve explicacion de lo que estaba pensando, pero todas sus ideas son maravillosos amigos, si podemos hacer algo mas chimbita que solo predecir resultados, mucho mejor, que se vuelva viral...la idea es que no haya login para los participantes, que con un codigo el Admin lo comparta por whatsapp que es donde esta todo mundo y con eso el que se meta haga parte de una liga ‎image omitted
+[4/1/26, 7:52:02 AM] Jhon: Let’s get this shit done
+[4/1/26, 7:52:09 AM] Jhon: https://github.com/gsd-build/get-shit-done
+[4/1/26, 7:52:28 AM] Jhon: @⁨Sergio Orozco⁩ ha probado eso
+[4/1/26, 8:02:50 AM] Sergio Orozco: Una vez jajaja por guevoniar jaja
+[4/1/26, 8:02:53 AM] Sergio Orozco: Pero si
+[4/3/26, 6:45:45 AM] Saul: me avisan muchachxs si siguen firmes y si podemos crear un mini-plan de trabajo, ponernos como meta 1 semana maximo
+[4/3/26, 6:46:08 AM] Saul: aun hay tiempo pero chevere lanzarlo incluso mucho antes de que comience el mundial, mucha gente le gusta comenzar a apostar rapidito
+[4/3/26, 6:46:31 AM] Saul: ademas no se si conocen https://code.visualstudio.com/ , apenas lo descubrí, se ve sabroso, facil y gratis aparentemente
+[4/3/26, 6:49:24 AM] Saul: osino yo puedo comenzar y ustedes se unen, la pulen o le meten mano
+[4/3/26, 6:53:54 AM] Jhon: Justo estaba pensando si habían más partidos amistosos o si ya se acabaron
+[4/3/26, 6:54:06 AM] Jhon: Que eso aguantaba para tener tracción
+[4/3/26, 6:55:02 AM] Jhon: Eso lo usa medio mundo de desarrollo y sobre eso es que han construido otros como cursor y antigravity
+[4/3/26, 6:57:52 AM] Saul: buen punto, un amigo ya comenzó una en su oficina, con hojas de excel, y disque lo que estan apostando antes de comenzar el mundial es quién va a ser campeon, luego los marcadores de cada juego y los pueden modificar justo antes de que inicie el primer partido el 11 de Junio
+‎[4/3/26, 8:13:28 AM] Saul: había pensado que se llamara Fuut o algo asi, sencillo y que fuera medio retro la interfwaz jajaj muy creepy? ‎image omitted
+‎[4/3/26, 8:13:44 AM] Saul: o algo mas infantil? ‎image omitted
+[4/3/26, 8:13:51 AM] Saul: o de pronto no nos toman en serio?
+[4/3/26, 12:25:53 PM] Jhon: Muy chimba retro
+[4/3/26, 12:27:29 PM] Sergio Orozco: esta muy chimba
+[4/3/26, 12:27:34 PM] Sergio Orozco: muy aletoso
+[4/3/26, 12:59:37 PM] Saul: Jaja pero me da susto que nos tomen como un chiste
+[4/3/26, 12:59:49 PM] Saul: Toca ensayar
+[4/3/26, 1:02:16 PM] Jhon: Pero eso puede ser bueno
+[4/3/26, 1:02:21 PM] Jhon: Si le sacamos provecho
+[4/3/26, 1:25:29 PM] Saul: Pixelart
+[4/3/26, 1:28:43 PM] Sergio Orozco: mk esta tan chimba
+[4/7/26, 9:48:42 PM] Jhon: Lo del easy invite aún no me cuadra del todo… si solo me piden nickname, entro la primera vez y pongo Sergay… y para entrar luego, tengo que volver a usar el mismo link con el código que me compartieron? 
+
+Pero ahí que pasa si yo ya entré una vez y puse un username? O lo que vos decías era que el código fuera por cada persona y ya si uno pone el nickname, ese código queda asociado al nickname?
+[4/8/26, 8:25:50 AM] Sergio Orozco: Jajajajajajajajajajaja
+[4/8/26, 8:25:53 AM] Sergio Orozco: Sergay
+[4/8/26, 8:52:51 AM] Jhon: Pero tiene sentido lo que pregunto?
+[4/8/26, 8:53:05 AM] Jhon: Anoche me senté a medio escribir las features
+[4/8/26, 8:53:12 AM] Jhon: Y me quedé con esa duda
+[4/8/26, 9:11:22 AM] Saul: Si, un solo código por persona
+[4/8/26, 9:13:16 AM] Saul: La idea es que haya 0 fricción en especial pa los viejitos, por eso pensaba un código que uno comparta por WhatsApp que es donde está todo mundo
+[4/8/26, 9:14:16 AM] Saul: Puede ser un código diferente por usuario
+[4/8/26, 11:59:41 AM] Jhon: Pero entonces la gente tiene que ingresar eee código cada vez que entre a la app?
+[4/8/26, 12:00:40 PM] Jhon: No se si eso es más fricción que crear una cuenta y que el login no expire rápido
+[4/8/26, 12:06:16 PM] Saul: No, solo la primera vez, es para inscribirse
+[4/8/26, 12:06:23 PM] Saul: Pero si tienen otras soluciones de una
+[4/8/26, 12:07:58 PM] Jhon: Pero como lo identificamos cuando entre de nuevo? Por ejemplo si la primera vez entra desde el tel y después quiere entrar desde un compu
+[4/8/26, 12:16:17 PM] Saul: Pues yo lo veía así: 
+El código de invitación se usa una sola vez, para poder entrar al juego.
+Luego el usuario debe meter un email para poder volver a entrar más tarde a la session
+[4/8/26, 12:17:53 PM] Saul: Mejor dicho, el código compartido por WhatsApp es para que la gente rapidito entre al juego sin necesidad de logearse. Supongo que en ese momento se crea en la base de datos una sesión anónima que funciona si el usuario siempre entra desde el mismo teléfono. Pero se le advierte al usuario de que mejor meta un email
+[4/8/26, 12:18:10 PM] Saul: No sé si me explico, o muy enredado muchachxs?
+[4/8/26, 12:18:16 PM] Jhon: Ah bueno ya eso es diferente. Si le pide email ya es lo mismo que crear cuenta…
+[4/8/26, 12:18:38 PM] Jhon: Es que uno no puede identificar automágicamente desde que tel está entrando
+[4/8/26, 12:18:53 PM] Saul: Pero digamos que pa entrar de una y meter resultados, con el código de invitación basta y aterriza de una vez en las predicciones
+[4/8/26, 12:20:08 PM] Jhon: Puede ser que lo deje llenar predicciones y se le pida el email (crear cuenta) apenas las vaya a mandar
+[4/8/26, 12:20:26 PM] Saul: Buena idea
+[4/8/26, 12:20:36 PM] Jhon: Pero si llena una predicción con el solo código y cierra, chao, se pierde
+[4/8/26, 12:21:03 PM] Saul: Tons tiene que llenar todo en una sola sentada
+[4/8/26, 12:21:27 PM] Saul: Son como 100 partidos
+[4/8/26, 12:22:13 PM] Jhon: Si vuelve a usar el mismo link con el código luego, ya en base de datos está asociado el código con su correo (y un password obviamente) entonces puede llenar otro partido
+[4/8/26, 12:22:45 PM] Jhon: Nono, solo la primera vez que vaya a llenar el pronóstico de un partido, le pedimos que llene correo y contraseña
+[4/8/26, 12:24:06 PM] Jhon: Luego puede entrar o usando el mismo link (con el código ahí ya automático)  o usando la app directo con el correo. En ambos casos si ya creó la cuenta, le pedimos el password
+[4/8/26, 12:24:57 PM] Jhon: Se puede hacer que quede loggeado por mucho tiempo así se evita lo del password
+[4/8/26, 12:25:16 PM] Jhon: Pero si o si hay que tener una forma de identificarlo luego
+[4/8/26, 12:27:20 PM] Saul: Por otro lado. Tienes features bacanos para agregarle? Yo ya estaba trabajando en un prototipo con lo básico pero si tienen ideas me avisan y los agrego
+[4/8/26, 1:15:43 PM] Jhon: Pues estaba pensando en una pero no sé qué tanto pegue…
+[4/8/26, 1:16:43 PM] Jhon: Cómo poder proponer una apuesta especial, como por ejemplo cuántos goles hace C jugador, o cuantos minutos dura el partido, o cosas random como si alguien se mete a la cancha
+[4/8/26, 1:17:13 PM] Jhon: Los gringos apuestan a todo… pero no se si los fans de fútbol también lo hagan
+[4/8/26, 1:17:26 PM] Jhon: Sería algo más divertido que la polla normal
+[4/8/26, 1:43:20 PM] Saul: Me gusta
+[4/8/26, 1:43:28 PM] Saul: Puede ser de extra puntos
+[4/8/26, 1:43:36 PM] Saul: Acertar en vainas random
+[4/8/26, 1:46:46 PM] Jhon: Si, lo había pensado como que el dueño de la liga defina esas apuestas random para ciertos partidos, como opcionales de pronto. O que los miembros puedan también proponerlas y el admin las acepte, pero no se si se complica ya mucho
+[4/8/26, 1:47:54 PM] Saul: Es breve
+[4/8/26, 1:48:01 PM] Saul: Pa ganar mini punticos
+[4/8/26, 1:48:40 PM] Sergio Orozco: Oe @⁨Jhon⁩  como lo vana pedalear
+[4/8/26, 1:48:52 PM] Sergio Orozco: Le va a entregar todo eso al ia lord ?
+[4/8/26, 1:50:28 PM] Jhon: Claaaa, por eso estoy tratando de documentar bien los specs
+[4/8/26, 1:50:46 PM] Saul: Todo todito
+[4/8/26, 1:50:48 PM] Jhon: Podemos dividirnos el orqustamiento por ejemplo
+‎[4/8/26, 1:50:55 PM] Sergio Orozco: ‎audio omitted
+[4/8/26, 1:50:57 PM] Jhon: Por features
+[4/8/26, 1:50:58 PM] Saul: Pero las ideas nosotros
+‎[4/8/26, 1:51:10 PM] Sergio Orozco: ‎sticker omitted
+[4/8/26, 1:51:13 PM] Saul: Yo diría que en Claude Code y ahí aprendemos
+[4/8/26, 1:51:27 PM] Jhon: Yo si llevo rato usando Claude code pero en el trabajo
+[4/8/26, 1:51:36 PM] Jhon: Eso es muy brutal
+[4/8/26, 1:51:52 PM] Saul: Instalarlo cada uno en su compu
+[4/8/26, 1:51:54 PM] Jhon: Anoche probé con un modelo local pero la máquina no me da pa tanto
+[4/8/26, 1:52:06 PM] Jhon: Pues, Claude code con modelo local
+[4/8/26, 1:52:14 PM] Saul: Creamos algo en equipo, eso si, creo que cada uno tendría que pagar el plan mensual
+[4/8/26, 1:52:36 PM] Jhon: Apenas fue capaz de crear una estructura de archivos y se murió jaja
+[4/8/26, 1:52:45 PM] Jhon: Si eso toca así obvio
+[4/8/26, 1:53:16 PM] Jhon: https://github.com/rtk-ai/rtk
+
+Pa ahorrar tokens
+[4/8/26, 1:53:20 PM] Saul: Yo ya había creado algo breve en Lovable pero pensaba pasarlo a Claude Code, les muestro mañana antes de seguir gastando tokens
+[4/8/26, 1:55:41 PM] Saul: O hagan ustedes dos esa mierda y yo al final le meto el visual sabroso
+[4/8/26, 1:55:56 PM] Saul: Peor eso si, que todo estemos en el mismo proyecto en Claude Code
+[4/8/26, 1:56:51 PM] Jhon: En el mismo repo de GitHub
+[4/8/26, 1:57:25 PM] Jhon: De esto qué tenes bebé? Tenes algo que puedas exportar?
+[4/8/26, 1:58:04 PM] Jhon: La idea sería que también nos ayude con el visual a partir de lo que vos hayas diseñado
+[4/8/26, 1:58:23 PM] Saul: Si si pero ya ando en la cama
+[4/8/26, 1:58:37 PM] Saul: Mañana verán lo que llevaba
+[4/8/26, 1:59:57 PM] Jhon: Vaya duerma bebé, picos
+‎[4/8/26, 2:00:22 PM] Sergio Orozco: ‎sticker omitted
+‎[4/8/26, 2:00:24 PM] Sergio Orozco: ‎sticker omitted
+[4/9/26, 12:25:30 AM] Saul: yo dirìa que al reves, comenzar con algo funcional y al final le doy una maquilladita con el estilo que quiero
+[4/9/26, 12:25:41 AM] Saul: pero tambien podemos comenzar con lo que ya tengo, pille les muestro:
+[4/9/26, 1:21:11 AM] Saul: https://fuut2026.lovable.app/ aun no tiene los graficos que quiero, mas tarde
+[4/9/26, 1:21:34 AM] Saul: pero es la funcionalidad que habìa imaginado, para ingresar pueden meter cualquier codigo de invitacion y va a funcionar, es un prototipo con datos quemados ‎<This message was edited>
+[4/9/26, 1:26:10 AM] Saul: si quieren, hagamos el prototipo perfecto antes de pasar a claude, me dan feedback, etc, lo termino en Lovable, luego es breve pasar el codigo a Claude code ‎<This message was edited>
+[4/9/26, 1:26:22 AM] Saul: o si queiren van preparando algo en Claude, para ganar tiempo? ‎<This message was edited>
+[4/9/26, 1:28:48 AM] Saul: Fuut
+[4/9/26, 3:29:45 AM] Sergio Orozco: Meto
+[4/9/26, 7:09:22 AM] Saul: epa
+[4/9/26, 7:09:30 AM] Saul: me dicen a ver còmo procedemos
+[4/9/26, 7:10:09 AM] Sergio Orozco: Men lo de siempre haga los mocks básicos y luego lo pasamos con la ia
+[4/9/26, 11:33:49 AM] Jhon: https://www.instagram.com/reel/DW6r3T9gYrM/?igsh=MTd0cTE3ajd2bGl3NQ==
+
+Otro pa probar para ahorrar tokens
+[4/9/26, 11:33:54 AM] Jhon: Puro cavernícola
+[4/9/26, 11:38:25 AM] Saul: Muy buena
+[4/9/26, 12:07:46 PM] Saul: @⁨Jhon⁩ échale un ojito y me decís qué tal
+[4/9/26, 2:02:53 PM] Jhon: Sisas, ahí lo vi por encima. Mas tarde lo reviso bien
+[4/10/26, 8:49:55 AM] Saul: perdòn, pero no me pegue
+[4/10/26, 8:50:23 AM] Jhon: Pues no se haga pegar bebé, es que también
+[4/10/26, 8:50:40 AM] Jhon: Oiga más bien consíganos trabajo allá
+[4/10/26, 8:50:46 AM] Jhon: Que pereza América ome
+[4/10/26, 8:51:21 AM] Saul: ahghs como asi ome, què pasa.? cuente
+[4/10/26, 8:51:25 AM] Saul: pensè que estabas contento
+[4/10/26, 8:51:58 AM] Jhon: Si pero no sabemos por cuánto tiempo jaja
+[4/10/26, 8:52:17 AM] Jhon: Está poniéndose todo más cagado todos los días
+[4/10/26, 8:55:16 AM] Saul: con temas de ICE, policia y demas? o temas de visa? què es lo que mas azara?
+[4/10/26, 9:27:34 AM] Jhon: Que el sueño americano se esfumó
+[4/10/26, 9:27:49 AM] Jhon: Ya quiero el sueño europeo donde la educación es más barata o gratis
+[4/10/26, 9:31:48 AM] Saul: Y el vino y la champaña es más barata que el agua
+[4/10/26, 9:34:47 AM] Saul: Nos hacemos una hackaton este finde? Y ahí sacamos lo que haya que sacar? O un otro día?
+[4/10/26, 9:35:46 AM] Jhon: Este finde aguanta dedicarle unas horas al menos
+[4/10/26, 9:36:12 AM] Saul: Yo le tengo fe a que nos llamemos Mini Gorila y hagamos solo Mini Sass que den plática, herramientas útiles en muchos sectores
+[4/10/26, 9:36:28 AM] Saul: Jajaj o el nombre que quieran; pero hagamos una primera y aprendemos con esa
+[4/10/26, 9:40:28 AM] Jhon: Para mí el futuro próximo es implementarle AI a empresas mini
+[4/10/26, 9:40:43 AM] Saul: Agentes a las panaderías de barrio
+[4/10/26, 9:40:44 AM] Jhon: Resolverles problemas a restaurantes o cafés como el tuyo
+[4/10/26, 9:40:48 AM] Jhon: Eso mismo
+[4/10/26, 9:41:00 AM] Saul: Sí claro, a los negocios tradicionales
+[4/10/26, 9:41:04 AM] Jhon: Me emputa que en Colombia nada funciona remoto
+[4/10/26, 9:41:47 AM] Jhon: Cómprele a sus papás un mercado desde lejos pues y que todo le salga bien y se lo lleven a la casa
+[4/10/26, 9:41:54 AM] Jhon: Es una odisea
+[4/10/26, 9:43:08 AM] Jhon: Por ejemplo pa mandarles algo de cumpleaños, toca que alguien que esté allá le haga a uno el favor. Muy poquitos negocios tienen esas cosas resueltas
+[4/10/26, 9:45:20 AM] Saul: Si, he tenido mil problemas con esas gestiones
+[4/10/26, 9:45:38 AM] Saul: Ahora ando con temas de sacar papeles en las notarías colombianas y desde acá no puede uno hacer nada
+[4/10/26, 9:49:29 AM] Jhon: Eso ya es otro nivel de inutilidad con esos hps
+[4/10/26, 10:10:02 AM] Saul: Yo creo que problemas hay muchos y ahora tenemos la oportunidad única de solucionarlos sin tanta inversión de tiempo y plata.
+[4/10/26, 10:10:44 AM] Saul: Tenemos es que lanzar una primera vaina y con esa aprender a venderla
+[4/10/26, 10:10:58 AM] Saul: Así la segunda será más breve
+[4/10/26, 10:59:56 AM] Jhon: Si, de acuerdo. Tenemos que hacer la primera pa ver cómo la movemos o la pivotamos
+[4/10/26, 11:00:28 AM] Jhon: Lo mejor es que tenemos casos cercanos (vos, una prima que tiene restaurantes…) pa probar y ver si funciona
+‎[4/10/26, 12:27:10 PM] Saul: hoy por primera vez paguè Claude Code, ando jugando con cositas ‎image omitted
+[4/10/26, 12:27:13 PM] Saul: que miedo esa vaina !
+[4/10/26, 12:27:24 PM] Saul: ahora comienzo a entender el boom de esta maricada
+[4/10/26, 12:27:29 PM] Saul: da miedo, no?
+[4/10/26, 12:27:53 PM] Saul: son puros Agentes camellando sin quejarse
+‎[4/10/26, 12:31:54 PM] Jhon: ‎sticker omitted
+[4/10/26, 12:36:26 PM] Sergio Orozco: Estoy leyendo todo el spam
+[4/10/26, 1:06:45 PM] Saul: Mucha dopamina, no? es una droga
+[4/10/26, 1:06:49 PM] Saul: mejor me abro a dormir
+[4/10/26, 1:07:07 PM] Saul: mas malo que el perico
+[4/10/26, 1:07:11 PM] Sergio Orozco: Mk no es que he estado corriendo porque el proyecto que llevo un año se entregó esta semana
+[4/10/26, 1:07:12 PM] Sergio Orozco: Jajajajaja
+[4/10/26, 1:18:06 PM] Jhon: Y más caro también
+[4/10/26, 1:18:38 PM] Sergio Orozco: El perico es más sano
+[4/10/26, 1:18:43 PM] Jhon: Le montaron unas herramientas UNA CHIMBA hace poco. Superpowers es una
+[4/10/26, 1:19:49 PM] Jhon: Ya cuando uno lleva tiempo usándolo, /insights revisa todas las sesiones y le da a uno tips de cómo usarlo mejor y le muestra un montón de info una cuca
+[4/10/26, 1:20:14 PM] Jhon: Hay otra que le crea tutoriales para aprender a usar Claude basado en esos insights
+[4/10/26, 1:22:28 PM] Saul: el tema de los Skills, apenas ando leyendo
+[4/10/26, 1:22:52 PM] Saul: es decirle: vea, agarre los skills de un super designer y apliquelos en mi proyecto
+[4/10/26, 1:24:16 PM] Jhon: Es muy brutal todo el concepto de plugins
+[4/10/26, 1:32:21 PM] Saul: El Coworking? Es otra interfaz
+[4/10/26, 1:32:49 PM] Saul: Si servirá pa algo? O mejor no gastar tokens en esa vaina ?
+[4/10/26, 1:33:27 PM] Jhon: No a esa aún no le meta
+[4/10/26, 1:33:49 PM] Jhon: Eso es cuando quiera automatizar cosas usando el computador, como open claw
+[4/10/26, 1:34:47 PM] Saul: La última pregunta antes de irme a mirar pa dentro 💤
+[4/10/26, 1:35:05 PM] Saul: Trabajar con otros usuarios? Si cree un proyecto y quiero meterlos a ustedes por ejemplo
+[4/10/26, 1:35:13 PM] Saul: Toca cambiarme de plan! ?
+[4/10/26, 1:40:03 PM] Jhon: No, lo que hacemos es que todos trabajamos en un repositorio de GitHub
+[4/10/26, 1:40:20 PM] Jhon: Y cada uno tiene su esclavo (Claude).
+[4/10/26, 1:40:39 PM] Jhon: Por eso es importante tener los features y una buena estructura desde el principio
+[4/10/26, 1:43:21 PM] Jhon: Con eso, usamos algo como get shit done o /superpowers:brainstorming para que cree un plan de trabajo
+[4/11/26, 1:22:27 AM] Saul: Listo papi
+[4/11/26, 3:02:17 AM] Saul: ‎This message was deleted.
+[4/11/26, 3:03:32 AM] Saul: por ahora los features son los basicos:
+1. inscribirse a una liga
+2. meter predicciones de resultados
+3. mirar el ranking de puntos y posiciones
+4. el Admin puede agregar resultados manualmente, invitar nuevos miembros, etc
+5. le metì un poco de pixelart, pero mas tarde le meto mas gallitos y detalles
+[4/11/26, 3:04:07 AM] Saul: saquenle el ratico porfa, quiero dejar listo el prototipo este finde...necesito feedback, si quieren le metemos otros features
+[4/11/26, 3:04:21 AM] Saul: 6. todo esta en Github y Supabase
+[4/11/26, 3:05:49 AM] Saul: inspiracion: las maquinitas de futbol que tenìan las tiendas de barrio en Medellin, ahi chimbiaba yo mucho despues de salir del colegio
+[4/11/26, 3:54:49 AM] Saul: revisen: https://fuut2026-main.vercel.app/
+[4/11/26, 7:48:47 AM] Jhon: Apenas uno entra, cae en un partido para poner el resultado
+[4/11/26, 7:49:07 AM] Jhon: Eso es un feature o un bug?
+‎[4/11/26, 7:50:41 AM] Jhon: Esa forma de poner el marcador está buena ‎image omitted
+[4/11/26, 7:51:26 AM] Jhon: Lo de abajo de que predicen los otros es algo normal en esas quinielas?
+‎[4/11/26, 7:54:21 AM] Jhon: En esta aparecerían todos los partidos por día? Podríamos ponerle un filtro que sea para verlos por día o por grupo ‎image omitted
+[4/11/26, 7:54:52 AM] Jhon: Como dos formas de visualizar
+[4/11/26, 7:58:50 AM] Saul: Feature que podemos obviar, la idea era mostrar más detalle de cada match o pillen abajo el tema de las predicciones de los otros, es un juego psicológico
+[4/11/26, 7:59:08 AM] Saul: Como ordene !
+[4/11/26, 8:00:21 AM] Jhon: Los que salen como locked es que ya pasó?
+[4/11/26, 8:00:29 AM] Saul: Que otra cosa? Le metemos el tema de las predicciones charras que había dicho Joncito? Sumar mini puntos
+[4/11/26, 8:00:52 AM] Saul: Si, ya es tarde porque ya el partido comenzó
+[4/11/26, 8:01:07 AM] Jhon: Eso puede ser un feature adicional cuando ya tengamos algo andando o que?
+[4/11/26, 8:01:20 AM] Jhon: Tolis
+[4/11/26, 8:02:52 AM] Saul: Lo apago por ahora
+[4/11/26, 8:04:28 AM] Jhon: Se ve muy chimba así con ese diseño
+[4/11/26, 8:04:58 AM] Saul: Puedo quitarlo también, que llegue de una vez a la lista de todos los partidos?
+[4/11/26, 8:05:27 AM] Jhon: Si, creo que es mejor
+[4/11/26, 8:05:43 AM] Jhon: Eso lo monto en un repo de GitHub?
+[4/11/26, 8:07:45 AM] Jhon: https://github.com/jaiversin
+
+Cuando lo subas, lo podes compartir pa nosotros poder verlo
+[4/11/26, 8:08:37 AM] Saul: Ojalá nos tomen en serio y no crean que es un juego de niños
+[4/11/26, 8:11:03 AM] Saul: https://github.com/mrsaul/fuut2026
+[4/11/26, 8:14:45 AM] Saul: Deployment en Vercel
+[4/11/26, 8:16:30 AM] Jhon: Tenes que entrar y agregarnos como colaboradores
+[4/11/26, 8:17:04 AM] Jhon: En settings del repo, collaborators and teams
+[4/11/26, 8:19:05 AM] Saul: Listo
+[4/11/26, 8:23:18 AM] Jhon: Listo
+[4/11/26, 8:23:40 AM] Saul: Algo mas? A Vercel o a Supabase? Ya están conectados también.
+[4/11/26, 8:24:49 AM] Saul: Lo que estoy haciendo pa no cagarla es no tocar Claude code por ahora, es decir, prototipo en Lovable
+[4/11/26, 8:25:21 AM] Saul: Pero si quieren hacer algo, metanle mano sin miedo
+[4/11/26, 8:33:10 AM] Jhon: Supongo que tendría que hacer lo mismo, algo por invitación
+[4/11/26, 8:33:17 AM] Jhon: Pero eso mismo quería ver
+[4/11/26, 8:33:32 AM] Jhon: Cuál es tu proceso para poder ver cómo nos integramos ahí
+[4/11/26, 8:37:04 AM] Saul: Como ordene
+[4/11/26, 8:38:19 AM] Saul: Mi proceso: Lovable sin conectar a base de datos desde Lovable; solo prototipo mockup…pero está sincronizado con GitHub y GitHub con Vercel
+[4/11/26, 8:38:42 AM] Saul: Pero; la base de datos la conecté a Supabase desde Claude code
+[4/11/26, 8:39:48 AM] Saul: No se si está bien asi o la cagué…no me regañe
+‎[4/11/26, 8:39:55 AM] Jhon: ‎sticker omitted
+[4/11/26, 8:40:27 AM] Jhon: Es que estoy tratando de armarme el flujo de trabajo en la cabeza
+[4/11/26, 8:40:58 AM] Jhon: Lo que haces en lovable, lo sube a GitHub todo, cierto?
+[4/11/26, 8:41:45 AM] Saul: Si señor
+[4/11/26, 8:42:33 AM] Jhon: Y lo que hace Claude también en teoría debería poderlo subir a GitHub pero diciéndole explícitamente que no suba ningún secret como api keys o claves de bd
+[4/11/26, 8:42:33 AM] Saul: Todo lo que es Ui en Lovable
+[4/11/26, 8:42:42 AM] Saul: Incluso los features
+[4/11/26, 8:43:20 AM] Jhon: Claude es el que ya te desplegó a vercel?
+[4/11/26, 8:43:50 AM] Saul: Cada que hago algo en Lovable le digo esto como primer prompt: ojo marica con tocar la base da datos de Supabase
+[4/11/26, 8:44:11 AM] Saul: Si señor, anoche aprendí a hacer esa vuelta y lo hice desde Claude
+[4/11/26, 8:45:33 AM] Jhon: Y cuando abres Claude, lo pones a trabajar desde la carpeta donde tienes el .git?
+[4/11/26, 8:46:21 AM] Saul: Si, confirmado, pero desde anoche no he tocado Claude ni lo quiero hacer, solo si ustedes me dejan…por ahora Lovable y sync con GitHub
+‎[4/11/26, 8:48:55 AM] Jhon: ‎audio omitted
+[4/11/26, 8:49:06 AM] Jhon: Perdón por el podcast
+[4/11/26, 8:49:23 AM] Saul: Que bella voz
+[4/11/26, 8:49:31 AM] Saul: Obvio, usted pilotea
+[4/11/26, 8:49:36 AM] Saul: Somos tus esclavos
+[4/11/26, 8:50:15 AM] Saul: Si, hagamos eso, yo me encargo de Lovable - GitHub
+[4/11/26, 8:50:22 AM] Saul: Y hasta ahí llego yo
+[4/11/26, 8:50:34 AM] Saul: Y ustedes se pegan de ahí
+[4/11/26, 8:50:35 AM] Saul: Creo
+[4/11/26, 8:50:46 AM] Saul: Listo hagamos la estructura
+[4/11/26, 8:51:09 AM] Jhon: Yo me encargo de hacer una estructura base
+[4/11/26, 8:51:20 AM] Jhon: A ver si Claude respeta el prototipo
+[4/11/26, 8:51:42 AM] Jhon: Por la noche le doy a eso
+[4/11/26, 8:51:43 AM] Saul: Muy clarito todo
+[4/11/26, 8:52:17 AM] Saul: De todas maneras en un rato los voy a meter a los dos al proyecto de Vercel y Supabase
+[4/11/26, 8:52:25 AM] Jhon: Tolis
+[4/11/26, 8:52:48 AM] Jhon: Bueno, yo estaba averiguando también pa crear la llc acá
+[4/11/26, 8:53:03 AM] Saul: Hay dos vainas pegadas a GitHub: Lovable y Claude
+[4/11/26, 8:53:21 AM] Saul: Pero; la base de datos solo se modifica desde Claude Code
+[4/11/26, 8:53:21 AM] Sergio Orozco: 2 years ago
+[4/11/26, 8:53:51 AM] Sergio Orozco: leyendo apenas revivo
+[4/11/26, 8:53:53 AM] Jhon: Me demoro una semana en cuanto empiece a hacer el proceso
+[4/11/26, 8:54:08 AM] Saul: El mundial comienza pronto
+[4/11/26, 8:54:17 AM] Sergio Orozco: vas a pedir $$?
+[4/11/26, 8:54:27 AM] Sergio Orozco: o solo por goma bebé
+[4/11/26, 8:54:29 AM] Jhon: Tenemos que ver cuáles opciones ponemos pagas
+[4/11/26, 8:54:32 AM] Saul: Por ahora voy a trabajar un poquito en marketing, un landinosge o algo asi, una cuenta breve de IG
+[4/11/26, 8:55:16 AM] Jhon: Pa marketing esos vídeos que pusiste de píxel art ❤️❤️❤️
+[4/11/26, 8:55:28 AM] Saul: Pensémosle; diría que máximo 10 personas gratis y de ahí pa arriba cobrar? Comenzamos con familia y amigos gratis…con los vagos de Igaaps por ejemplo
+[4/11/26, 8:55:37 AM] Sergio Orozco: hey ya pague la de 100 usd
+[4/11/26, 8:55:38 AM] Sergio Orozco: jajaja
+[4/11/26, 8:55:42 AM] Sergio Orozco: no la puedo dejar perder
+[4/11/26, 8:55:42 AM] Sergio Orozco: jajajaja
+[4/11/26, 8:55:57 AM] Saul: Listo, cobrar alguito
+[4/11/26, 8:56:17 AM] Sergio Orozco: ahora tengo es que ver que tanto puedo hacer recién uso Claude no había podido mirar mucho por mi labor y mis vicios
+[4/11/26, 8:56:22 AM] Sergio Orozco: laburo
+[4/11/26, 8:56:37 AM] Sergio Orozco: como la cocaina y las malas
+[4/11/26, 8:57:04 AM] Sergio Orozco: esta brutal el pixel art por cierto casi te pido el codigo
+[4/11/26, 8:57:10 AM] Jhon: Pero no nos enfoquemos en eso por ahora
+[4/11/26, 8:57:39 AM] Jhon: Metamosle a que quede chimba y bien fácil de usar
+[4/11/26, 8:57:58 AM] Saul: Y hacemos mobile app o sería complicarnos? Yo digo es pa entrenarnos lanzando una app
+[4/11/26, 8:58:12 AM] Saul: Si señor como ordene
+[4/11/26, 8:58:29 AM] Jhon: Yo diría que no le metamos a app por ahora
+[4/11/26, 8:58:47 AM] Jhon: El proceso es diferente desde el principio
+[4/11/26, 8:59:16 AM] Saul: Wpa
+[4/11/26, 8:59:18 AM] Saul: De una
+[4/11/26, 8:59:21 AM] Saul: Perdón
+[4/11/26, 9:00:32 AM] Jhon: Es que me quedo a medias en los mensajes porque estoy acá vistiendo una criaturita
+[4/11/26, 9:00:53 AM] Jhon: Toca mensajes de voz, no me maten
+[4/11/26, 9:31:23 AM] Saul: La criatura sos vos
+‎[4/11/26, 9:56:46 AM] Jhon: ‎sticker omitted
+[4/11/26, 10:50:52 AM] Saul: Ese es tu Pipi?
+[4/11/26, 10:53:21 AM] Jhon: Ojalá, eso está enorme
+[4/11/26, 11:47:21 AM] Jhon: ***
+
+## Objetivo
+
+Definir un flujo de trabajo claro para que:
+- **el diseñador** prototipe en Lovable,
+- **el arquitecto** traduzca el prototipo a una base técnica sólida,
+- **los ingenieros** implementen con apoyo de agentes de IA,
+- y todo el proceso mantenga control, calidad y trazabilidad.
+
+## Resumen del flujo
+
+### 1. Diseño
+El diseñador crea un prototipo funcional en Lovable para validar:
+- flujos de usuario,
+- pantallas,
+- estados vacíos / loading / error,
+- navegación,
+- intención visual.
+
+**Salida:** prototipo + notas de handoff.
+
+### 2. Arquitectura
+El arquitecto toma el prototipo y define:
+- estructura del repositorio,
+- modelo de dominio,
+- contratos de API,
+- documentación,
+- definición de agentes,
+- reglas y límites.
+
+**Salida:** blueprint técnico + documentación base + tareas preparadas.
+
+### 3. Implementación
+El ingeniero toma tareas pequeñas y usa un agente para ayudar a implementarlas.
+
+**Regla clave:** el agente no recibe “haz toda la app”, sino tareas concretas con:
+- objetivo,
+- alcance,
+- archivos permitidos,
+- restricciones,
+- criterios de aceptación,
+- validación.
+
+### 4. Revisión
+Antes de merge:
+- revisar diff,
+- correr tests,
+- validar arquitectura,
+- revisar seguridad,
+- actualizar documentación.
+
+***
+
+## Principios clave
+
+1. **Lovable sirve para prototipar, no para definir la producción.**
+2. **El arquitecto define el sistema, no solo la app.**
+3. **El ingeniero usa IA como acelerador, no como reemplazo del criterio técnico.**
+4. **Toda tarea debe ser pequeña, clara y verificable.**
+5. **Prompts, políticas y tareas deben vivir en el repo.**
+6. **Cambios sensibles requieren revisión humana.**
+
+***
+
+## Estructura recomendada del repo
+
+- `docs/product/`
+- `docs/architecture/`
+- `docs/engineering/`
+- `docs/agents/`
+- `.ai/prompts/`
+- `.ai/policies/`
+- `.ai/tasks/`
+- `src/`
+- `infra/`
+
+***
+
+## Entregables por rol
+
+### Diseñador
+- Prototipo funcional.
+- Lista de pantallas.
+- Notas UX.
+- Edge cases.
+- Decisiones que deben conservarse.
+
+### Arquitecto
+- System overview.
+- Domain model.
+- Capability matrix.
+- ADRs.
+- Definición de agentes.
+- Task breakdown.
+
+### Ingeniero
+- Código productivo.
+- Tests.
+- PRs.
+- Evidencia de validación.
+- Correcciones según revisión.
+
+***
+
+## Diagrama mental del proceso
+
+**Idea → Prototipo en Lovable → Blueprint técnico → Tareas pequeñas → Implementación con agente → Revisión humana → Tests → Merge**
+
+***
+
+## Recomendación práctica
+
+Si quieres que esto funcione de verdad, empieza con tres documentos:
+1. `lovable-handoff.md`
+2. `system-overview.md`
+3. `capability-matrix.md`
+
+Después agrega:
+4. `definition-of-done.md`
+5. `AGENTS.md`
+6. `.ai/prompts/`
+
+Eso te da un flujo mínimo pero serio, fácil de adoptar por el equipo.
+[4/11/26, 11:49:44 AM] Jhon: Esa es la versión para chat, ya estoy haciendo una versión para subir al repo y que nos guíe a nosotros y a los modelos
+[4/11/26, 11:52:11 AM] Jhon: Porfa revísenlo y me dicen si les hace sentido el flujo
+[4/11/26, 12:28:42 PM] Saul: Revisando…
+[4/11/26, 12:30:58 PM] Saul: Está brutal
+[4/11/26, 12:31:24 PM] Saul: Si tomamos esto en serio, yo hago mi parte bien hecha, tarea por tarea
+[4/11/26, 12:31:39 PM] Saul: Incluso mañana mismo comienzo a pulir y a hacer mis entregables
+[4/11/26, 12:43:27 PM] Saul: Me han estado dando ideas que harían de esto algo más entetenido. Acá van:
+- predecir si Trump estará en el estadio o alguien famoso
+- ⁠predecir si habrá algún penalty en el partido
+- ⁠predecir qué jugador jugará o no
+- ⁠predecir cuántas veces el arbrito irá al VAR
+- ⁠antes de comenzar el mundial: ósea ya…escoger el país que va a ganar el mundial
+[4/11/26, 12:43:29 PM] Saul: etc
+[4/11/26, 12:43:47 PM] Saul: Vainas random que entretengan la gente mientras ven el partido
+[4/11/26, 3:37:14 PM] Jhon: Eso era lo que te decía de cosas random, la pregunta es si esas apuestas las tiramos nosotros o dejamos que el dueño de la liga ponga las que quiera (con cierto límite)
+[4/11/26, 3:37:53 PM] Jhon: La otra parte de eso es los resultados
+[4/11/26, 3:38:00 PM] Jhon: Porque para el marcado se saca breve
+[4/11/26, 3:38:30 PM] Jhon: Pero para esas cosas no se como se podría poner
+[4/12/26, 12:19:20 AM] Saul: Y creo que esos “Micro-predicciones ” deberían estar en los features del prototipo; Osino sería una app de predicciones muy normalita, ¿no? Qué opinan?
+[4/12/26, 3:22:18 AM] Saul: hice varios ajusticos, ademes puse el tema de Bonus en cada match, para las predicciones random, me dicen que tal
+[4/12/26, 3:22:19 AM] Saul: https://fuut2026-main.vercel.app/
+[4/12/26, 8:07:49 AM] Jhon: Pero entonces la random está definida por nosotros desde el principio para cada match?
+[4/12/26, 8:07:58 AM] Jhon: Lo de los filtros quedó chimba así
+[4/12/26, 8:09:20 AM] Jhon: El tab de results también puede tener el mismo filtro, no?
+[4/12/26, 8:09:26 AM] Saul: Sí claro, definidas por cada manager de la liga
+[4/12/26, 8:09:54 AM] Jhon: Ah ok, esa era la pregunta si era de libre elección por el admin
+[4/12/26, 8:10:23 AM] Jhon: Por lo que te decía, de donde sacamos el resultado de cada una
+[4/12/26, 8:10:47 AM] Jhon: Si la pone cada admin, el admin tiene la responsabilidad de poner el resultado también
+[4/12/26, 9:25:29 AM] Saul: El manager pone cosas charras y los puntos que quiera. Ejemplo: 
+- Trump viene a este partido de apertura. 1 punto
+- ⁠habrán expulsados en el partido: 0.5 puntos
+[4/12/26, 9:25:31 AM] Saul: etc
+[4/12/26, 9:25:48 AM] Saul: Lo haré. Listo
+[4/12/26, 9:28:15 AM] Jhon: Pero no me refiero a eso
+[4/12/26, 9:29:28 AM] Jhon: Sino que el admin cuando termina el partido es el que tiene que ir a poner:
+- trumpilio fue al partido, y pone que si
+- ⁠expulsados, si, pone que si en la app.
+[4/12/26, 9:29:49 AM] Jhon: No hay forma de automatizar el resultado de esas mini apuestas
+[4/12/26, 9:33:01 AM] Saul: Aaa si claro, tenes razón, el Admin debe hacerlo manualmente
+[4/12/26, 9:33:44 AM] Saul: Tocaría que sean pronósticos que se puedan Scrappiar luego
+[4/12/26, 9:36:34 AM] Saul: Aunque el hecho que sea manual no me disgusta; eso crea una expectativa de saber cuántos puntos hizo cada uno
+[4/12/26, 9:36:49 AM] Saul: Mantiene a la gente enganchada a la app incluso después de terminado el partido
+[4/12/26, 9:50:55 AM] Jhon: A mi tampoco. Es solo para tenerlo claro y que el ux lo haga fácil también
