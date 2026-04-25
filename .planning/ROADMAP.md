@@ -18,7 +18,11 @@
   2. Anonymous users can pick a nickname and it persists to an account.
   3. Database schema is deployed and accessible.
   4. Backend Express service is running and connected to Supabase.
-**Plans**: TBD
+**Plans**:
+- [ ] 01-01-PLAN.md — Initialize monorepo structure and shared types.
+- [ ] 01-02-PLAN.md — Setup Supabase schema and Express auth middleware.
+- [ ] 01-03-PLAN.md — Implement frontend auth flow (Anonymous -> Email).
+- [ ] 01-04-PLAN.md — End-to-end auth verification and connectivity tests.
 **UI hint**: yes
 
 ### Phase 2: League & Prediction Core
@@ -73,7 +77,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Onboarding | 0/1 | Not started | - |
+| 1. Foundation & Onboarding | 0/4 | Not started | - |
 | 2. League & Prediction Core | 0/1 | Not started | - |
 | 3. Scoring & Real-time Rankings | 0/1 | Not started | - |
 | 4. Social & Bonus Predictions | 0/1 | Not started | - |
