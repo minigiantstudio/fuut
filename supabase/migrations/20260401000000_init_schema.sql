@@ -1,80 +1,86 @@
+-- Enable Row Level Security (RLS)
+ALTER SYSTEM SET "row_level_security" = ON;
+
 -- Create profiles table
-CREATE TABLE public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
-  nickname TEXT NOT NULL,
-  avatar_url TEXT,
-  locale TEXT NOT NULL DEFAULT 'en',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id uuid NOT NULL PRIMARY KEY DEFAULT auth.uid(),
+    nickname text,
+    avatar_url text,
+    locale text DEFAULT 'en'
 );
 
--- Create matches table
-CREATE TABLE public.matches (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  home_team TEXT NOT NULL,
-  away_team TEXT NOT NULL,
-  kickoff_at TIMESTAMPTZ NOT NULL,
-  status TEXT NOT NULL DEFAULT 'scheduled',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Create predictions table
-CREATE TABLE public.predictions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
-  match_id UUID NOT NULL REFERENCES public.matches ON DELETE CASCADE,
-  home_score INTEGER NOT NULL,
-  away_score INTEGER NOT NULL,
-  points INTEGER,
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, match_id)
-);
-
--- Enable RLS
+-- Enable RLS for profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.predictions ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policies
-CREATE POLICY "Public profiles are viewable by everyone."
-  ON public.profiles FOR SELECT
-  USING ( true );
+-- RLS Policy for profiles: Public read, Owner update
+CREATE POLICY "Public profiles read" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can insert their own profile."
-  ON public.profiles FOR INSERT
-  WITH CHECK ( auth.uid() = id );
-
-CREATE POLICY "Users can update own profile."
-  ON public.profiles FOR UPDATE
-  USING ( auth.uid() = id );
-
--- Matches Policies
-CREATE POLICY "Matches are viewable by everyone."
-  ON public.matches FOR SELECT
-  USING ( true );
-
--- Predictions Policies
-CREATE POLICY "Users can view their own predictions."
-  ON public.predictions FOR SELECT
-  USING ( auth.uid() = user_id );
-
-CREATE POLICY "Users can insert their own predictions."
-  ON public.predictions FOR INSERT
-  WITH CHECK ( auth.uid() = user_id );
-
-CREATE POLICY "Users can update their own predictions."
-  ON public.predictions FOR UPDATE
-  USING ( auth.uid() = user_id );
-
--- Trigger for profile creation
-CREATE OR REPLACE FUNCTION public.handle_new_user()
+-- Trigger to create profile on auth.users insert
+CREATE OR REPLACE FUNCTION public.create_profile_for_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, nickname, locale)
-  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'nickname', new.email), 'en');
+  VALUES (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'locale');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.create_profile_for_new_user();
+
+
+-- Create matches table
+CREATE TABLE IF NOT EXISTS public.matches (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    home_team text NOT NULL,
+    away_team text NOT NULL,
+    kickoff_at timestamptz NOT NULL,
+    status text DEFAULT 'scheduled' -- e.g., scheduled, ongoing, finished
+);
+
+-- Enable RLS for matches
+ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policy for matches: Public read, no public write
+CREATE POLICY "Public matches read" ON public.matches FOR SELECT USING (true);
+-- No INSERT, UPDATE, DELETE policies for public
+
+
+-- Create predictions table
+CREATE TABLE IF NOT EXISTS public.predictions (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL,
+    match_id uuid NOT NULL,
+    home_score smallint,
+    away_score smallint,
+    points smallint, -- Calculated points for a prediction
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now(),
+
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES public.profiles (id) ON DELETE CASCADE,
+    CONSTRAINT fk_match FOREIGN KEY (match_id) REFERENCES public.matches (id) ON DELETE CASCADE
+);
+
+-- Enable RLS for predictions
+ALTER TABLE public.predictions ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policy for predictions: Owner read/write, no other public access
+CREATE POLICY "Users can select their own predictions" ON public.predictions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create their own predictions" ON public.predictions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own predictions" ON public.predictions FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own predictions" ON public.predictions FOR DELETE USING (auth.uid() = user_id);
+
+-- Ensure updated_at is updated on row update
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_predictions_updated_at
+BEFORE UPDATE ON public.predictions
+FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
