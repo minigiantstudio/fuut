@@ -1,5 +1,6 @@
 import { useState } from "react";
 import trophyIcon from "@/assets/trophy.png";
+import type { Profile } from "@fuut/types";
 
 const members = [
   { initials: "CD", color: "bg-foreground" },
@@ -13,7 +14,7 @@ const members = [
 ];
 
 interface OnboardingProps {
-  onComplete: (nickname: string, email?: string) => void;
+  onComplete: (profile: Profile) => void;
 }
 
 const Onboarding = ({ onComplete }: OnboardingProps) => {
@@ -32,6 +33,15 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     } else {
       setCodeError(true);
     }
+  };
+
+  const handleComplete = () => {
+    const profile: Profile = {
+      id: crypto.randomUUID(),
+      nickname,
+      locale: "en",
+    };
+    onComplete(profile);
   };
 
   // Step 1 — Enter invite code
@@ -229,7 +239,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             />
 
             <button
-              onClick={() => onComplete(nickname, email || undefined)}
+              onClick={handleComplete}
               className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             >
               Save & continue
@@ -293,7 +303,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           </div>
 
           <button
-            onClick={() => onComplete(nickname)}
+            onClick={handleComplete}
             className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
           >
             Start predicting

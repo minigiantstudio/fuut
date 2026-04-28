@@ -15,7 +15,7 @@ const BONUS_QUESTIONS = [
 ];
 
 interface BonusPredictionProps {
-  matchId: number;
+  matchId: string;
   disabled?: boolean;
 }
 
@@ -24,7 +24,7 @@ const BonusPrediction = ({ matchId, disabled = false }: BonusPredictionProps) =>
   const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
 
   const question = useMemo(
-    () => BONUS_QUESTIONS[matchId % BONUS_QUESTIONS.length],
+    () => BONUS_QUESTIONS[parseInt(matchId) % BONUS_QUESTIONS.length],
     [matchId]
   );
 

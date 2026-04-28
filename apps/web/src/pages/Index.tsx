@@ -6,12 +6,11 @@ import RankingTab from "@/components/tabs/RankingTab";
 import ResultsTab from "@/components/tabs/ResultsTab";
 import LeagueTab from "@/components/tabs/LeagueTab";
 import Onboarding from "@/components/Onboarding";
+import type { Profile } from "@fuut/types";
 
 const SESSION_KEY = "fuut2026_session";
 
-interface Session {
-  nickname: string;
-  email?: string;
+interface Session extends Profile {
   joinedAt: string;
 }
 
@@ -35,10 +34,9 @@ const Index = () => {
     setLoading(false);
   }, []);
 
-  const handleOnboardingComplete = (nickname: string, email?: string) => {
+  const handleOnboardingComplete = (profile: Profile) => {
     const newSession: Session = {
-      nickname,
-      email,
+      ...profile,
       joinedAt: new Date().toISOString(),
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
