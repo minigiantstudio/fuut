@@ -1,0 +1,10 @@
+{
+  "name": "@fuut/api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "echo 'API dev script not yet implemented'",
+    "build": "echo 'API build script not yet implemented'"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@fuut/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Web dev script not yet implemented'",
+    "build": "echo 'Web build script not yet implemented'"
+  }
+}

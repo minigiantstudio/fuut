@@ -1,0 +1,14 @@
+{
+  "name": "fuut",
+  "private": true,
+  "description": "Retro-cool 2026 World Cup prediction game",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
