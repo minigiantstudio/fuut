@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { supabase } from "@/lib/supabase/client";
 
 interface EnterResultProps {
   open: boolean;
   onClose: () => void;
+  matchId: string;
+  leagueId: string;
   home: string;
   away: string;
-  memberCount: number;
-  onConfirm: (homeScore: number, awayScore: number) => void;
+  memberCount?: number;
+  onConfirm?: (homeScore: number, awayScore: number) => void;
+  onDone?: () => void;
 }
 
 const ScoreInput = ({
@@ -39,20 +43,35 @@ const ScoreInput = ({
   </div>
 );
 
-const EnterResult = ({
-  open,
-  onClose,
-  home,
-  away,
-  memberCount,
-  onConfirm,
-}: EnterResultProps) => {
+const EnterResult = ({ open, onClose, matchId, leagueId, home, away, onDone }: EnterResultProps) => {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConfirm = () => {
-    onConfirm(homeScore, awayScore);
-    onClose();
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Update match with final score
+      const { error: matchErr } = await supabase
+        .from("matches")
+        .update({ home_score: homeScore, away_score: awayScore, is_final: true })
+        .eq("id", matchId);
+      if (matchErr) throw matchErr;
+
+      // Trigger scoring Edge Function
+      await supabase.functions.invoke("score-match", {
+        body: { matchId },
+      });
+
+      onDone?.();
+      onClose();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to save result");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,14 +84,12 @@ const EnterResult = ({
         <div className="flex items-center justify-between text-center">
           <span className="text-[8px] text-foreground flex-1">{home}</span>
           <div className="flex flex-col items-center px-3">
-            <span className="text-[6px] text-muted-foreground">Jun 12 · 18:00</span>
+            <span className="text-[6px] text-muted-foreground">Final score</span>
           </div>
           <span className="text-[8px] text-foreground flex-1 text-right">{away}</span>
         </div>
 
-        <p className="text-center text-[7px] text-pixel-blue mt-1 mb-6">
-          Enter final result
-        </p>
+        <p className="text-center text-[7px] text-pixel-blue mt-1 mb-6">Enter final result</p>
 
         <div className="flex items-center justify-center gap-10 mb-8">
           <ScoreInput label={home} value={homeScore} onChange={setHomeScore} />
@@ -80,22 +97,22 @@ const EnterResult = ({
           <ScoreInput label={away} value={awayScore} onChange={setAwayScore} />
         </div>
 
-        <button
-          className="w-full py-3 pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
-          onClick={handleConfirm}
-        >
-          Confirm · score {memberCount} players
-        </button>
+        {error && <p className="text-[6px] text-pixel-red text-center mb-3">{error}</p>}
 
         <button
-          className="w-full py-2 mt-2 text-[7px] text-muted-foreground"
-          onClick={onClose}
+          className="w-full py-3 pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
+          onClick={handleConfirm}
+          disabled={loading}
         >
+          {loading ? "Saving..." : "Confirm result"}
+        </button>
+
+        <button className="w-full py-2 mt-2 text-[7px] text-muted-foreground" onClick={onClose}>
           Cancel
         </button>
 
         <p className="text-center text-[6px] text-muted-foreground mt-4">
-          Leaderboard updates instantly
+          Leaderboard updates automatically
         </p>
       </SheetContent>
     </Sheet>

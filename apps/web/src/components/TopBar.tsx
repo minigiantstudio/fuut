@@ -1,13 +1,17 @@
 interface TopBarProps {
   onLogout?: () => void;
+  leagueName?: string;
+  nickname?: string;
 }
 
-const TopBar = ({ onLogout }: TopBarProps) => {
+const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) => {
+  const initials = nickname ? nickname.slice(0, 2).toUpperCase() : "??";
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[var(--topbar-height)] border-b-3 border-foreground flex items-center justify-center bg-green-800">
       <div className="w-full max-w-[430px] px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-accent">⚽ Chez Dupont</span>
+          <span className="text-[10px] font-bold text-accent">⚽ {leagueName}</span>
           <span className="text-foreground">·</span>
           <span className="text-[8px] text-primary-foreground">Group stage</span>
         </div>
@@ -21,7 +25,7 @@ const TopBar = ({ onLogout }: TopBarProps) => {
             </button>
           )}
           <div className="w-8 h-8 bg-foreground flex items-center justify-center">
-            <span className="text-[8px] font-bold text-primary-foreground">CD</span>
+            <span className="text-[8px] font-bold text-primary-foreground">{initials}</span>
           </div>
         </div>
       </div>

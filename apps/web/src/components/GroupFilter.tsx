@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { Filter } from "lucide-react";
 
-const groups = ["All", "Group A", "Group B", "Group C", "Group D", "Group E", "Group F", "Group G", "Group H"];
+const defaultGroups = ["All", "Group A", "Group B", "Group C", "Group D", "Group E", "Group F", "Group G", "Group H"];
 
 interface GroupFilterProps {
+  groups?: string[];
   active: string;
-  onSelect: (group: string) => void;
+  onSelect?: (group: string) => void;
+  onChange?: (group: string) => void;
 }
 
-const GroupFilter = ({ active, onSelect }: GroupFilterProps) => {
+const GroupFilter = ({ groups = defaultGroups, active, onSelect, onChange }: GroupFilterProps) => {
+  const handleSelect = (group: string) => {
+    onSelect?.(group);
+    onChange?.(group);
+  };
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,7 +35,7 @@ const GroupFilter = ({ active, onSelect }: GroupFilterProps) => {
               <button
                 key={group}
                 onClick={() => {
-                  onSelect(group);
+                  handleSelect(group);
                   setOpen(false);
                 }}
                 className={`w-full text-left px-3 py-2 text-[7px] uppercase tracking-wider border-b border-foreground/20 last:border-b-0 transition-colors ${

@@ -1,47 +1,90 @@
 import { useState } from "react";
 import trophyIcon from "@/assets/trophy.png";
-import type { Profile } from "@fuut/types";
+import { supabase } from "@/lib/supabase/client";
+import { useSession } from "@/contexts/SessionContext";
 
-const members = [
-  { initials: "CD", color: "bg-foreground" },
-  { initials: "AL", color: "bg-pixel-green" },
-  { initials: "MR", color: "bg-pixel-gold" },
-  { initials: "JB", color: "bg-pixel-red" },
-  { initials: "SK", color: "bg-pixel-blue" },
-  { initials: "LP", color: "bg-foreground" },
-  { initials: "TH", color: "bg-pixel-gold" },
-  { initials: "NW", color: "bg-pixel-green" },
+const avatarColors = [
+  "bg-foreground", "bg-pixel-green", "bg-pixel-gold",
+  "bg-pixel-red", "bg-pixel-blue", "bg-foreground",
+  "bg-pixel-gold", "bg-pixel-green",
 ];
+const placeholderInitials = ["CD", "AL", "MR", "JB", "SK", "LP", "TH", "NW"];
 
 interface OnboardingProps {
-  onComplete: (profile: Profile) => void;
+  prefilledCode?: string;
 }
 
-const Onboarding = ({ onComplete }: OnboardingProps) => {
+const Onboarding = ({ prefilledCode }: OnboardingProps) => {
+  const { refreshSession } = useSession();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery">(1);
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCode, setInviteCode] = useState(prefilledCode ?? "");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
-  const [codeError, setCodeError] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoverySent, setRecoverySent] = useState(false);
 
-  const validateCode = () => {
-    if (inviteCode.trim().length >= 3) {
-      setCodeError(false);
-      setStep(2);
-    } else {
-      setCodeError(true);
+  // Resolved from invite code lookup
+  const [leagueId, setLeagueId] = useState<string | null>(null);
+  const [leagueName, setLeagueName] = useState<string>("");
+
+  const validateCode = async () => {
+    setCodeLoading(true);
+    setCodeError(null);
+    const { data, error } = await supabase.rpc("lookup_league_by_invite_code", {
+      p_code: inviteCode.trim().toUpperCase(),
+    });
+    setCodeLoading(false);
+    if (error || !data) {
+      setCodeError("Invalid code. Ask your admin.");
+      return;
+    }
+    setLeagueId(data.id);
+    setLeagueName(data.name);
+    setStep(2);
+  };
+
+  const handleComplete = async (withEmail: boolean) => {
+    if (!leagueId) return;
+    setJoinLoading(true);
+    setJoinError(null);
+    try {
+      // 1. Sign in anonymously
+      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+      if (authError || !authData.user) throw new Error(authError?.message ?? "Auth failed");
+      const userId = authData.user.id;
+
+      // 2. Insert user row
+      const { error: userErr } = await supabase.from("users").insert({
+        id: userId,
+        nickname: nickname.trim(),
+        email: withEmail && email.trim() ? email.trim() : null,
+      });
+      if (userErr) throw new Error(userErr.message);
+
+      // 3. Insert league_members row
+      const { error: memberErr } = await supabase.from("league_members").insert({
+        user_id: userId,
+        league_id: leagueId,
+        role: "member",
+      });
+      if (memberErr) throw new Error(memberErr.message);
+
+      // 4. Refresh session context
+      await refreshSession();
+    } catch (e: unknown) {
+      setJoinError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setJoinLoading(false);
     }
   };
 
-  const handleComplete = () => {
-    const profile: Profile = {
-      id: crypto.randomUUID(),
-      nickname,
-      locale: "en",
-    };
-    onComplete(profile);
+  const handleSendRecovery = async () => {
+    await supabase.auth.signInWithOtp({ email: recoveryEmail });
+    setRecoverySent(true);
   };
 
   // Step 1 — Enter invite code
@@ -57,12 +100,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             </div>
 
             <div className="flex items-center -space-x-1">
-              {members.map((m) => (
+              {placeholderInitials.map((init, i) => (
                 <div
-                  key={m.initials}
-                  className={`w-8 h-8 ${m.color} flex items-center justify-center text-[6px] text-primary-foreground border-2 border-background`}
+                  key={init}
+                  className={`w-8 h-8 ${avatarColors[i]} flex items-center justify-center text-[6px] text-primary-foreground border-2 border-background`}
                 >
-                  {m.initials}
+                  {init}
                 </div>
               ))}
             </div>
@@ -74,25 +117,24 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                   value={inviteCode}
                   onChange={(e) => {
                     setInviteCode(e.target.value.toUpperCase());
-                    setCodeError(false);
+                    setCodeError(null);
                   }}
+                  onKeyDown={(e) => e.key === "Enter" && validateCode()}
                   placeholder="CODE"
                   className="w-full h-12 pixel-inset bg-card px-4 text-center text-[12px] tracking-[0.3em] text-foreground placeholder:text-muted-foreground placeholder:tracking-normal placeholder:text-[8px] focus:outline-none"
                   autoFocus
                 />
                 {codeError && (
-                  <p className="text-[6px] text-pixel-red text-center">
-                    Invalid code. Ask your admin.
-                  </p>
+                  <p className="text-[6px] text-pixel-red text-center">{codeError}</p>
                 )}
               </div>
 
               <button
                 onClick={validateCode}
-                disabled={!inviteCode.trim()}
+                disabled={!inviteCode.trim() || codeLoading}
                 className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-green-800 opacity-100"
               >
-                Join league
+                {codeLoading ? "Checking..." : "Join league"}
               </button>
 
               <button
@@ -116,9 +158,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
               <h1 className="text-[12px] text-foreground">Welcome back</h1>
-              <p className="text-[7px] text-muted-foreground">
-                Enter your email for a magic link.
-              </p>
+              <p className="text-[7px] text-muted-foreground">Enter your email for a magic link.</p>
             </div>
 
             {!recoverySent ? (
@@ -132,7 +172,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                   autoFocus
                 />
                 <button
-                  onClick={() => setRecoverySent(true)}
+                  onClick={handleSendRecovery}
                   disabled={!recoveryEmail.trim() || !recoveryEmail.includes("@")}
                   className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                 >
@@ -143,25 +183,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
               <div className="pixel-border bg-card p-5 space-y-3 text-center">
                 <p className="text-[16px]">✉️</p>
                 <p className="text-[8px] text-foreground">Check your inbox</p>
-                <p className="text-[6px] text-muted-foreground">
-                  If linked, you'll get a magic link.
-                </p>
+                <p className="text-[6px] text-muted-foreground">If linked, you'll get a magic link.</p>
               </div>
             )}
 
-            <div className="pixel-border-sm bg-muted p-4 space-y-2">
-              <p className="text-[6px] text-muted-foreground uppercase tracking-wide">No email?</p>
-              <p className="text-[6px] text-muted-foreground">
-                Ask your admin to reassign your spot.
-              </p>
-            </div>
-
             <button
-              onClick={() => {
-                setRecoverySent(false);
-                setRecoveryEmail("");
-                setStep(1);
-              }}
+              onClick={() => { setRecoverySent(false); setRecoveryEmail(""); setStep(1); }}
               className="w-full h-10 text-[7px] text-muted-foreground"
             >
               ← Back
@@ -180,7 +207,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
               <h1 className="text-[12px] text-foreground">Your nickname</h1>
-              <p className="text-[7px] text-muted-foreground">How others see you</p>
+              <p className="text-[7px] text-muted-foreground">
+                How others see you in <span className="text-foreground">{leagueName}</span>
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -188,13 +217,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                 type="text"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && nickname.trim() && setStep(3)}
                 placeholder="Nickname..."
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
-              <p className="text-[6px] text-muted-foreground">
-                No password · remembered on this device
-              </p>
+              <p className="text-[6px] text-muted-foreground">No password · remembered on this device</p>
             </div>
 
             <button
@@ -224,9 +252,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
               <h1 className="text-[12px] text-foreground">Add email</h1>
-              <p className="text-[7px] text-muted-foreground">
-                Optional — recover your account later.
-              </p>
+              <p className="text-[7px] text-muted-foreground">Optional — recover your account later.</p>
             </div>
 
             <input
@@ -239,18 +265,18 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             />
 
             <button
-              onClick={handleComplete}
+              onClick={() => handleComplete(true)}
+              disabled={joinLoading}
               className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             >
-              Save & continue
+              {joinLoading ? "Joining..." : "Save & continue"}
             </button>
 
-            <button
-              onClick={() => setStep(3)}
-              className="w-full h-10 text-[7px] text-muted-foreground"
-            >
+            <button onClick={() => handleComplete(false)} disabled={joinLoading} className="w-full h-10 text-[7px] text-muted-foreground">
               Skip for now
             </button>
+
+            {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
           </div>
         </div>
       </div>
@@ -266,48 +292,19 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             <p className="text-2xl">⚽</p>
             <h1 className="text-foreground text-sm">You're in!</h1>
             <p className="text-muted-foreground text-xs">
-              Welcome to <span className="text-foreground">Chez Dupont</span>, {nickname}
+              Welcome to <span className="text-foreground">{leagueName}</span>, {nickname}
             </p>
           </div>
 
-          <div className="pixel-border bg-card p-4 space-y-4">
-            <p className="text-muted-foreground uppercase tracking-wide text-xs">First match</p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-secondary flex items-center justify-center text-[10px]">🇺🇸</div>
-                <span className="text-foreground text-xs">USA</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  defaultValue=""
-                  placeholder="–"
-                  className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <span className="text-[7px] text-muted-foreground">:</span>
-                <input
-                  type="number"
-                  min={0}
-                  defaultValue=""
-                  placeholder="–"
-                  className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-foreground text-xs">MEX</span>
-                <div className="w-8 h-8 bg-secondary flex items-center justify-center text-[10px]">🇲🇽</div>
-              </div>
-            </div>
-            <p className="text-muted-foreground text-center text-xs font-mono font-bold">June 11, 2026 · 21:00</p>
-          </div>
-
           <button
-            onClick={handleComplete}
+            onClick={() => handleComplete(false)}
+            disabled={joinLoading}
             className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
           >
-            Start predicting
+            {joinLoading ? "Joining..." : "Start predicting"}
           </button>
+
+          {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
         </div>
       </div>
     </div>

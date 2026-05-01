@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { TabId } from "@/components/BottomNav";
 import PredictTab from "@/components/tabs/PredictTab";
@@ -6,46 +6,15 @@ import RankingTab from "@/components/tabs/RankingTab";
 import ResultsTab from "@/components/tabs/ResultsTab";
 import LeagueTab from "@/components/tabs/LeagueTab";
 import Onboarding from "@/components/Onboarding";
-import type { Profile } from "@fuut/types";
-
-const SESSION_KEY = "fuut2026_session";
-
-interface Session extends Profile {
-  joinedAt: string;
-}
+import { useSession } from "@/contexts/SessionContext";
+import { supabase } from "@/lib/supabase/client";
 
 const Index = () => {
+  const { session, loading } = useSession();
   const [activeTab, setActiveTab] = useState<TabId>("predict");
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Load session from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SESSION_KEY);
-      if (stored) {
-        setSession(JSON.parse(stored));
-      }
-    } catch {
-      // Corrupted data — clear it
-      localStorage.removeItem(SESSION_KEY);
-    }
-    setLoading(false);
-  }, []);
-
-  const handleOnboardingComplete = (profile: Profile) => {
-    const newSession: Session = {
-      ...profile,
-      joinedAt: new Date().toISOString(),
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
-    setSession(newSession);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem(SESSION_KEY);
-    setSession(null);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   if (loading) {
@@ -57,18 +26,26 @@ const Index = () => {
   }
 
   if (!session) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+    return <Onboarding />;
   }
 
+  const isAdmin = session.role === "admin";
+
   const tabContent: Record<TabId, React.ReactNode> = {
-    predict: <PredictTab isAdmin={isAdmin} />,
-    ranking: <RankingTab />,
-    results: <ResultsTab />,
-    league: <LeagueTab isAdmin={isAdmin} onAdminChange={setIsAdmin} />,
+    predict: <PredictTab isAdmin={isAdmin} session={session} />,
+    ranking: <RankingTab session={session} />,
+    results: <ResultsTab session={session} />,
+    league: <LeagueTab isAdmin={isAdmin} session={session} />,
   };
 
   return (
-    <AppLayout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
+    <AppLayout
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      onLogout={handleLogout}
+      leagueName={session.leagueName}
+      nickname={session.nickname}
+    >
       <div key={activeTab} className="pixel-screen-enter">
         {tabContent[activeTab]}
       </div>

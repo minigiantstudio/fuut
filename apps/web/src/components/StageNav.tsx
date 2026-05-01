@@ -1,21 +1,22 @@
 import { useRef, useEffect } from "react";
 
-const stages = [
-  "Matchday 1",
-  "Matchday 2",
-  "Matchday 3",
-  "Round of 16",
-  "Quarter-finals",
-  "Semi-finals",
-  "Final",
-];
-
 interface StageNavProps {
+  stages?: string[];
   active: string;
-  onSelect: (stage: string) => void;
+  onSelect?: (stage: string) => void;
+  onChange?: (stage: string) => void;
 }
 
-const StageNav = ({ active, onSelect }: StageNavProps) => {
+const defaultStages = [
+  "Matchday 1", "Matchday 2", "Matchday 3",
+  "Round of 16", "Quarter-finals", "Semi-finals", "Final",
+];
+
+const StageNav = ({ stages = defaultStages, active, onSelect, onChange }: StageNavProps) => {
+  const handleSelect = (stage: string) => {
+    onSelect?.(stage);
+    onChange?.(stage);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
 
@@ -37,7 +38,7 @@ const StageNav = ({ active, onSelect }: StageNavProps) => {
           <button
             key={stage}
             ref={isActive ? activeRef : undefined}
-            onClick={() => onSelect(stage)}
+            onClick={() => handleSelect(stage)}
             className={`shrink-0 px-3 py-2 text-[7px] uppercase tracking-wider border-2 border-foreground transition-all whitespace-nowrap pixel-press ${
               isActive
                 ? "bg-foreground text-primary-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))]"
