@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { Session } from "@/lib/supabase/types";
+import ConnectivityCheck from "@/components/ConnectivityCheck";
 
 interface MemberWithNickname {
   id: string;
@@ -121,6 +122,12 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
           </div>
         </div>
       )}
+
+      {/* Backend connectivity */}
+      <div className="space-y-2">
+        <h2 className="text-[8px] text-foreground">🔌 Backend</h2>
+        <ConnectivityCheck />
+      </div>
     </div>
   );
 };

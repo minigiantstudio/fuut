@@ -38,12 +38,14 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       p_code: inviteCode.trim().toUpperCase(),
     });
     setCodeLoading(false);
-    if (error || !data) {
+    // RPC returns an array (SETOF). Empty array means no match.
+    const league = Array.isArray(data) ? data[0] : data;
+    if (error || !league?.id) {
       setCodeError("Invalid code. Ask your admin.");
       return;
     }
-    setLeagueId(data.id);
-    setLeagueName(data.name);
+    setLeagueId(league.id);
+    setLeagueName(league.name);
     setStep(2);
   };
 

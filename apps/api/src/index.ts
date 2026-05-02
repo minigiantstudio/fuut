@@ -2,8 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@fuut/types'; // Assuming types are available
-import { authMiddleware } from './middleware/auth'; // Import the auth middleware
+import { authMiddleware } from './middleware/auth';
 
 dotenv.config();
 
@@ -18,8 +17,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase URL and ANON KEY must be provided in environment variables.');
 }
 
-// Use `as Database` to get type safety
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Middleware
 app.use(cors());
