@@ -8,12 +8,7 @@ test.describe("Onboarding & auth", () => {
     await expect(page.getByRole("button", { name: /Join league/i })).toBeVisible();
   });
 
-  // Known bug surfaced by this test: invalid invite codes (e.g. "ZZZZ") currently
-  // advance the user to the nickname screen instead of showing the error. The fix
-  // belongs in apps/web/src/components/Onboarding.tsx::validateCode (the `!data`
-  // check is too weak — the RPC returns an empty result rather than null).
-  // Tracked as a follow-up to phase 01-04.
-  test.fixme("invalid invite code surfaces an error", async ({ page }) => {
+  test("invalid invite code surfaces an error", async ({ page }) => {
     await page.goto("/");
     const codeInput = page.getByPlaceholder("CODE");
     await codeInput.fill("ZZZZ");
