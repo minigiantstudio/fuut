@@ -17,6 +17,9 @@
 - `apps/web/playwright.config.ts` — replaced missing `lovable-agent-playwright-config` with self-contained config
 - `apps/web/playwright-fixture.ts` — re-exports `@playwright/test` directly
 - `apps/web/.env.local` (gitignored) — Supabase URL + publishable anon key
+- `apps/web/src/components/Onboarding.tsx` — fix `validateCode` to read `data[0]` from the RPC array result (previously silently advanced for invalid codes and silently no-op'd on "Start predicting")
+- `apps/web/src/contexts/SessionContext.tsx` — switch `.single()` → `.maybeSingle()` so the retry loop doesn't log spurious PGRST116 errors during the post-signup race window
+- `apps/api/src/index.ts` — drop unresolvable `@fuut/types` import that prevented the API from booting
 
 **Decisions Made**:
 - DEC-005: Playwright config is self-contained (`@playwright/test`) rather than depending on a Lovable-internal package that wasn't published or installed. The previous config referenced `lovable-agent-playwright-config` which is not a workspace dep.
@@ -55,11 +58,18 @@ Running 4 tests using 4 workers
 5. Switch to the **League** tab → confirm the **🔌 Backend** card shows a green dot and "BACKEND CONNECTED".
 6. Stop the API server → click **Recheck** → confirm the badge flips to red and "BACKEND UNREACHABLE".
 
-## Known Bugs (out of scope; tracked here as follow-ups)
+## Bugs Found and Fixed During Verification
 
-- **Invalid invite code does not surface an error.** Submitting `ZZZZ` (or any unknown code) currently advances the user to the nickname screen instead of showing "Invalid code. Ask your admin." The fix is in `apps/web/src/components/Onboarding.tsx::validateCode` — the `!data` check is too weak; the RPC returns an empty result rather than `null`. The Playwright test for this case exists but is marked `test.fixme()` so the suite stays green and the bug is visible.
-- **`apps/api/.env` is committed to git** (with placeholder values today, but a footgun for real keys). Recommend adding a root `.gitignore` covering `apps/*/.env`, switching the tracked file to `.env.example` only, and using `git rm --cached apps/api/.env`.
+End-to-end manual verification (running the live app against the real Supabase project) surfaced three latent bugs that blocked the connectivity check from being demonstrable. All fixed on this branch:
+
+1. **Onboarding `validateCode` mishandled the RPC array result.** `lookup_league_by_invite_code` returns `SETOF` (an array). The component read `data.id` directly, so for valid codes `leagueId` ended up `undefined` (silently advancing past nickname into a "You're in!" screen whose **Start predicting** button no-op'd via `if (!leagueId) return`), and for invalid codes the `!data` truthiness check missed the empty-array case. Fix: `const league = Array.isArray(data) ? data[0] : data; if (!league?.id) ...`. The Playwright test that was previously `test.fixme()` now passes.
+2. **`SessionContext.loadSession` used `.single()`**, which logs a noisy PGRST116 error to the browser console for every retry tick during the legitimate race window between sign-in and the `users` row being inserted. Fix: switch to `.maybeSingle()` for both the `users` lookup and the `league_members` lookup. The retry loop is unchanged.
+3. **API failed to boot due to an unresolved `@fuut/types` import.** `apps/api/src/index.ts` imported `Database` from `@fuut/types`, but the package isn't a dependency of `@fuut/api` and never exported a `Database` type. ts-node bailed at compile time, so `nodemon` reported "clean exit" with no listener on port 3001. Fix: drop the import and the `<Database>` generic on `createClient`.
+
+## Outstanding Follow-Ups
+
 - **Plan 01-03 has no SUMMARY.md.** The frontend auth flow code shipped in commit `33d799b` ("Wire frontend to existing Supabase project") but `.planning/phases/01-foundation/01-03-SUMMARY.md` was never written. Recommend writing it retroactively against the as-built code so the phase ledger is accurate.
+- **Restore `Database` typing on the Supabase client.** The API now uses an untyped `createClient`. Recommend `supabase gen types typescript --project-id hqixsfarkhrwfaqvnvzi` → write to `packages/types/src/database.ts`, export from `@fuut/types`, and add `@fuut/types` as a workspace dep of `@fuut/api`.
 
 ## Auth Gates
 

@@ -48,9 +48,11 @@ progress:
 ### Todos
 
 - [ ] Write `01-03-SUMMARY.md` retroactively against the as-built onboarding flow (commit `33d799b`).
-- [ ] Fix invalid-invite-code bug in `apps/web/src/components/Onboarding.tsx::validateCode` (un-`fixme` the test once fixed).
-- [ ] Env hygiene: add root `.gitignore` covering `apps/*/.env`, untrack `apps/api/.env`, keep only `.env.example`.
-- [ ] Provision a separate test Supabase project (or mocking strategy) so the full join flow can be E2E-tested.
+- [x] Fix invalid-invite-code bug in `apps/web/src/components/Onboarding.tsx::validateCode` (test no longer `.fixme`'d).
+- [x] Env hygiene: root `.gitignore` covers `apps/*/.env`, `apps/api/.env` untracked, `.env.example` retained.
+- [x] Make the API actually boot (removed unresolvable `@fuut/types` import).
+- [ ] Restore typed Supabase client: generate `Database` types via `supabase gen types`, publish from `@fuut/types`, add it as a workspace dep of `@fuut/api`.
+- [ ] Provision a separate test Supabase project (or mocking strategy) so the full invite-code → join flow can be E2E-tested without polluting prod data.
 - [ ] Run Phase 1 verification once 01-04 is merged, then plan Phase 2.
 
 ### Blockers

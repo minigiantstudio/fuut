@@ -20,11 +20,14 @@ async function loadSession(attempt = 0): Promise<Session | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // maybeSingle() returns { data: null } cleanly when 0 rows; single() would log
+  // a PGRST116 error to the console during the retry window between sign-in and
+  // the users-row insert.
   const { data: dbUser } = await supabase
     .from("users")
     .select("id, nickname")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (!dbUser) {
     // Race condition: auth row exists but DB row not yet inserted → retry
@@ -39,7 +42,7 @@ async function loadSession(attempt = 0): Promise<Session | null> {
     .from("league_members")
     .select("*, leagues(id, name)")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (!membership || !membership.leagues) return null;
 
