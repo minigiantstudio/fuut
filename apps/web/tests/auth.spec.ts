@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, MOCK_INVITE_CODE } from "./helpers/mock-routes";
 
 test.describe("Onboarding & auth", () => {
   test("landing page shows invite-code entry", async ({ page }) => {
@@ -11,9 +11,17 @@ test.describe("Onboarding & auth", () => {
   test("invalid invite code surfaces an error", async ({ page }) => {
     await page.goto("/");
     const codeInput = page.getByPlaceholder("CODE");
-    await codeInput.fill("ZZZZ");
+    await codeInput.fill("ZZZZ"); // not MOCK_INVITE_CODE → mock returns []
     await page.getByRole("button", { name: /Join league/i }).click();
     await expect(page.getByText("Invalid code. Ask your admin.")).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("valid invite code advances to nickname step", async ({ page }) => {
+    await page.goto("/");
+    const codeInput = page.getByPlaceholder("CODE");
+    await codeInput.fill(MOCK_INVITE_CODE);
+    await page.getByRole("button", { name: /Join league/i }).click();
+    await expect(page.getByPlaceholder(/nickname/i)).toBeVisible({ timeout: 10_000 });
   });
 
   test('"I played before" reveals the recovery flow', async ({ page }) => {

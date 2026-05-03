@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-02T00:00:00.000Z"
+last_updated: "2026-05-03T00:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -31,7 +31,7 @@ progress:
 - **Requirement Coverage**: 100% (28/28 v1 requirements mapped)
 - **Phase Completion**: 0/5
 - **Plans Completed**: 4/4 in Phase 1
-- **Tests Passing**: 3 Playwright E2E (1 documented `fixme` for a known onboarding bug)
+- **Tests Passing**: 5 Playwright E2E (0 fixme; all run against Playwright `page.route()` mocks — no production Supabase hit)
 
 ## Accumulated Context
 
@@ -51,8 +51,8 @@ progress:
 - [x] Fix invalid-invite-code bug in `apps/web/src/components/Onboarding.tsx::validateCode` (test no longer `.fixme`'d).
 - [x] Env hygiene: root `.gitignore` covers `apps/*/.env`, `apps/api/.env` untracked, `.env.example` retained.
 - [x] Make the API actually boot (removed unresolvable `@fuut/types` import).
-- [ ] Restore typed Supabase client: generate `Database` types via `supabase gen types`, publish from `@fuut/types`, add it as a workspace dep of `@fuut/api`.
-- [ ] Provision a separate test Supabase project (or mocking strategy) so the full invite-code → join flow can be E2E-tested without polluting prod data.
+- [x] Restore typed Supabase client: generated `Database` types via `supabase gen types`, published from `@fuut/types`, added as workspace dep of `@fuut/api`; `createClient<Database>()` live in `apps/api/src/index.ts`.
+- [x] Provision a separate test Supabase project (or mocking strategy) — chose **Option B** (Playwright `page.route()` network mocking); implemented in `apps/web/tests/helpers/mock-routes.ts`; all 5 E2E tests pass without hitting production.
 - [ ] Run Phase 1 verification once 01-04 is merged, then plan Phase 2.
 
 ### Blockers
@@ -61,5 +61,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Implemented plan 01-04 on branch `phase-01-04` — `useApi` hook, `ConnectivityCheck` UI, Playwright E2E suite (3 passing, 1 `fixme`).
-**Next Step**: Review / merge `phase-01-04`, then either (a) tackle the documented follow-ups or (b) close Phase 1 and run `/gsd-plan-phase 2`.
+**Last Action**: Completed all Phase 1 follow-ups — `@fuut/types` workspace package restored with generated DB types; API wired with `createClient<Database>()`; Playwright test isolation implemented via `page.route()` mocks; 5/5 E2E tests passing; `TESTING.md` written.
+**Next Step**: Close Phase 1 — either merge open branches and run `/gsd-plan-phase 2`, or directly begin Phase 2 planning.
