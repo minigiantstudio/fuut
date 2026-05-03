@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-03T00:00:00.000Z"
+last_updated: "2026-05-03T12:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -47,7 +47,7 @@ progress:
 
 ### Todos
 
-- [ ] Write `01-03-SUMMARY.md` retroactively against the as-built onboarding flow (commit `33d799b`).
+- [x] Write `01-03-SUMMARY.md` retroactively against the as-built onboarding flow (commit `33d799b`) — written and updated to reflect passing E2E tests and resolved follow-ups.
 - [x] Fix invalid-invite-code bug in `apps/web/src/components/Onboarding.tsx::validateCode` (test no longer `.fixme`'d).
 - [x] Env hygiene: root `.gitignore` covers `apps/*/.env`, `apps/api/.env` untracked, `.env.example` retained.
 - [x] Make the API actually boot (removed unresolvable `@fuut/types` import).
@@ -61,5 +61,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Completed all Phase 1 follow-ups — `@fuut/types` workspace package restored with generated DB types; API wired with `createClient<Database>()`; Playwright test isolation implemented via `page.route()` mocks; 5/5 E2E tests passing; `TESTING.md` written.
-**Next Step**: Close Phase 1 — either merge open branches and run `/gsd-plan-phase 2`, or directly begin Phase 2 planning.
+**Last Action**: Updated `01-03-SUMMARY.md` to reflect current state — Tests section now shows 5 passing Playwright E2E tests (with mock-routes fixture); gaps #3 and #7 marked resolved; self-check updated; STATE.md todo marked done.
+**Next Step**: Close Phase 1 — run `/gsd-plan-phase 2` or begin Phase 2 planning directly.

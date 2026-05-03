@@ -136,11 +136,15 @@ Recovery — "I played before"
 | Test | Framework | Status | Notes |
 |---|---|---|---|
 | `src/test/example.test.ts` | Vitest | ✅ Passes | Placeholder only (`expect(true).toBe(true)`) |
-| Onboarding E2E | Playwright | ❌ Not written | No E2E tests exist for onboarding flow |
+| `landing page shows invite-code entry` | Playwright | ✅ Passes | Pure UI — no Supabase call |
+| `invalid invite code surfaces an error` | Playwright | ✅ Passes | Mock returns `[]` for non-`TEST1` code |
+| `valid invite code advances to nickname step` | Playwright | ✅ Passes | Mock returns `[MOCK_LEAGUE]` for `"TEST1"` — exercises the full happy-path branch |
+| `"I played before" reveals the recovery flow` | Playwright | ✅ Passes | Pure UI |
+| `no spurious session on first visit` | Playwright | ✅ Passes | Checks localStorage is empty after reload |
 | `useSession` unit tests | Vitest | ❌ Not written | SessionContext has no unit tests |
 | `loadSession` retry logic | Vitest | ❌ Not written | Race condition fix is untested |
 
-The task description references a "Playwright test no longer `.fixme`'d" — no such test was found in the repository at time of this summary. It may have existed in a different branch or the reference is to the prior `fuut2026-main` project.
+All 5 Playwright tests run against `page.route()` network mocks (see `apps/web/tests/helpers/mock-routes.ts`) — no production Supabase is hit. The `validateCode` bug (invalid code silently advancing onboarding) was fixed in plan 01-04 and the previously-skipped `test.fixme` is now a passing test.
 
 ---
 
@@ -163,11 +167,11 @@ These must exist on the connected Supabase project for the flow to work:
 |---|---|---|---|
 | 1 | **No account promotion** — email collected but stored in `public.users`, not linked to Supabase Auth; `supabase.auth.updateUser()` not implemented | High | Implement email OTP upgrade flow in a follow-up plan |
 | 2 | **Race condition is retry-based, not bulletproof** — if the DB insert takes > 2.5 s (5 × 500 ms), the user lands on a blank screen | Medium | Use a server-side trigger or webhook to confirm insert before returning |
-| 3 | **No E2E test for onboarding** | Medium | Write Playwright test: enter code → nickname → "Start predicting" → assert main tabs visible |
+| 3 | ~~**No E2E test for onboarding**~~ | ~~Medium~~ | ✅ **Resolved** — 5 Playwright tests covering the onboarding flow, all using `page.route()` mocks (plan 01-04 + follow-up) |
 | 4 | **`public.profiles` table unused** — 01-02 migration creates it; 01-03 ignores it in favour of `public.users` | Low | Either drop the table or reconcile in a migration |
 | 5 | **DEC-004 not updated in STATE.md** | Low | Update `STATE.md` to reflect invite-code-first as the canonical entry pattern |
 | 6 | **Single league per user** — `SessionContext` takes the first `league_members` row; multi-league users not supported | Low | Out of scope for v1; document as known limitation |
-| 7 | **`@fuut/types` package still in monorepo** — removed from `package.json` but source lives in `packages/types/` | Low | Either delete the package or re-integrate if shared types are needed |
+| 7 | ~~**`@fuut/types` package still in monorepo**~~ | ~~Low~~ | ✅ **Resolved** — `@fuut/types` restored as a proper workspace package with generated `Database` types from `supabase gen types`; `apps/api` uses `createClient<Database>()` (commit `3e8573c`) |
 
 ---
 
@@ -182,5 +186,6 @@ These must exist on the connected Supabase project for the flow to work:
 - [x] Build passes (`vite build` — no TypeScript errors)
 - [x] Deployed to `https://fuut2026-main.vercel.app` with correct env vars
 - [ ] Email upgrade path implemented
-- [ ] E2E test written
+- [x] E2E tests written — 5 Playwright tests passing via `page.route()` mocks
+- [x] `@fuut/types` re-integrated with generated `Database` types
 - [ ] DEC-004 updated in STATE.md
