@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@fuut/types';
 import { authMiddleware } from './middleware/auth';
 
 dotenv.config();
@@ -17,22 +18,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase URL and ANON KEY must be provided in environment variables.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Fully-typed Supabase client — query results are inferred from the DB schema.
+// The Database type is generated from the live project via `bun run gen` in packages/types.
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Health Check Endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).send('OK');
 });
 
 // Protected Route: Example /api/me
-// This route will only be accessible if the user is authenticated
 app.get('/api/me', authMiddleware, (req, res) => {
-  // The 'user' property is attached by the authMiddleware
-  const { user } = req as any; // Cast to 'any' for simplicity here, but a proper UserRequest type is better
+  const { user } = req as any;
   res.status(200).json({
     message: 'Welcome to your protected profile!',
     user: {

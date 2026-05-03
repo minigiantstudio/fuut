@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@fuut/types": "*",
     "@supabase/supabase-js": "^2.38.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
