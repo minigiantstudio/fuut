@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-03T12:00:00.000Z"
+last_updated: "2026-05-03T18:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
   completed_plans: 4
-  percent: 80
+  percent: 20
 ---
 
 # Project State - Fuut
@@ -17,21 +17,26 @@ progress:
 ## Project Reference
 
 **Core Value**: Frictionless, retro-cool 2026 World Cup prediction game for friends.
-**Current Focus**: Closing out Phase 1 (Foundation & Onboarding) — frontend↔backend connectivity verified.
+**Current Focus**: Phase 2 — Game Features (Predict, Score, Leaderboard).
 
 ## Current Position
 
-**Phase**: 01-foundation
-**Plan**: 01-04 (E2E auth verification & connectivity)
-**Status**: Plan 01-04 implemented on branch `phase-01-04`; awaiting Phase 1 verification.
-**Progress**: [████████░░] 80% (4/5 plans, including 01-03 which shipped via commit `33d799b` without a SUMMARY)
+**Phase**: 02 (not yet started)
+**Plan**: N/A — ready to plan Phase 2
+**Status**: ✅ Phase 1 COMPLETE — all plans implemented, all verification checks pass.
+**Progress**: [██░░░░░░░░] 20% overall (1/5 phases complete)
 
 ## Performance Metrics
 
 - **Requirement Coverage**: 100% (28/28 v1 requirements mapped)
-- **Phase Completion**: 0/5
+- **Phase Completion**: 1/5
 - **Plans Completed**: 4/4 in Phase 1
-- **Tests Passing**: 5 Playwright E2E (0 fixme; all run against Playwright `page.route()` mocks — no production Supabase hit)
+- **Tests Passing**: 5/5 Playwright E2E (0 fixme; all run against `page.route()` mocks — no production Supabase hit)
+- **Build**: ✅ `apps/web` (vite build) + `apps/api` (tsc) — zero errors
+- **Type Check**: ✅ `tsc --noEmit` passes in both apps
+- **Lint**: ✅ Zero errors; 1 acceptable warning in `SessionContext.tsx` (standard context pattern)
+- **API**: ✅ Boots and responds `OK` on `/health`
+- **SUMMARY files**: ✅ 4/4 plans have SUMMARY files
 
 ## Accumulated Context
 
@@ -40,7 +45,7 @@ progress:
 - **DEC-001**: Use Supabase for Auth, DB, and Real-time updates to minimize backend complexity.
 - **DEC-002**: Use Express for backend scoring jobs and complex business logic.
 - **DEC-003**: Retro 8-bit / Pixel Art aesthetic preserved from prototype.
-- **DEC-004**: "Frictionless" entry allows anonymous starts, requiring account only to save first prediction. (Note: drifted in implementation — onboarding is invite-code-first; see plan 01-03 / `33d799b`.)
+- **DEC-004**: ~~"Frictionless" entry allows anonymous starts, requiring account only to save first prediction."~~ **Superseded**: Entry requires a valid invite code; anonymous Supabase auth is used under the hood so no password is required. See plan 01-03-SUMMARY for full rationale.
 - **DEC-005**: Playwright config is self-contained against `@playwright/test`; no dependency on `lovable-agent-playwright-config`.
 - **DEC-006**: Frontend talks to API via `VITE_API_URL`, defaulting to `http://localhost:3001`.
 - **DEC-007**: Vite dev server is launched via `bun --bun vite` to avoid Node-x64 / bun-arm64 native-binary mismatch on this machine.
@@ -53,7 +58,7 @@ progress:
 - [x] Make the API actually boot (removed unresolvable `@fuut/types` import).
 - [x] Restore typed Supabase client: generated `Database` types via `supabase gen types`, published from `@fuut/types`, added as workspace dep of `@fuut/api`; `createClient<Database>()` live in `apps/api/src/index.ts`.
 - [x] Provision a separate test Supabase project (or mocking strategy) — chose **Option B** (Playwright `page.route()` network mocking); implemented in `apps/web/tests/helpers/mock-routes.ts`; all 5 E2E tests pass without hitting production.
-- [ ] Run Phase 1 verification once 01-04 is merged, then plan Phase 2.
+- [x] Run Phase 1 verification — all checks pass (build, type-check, lint, E2E, API boot, SUMMARY audit). Phase 1 closed.
 
 ### Blockers
 
@@ -61,5 +66,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Updated `01-03-SUMMARY.md` to reflect current state — Tests section now shows 5 passing Playwright E2E tests (with mock-routes fixture); gaps #3 and #7 marked resolved; self-check updated; STATE.md todo marked done.
-**Next Step**: Close Phase 1 — run `/gsd-plan-phase 2` or begin Phase 2 planning directly.
+**Last Action**: Phase 1 verification complete — fixed ghost `@types/node 2` dir (API tsc was failing), fixed lint errors (shadcn/ui components excluded; tailwind config suppressed), wrote missing `01-01-SUMMARY.md`, confirmed 5/5 Playwright E2E pass, API boots, both apps build and type-check clean.
+**Next Step**: Begin Phase 2 planning — run `/gsd-plan-phase 2` to generate the Phase 2 plan set.
