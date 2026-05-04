@@ -42,53 +42,43 @@ The same rule applies to *planning* work: if `.planning/phases/<phase>/` doesn't
 yet exist and someone is about to run `/gsd-plan-phase`, check for a phase
 planning branch (e.g. `phase-XX-plan`) before opening a new one.
 
-## Closing out a plan — open the PR proactively
+## When checks pass — prompt to open a PR
 
-Once a plan's verification checks pass, **prompt the dev (or open the PR
-directly if running autonomously)** — don't wait to be asked. "Verification
-checks pass" means *all* of:
+Once a plan is implemented and **all the checks below are green**, the agent
+must surface a one-line offer to open the PR. Do not silently move on to the
+next plan, and do not open the PR autonomously without confirming first
+(the dev may want to amend, squash, or run additional manual UAT).
 
-- All tasks in `<XX>-<YY>-PLAN.md` are done
-- E2E tests pass (`bunx playwright test` from `apps/web` is green)
-- Type-check passes (`bunx tsc --noEmit` in every touched workspace)
-- Lint passes (`bun run lint --workspaces --if-present`)
-- The build runs clean if relevant (`bun run build --workspaces --if-present`)
-- `<XX>-<YY>-SUMMARY.md` is written and reflects what actually shipped
-- `.planning/STATE.md` is refreshed with the new progress + decisions + todos
+The "checks" gate, in order:
+1. Tests pass — `bunx playwright test` and any plan-specific test commands.
+2. Type-check passes — `bunx tsc --noEmit` in every workspace touched.
+3. Lint passes — `bun run lint` in every workspace touched.
+4. Manual UAT items in the plan are either verified or explicitly deferred.
+5. The plan's `SUMMARY.md` exists and accurately reflects what shipped.
 
-When all of that is true, push the branch and offer to create the PR.
-Use the existing commit-message scope as the title prefix.
+When all five are green, prompt with something like:
 
-**PR title:** `feat(<phase>-<plan>): <one-line summary of what shipped>`
-(use `fix(...)`, `docs(...)`, `chore(...)` if more apt than `feat`).
+> ✅ Plan `XX-YY` checks all pass. Want me to push `phase-XX-YY` and open the PR?
 
-**PR body template:**
+If the dev confirms, draft the PR with:
 
-```markdown
-## Summary
-- <bullet 1: the most user-visible change>
-- <bullet 2: …>
-- <bullet 3: notable refactors or fixes that came along for the ride>
+- **Title:** `feat(<phase-plan>): <one-line outcome>` — e.g.
+  `feat(02-league-prediction-01): create-league flow with shareable invite code`.
+  Mirror the lead commit's Conventional Commit scope.
+- **Body** (sections, in this order):
+  - **Summary** — 3–6 bullets of what changed and why. Pull from
+    `<XX>-<YY>-SUMMARY.md::Key Files Created/Modified` and the goal.
+  - **Test plan** — bulleted checklist of what was run (paste the green test
+    output one-liner) plus any manual UAT steps. Mark each `[x]` if verified.
+  - **Bugs found and fixed** (if any) — short list with file paths, mirroring
+    the SUMMARY's "Bugs Found and Fixed" section.
+  - **Follow-ups** — surface anything the SUMMARY tracked as deferred so the
+    reviewer knows what's *not* in this PR.
+  - Close with the standard `🤖 Generated with [Claude Code]…` footer.
 
-## Test plan
-- [x] `bunx playwright test` — N/N passing
-- [x] `bunx tsc --noEmit` — clean in apps/web and apps/api
-- [x] Manual end-to-end: <one-line of the human path that was walked>
-- [x] <any other check from PLAN.md verification block>
-
-## Follow-ups (tracked in STATE.md, not in this PR)
-- <pull from STATE.md todos that are out of scope here>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-```
-
-The Summary section should pull from the SUMMARY.md "Key Files Created/Modified"
-and "Bugs Found and Fixed" sections, condensed. The Test plan section should pull
-from the PLAN.md `<verification>` block plus anything actually exercised by hand.
-Don't fabricate test results — only check a box if you ran the check.
-
-When you tell the dev "all checks pass, ready to PR?" include a concrete title
-and body draft so they can `/y` and ship without retyping anything.
+Use `gh pr create` if available; otherwise push the branch and surface the
+`https://github.com/<owner>/<repo>/compare/main...phase-XX-YY` URL with the
+title and body ready to paste.
 
 ## Commit message convention
 
