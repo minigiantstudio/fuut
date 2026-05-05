@@ -67,4 +67,4 @@ progress:
 ## Session Continuity
 
 **Last Action**: Phase 1 verification complete — fixed ghost `@types/node 2` dir (API tsc was failing), fixed lint errors (shadcn/ui components excluded; tailwind config suppressed), wrote missing `01-01-SUMMARY.md`, confirmed 5/5 Playwright E2E pass, API boots, both apps build and type-check clean.
-**Next Step**: Begin Phase 2 planning — run `/gsd-plan-phase 2` to generate the Phase 2 plan set.
+**Next Step**: Begin Phase 2 planning — run `/gsd:plan-phase 2` to generate the Phase 2 plan set.
