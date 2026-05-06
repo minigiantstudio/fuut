@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MatchDetail from "@/components/MatchDetail";
 import EnterResult from "@/components/EnterResult";
@@ -28,6 +28,14 @@ const statusConfig: Record<MatchStatus, { label: string; className: string }> = 
   needs_result: { label: "RESULT?", className: "bg-pixel-gold text-foreground" },
 };
 
+function getLocksInLabel(kickoffAt: string): string | null {
+  const diff = new Date(kickoffAt).getTime() - Date.now();
+  if (diff <= 0 || diff > 24 * 60 * 60 * 1000) return null;
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  return h > 0 ? `Locks in ${h}h ${m}m` : `Locks in ${m}m`;
+}
+
 const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
@@ -35,6 +43,13 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const [activeStage, setActiveStage] = useState("Matchday 1");
   const [activeGroup, setActiveGroup] = useState("All");
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: rawMatches = [] } = useQuery<DbMatch[]>({
     queryKey: ["matches"],
@@ -83,7 +98,8 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       }
       return { ...m, uiStatus, prediction: pred };
     });
-  }, [rawMatches, predictionMap]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawMatches, predictionMap, tick]);
 
   const stages = useMemo(() => [...new Set(matches.map((m) => m.stage))], [matches]);
   const groups = useMemo(() => {
@@ -210,10 +226,18 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-[6px] text-muted-foreground font-mono">
-                      {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
-                      {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[6px] text-muted-foreground font-mono">
+                        {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
+                        {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      {match.uiStatus === "open" && (() => {
+                        const label = getLocksInLabel(match.kickoff_at);
+                        return label ? (
+                          <span className="text-[6px] text-pixel-red">{label}</span>
+                        ) : null;
+                      })()}
+                    </div>
                     {isAdmin && match.uiStatus === "needs_result" && (
                       <button
                         className="text-[6px] text-pixel-blue border border-pixel-blue px-2 py-0.5"
