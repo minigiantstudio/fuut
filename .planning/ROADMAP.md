@@ -34,7 +34,10 @@
   2. User can join a league using a code.
   3. User can submit and edit predictions for upcoming matches.
   4. Predictions are locked based on kickoff time.
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 02-01-PLAN.md — SessionContext multi-league refactor + Join.tsx fix + Wave 0 test stubs.
+- [ ] 02-02-PLAN.md — League creation flow (Onboarding fork + RPC migration + TopBar switcher + LeagueTab regenerate).
+- [ ] 02-03-PLAN.md — Prediction countdown UX ("Locks in Xh Ym" label on PredictTab).
 **UI hint**: yes
 
 ### Phase 3: Scoring & Real-time Rankings
@@ -78,7 +81,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Onboarding | 0/4 | Not started | - |
-| 2. League & Prediction Core | 0/1 | Not started | - |
+| 2. League & Prediction Core | 0/3 | In progress | - |
 | 3. Scoring & Real-time Rankings | 0/1 | Not started | - |
 | 4. Social & Bonus Predictions | 0/1 | Not started | - |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |
