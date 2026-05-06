@@ -21,10 +21,10 @@ progress:
 
 ## Current Position
 
-**Phase**: 02 (planned — ready to execute)
-**Plan**: 02-01 (Wave 1 — SessionContext refactor + Join.tsx fix + Wave 0 test stubs)
-**Status**: ✅ Phase 1 COMPLETE. Phase 2 PLANNED — 3 plans in 2 waves, verification passed.
-**Progress**: [██░░░░░░░░] 20% overall (1/5 phases complete)
+**Phase**: 02 (in progress)
+**Plan**: 02-03 (Wave 2 — Prediction countdown UX)
+**Status**: ✅ Phase 1 COMPLETE. Phase 2 IN PROGRESS — Plans 02-01 and 02-02 complete; 02-03 remaining.
+**Progress**: [███░░░░░░░] 25% overall (1/5 phases complete; 6/7 plans done)
 
 ## Performance Metrics
 
@@ -49,6 +49,9 @@ progress:
 - **DEC-005**: Playwright config is self-contained against `@playwright/test`; no dependency on `lovable-agent-playwright-config`.
 - **DEC-006**: Frontend talks to API via `VITE_API_URL`, defaulting to `http://localhost:3001`.
 - **DEC-007**: Vite dev server is launched via `bun --bun vite` to avoid Node-x64 / bun-arm64 native-binary mismatch on this machine.
+- **DEC-008**: Invite code stored from create_league RPC response before refreshSession() fires (Pitfall 3 avoidance) — confirmation screen renders immediately without waiting for session load.
+- **DEC-009**: TopBar reads leagues[] from useSession() internally; prop interface unchanged so Index.tsx requires no updates.
+- **DEC-010**: useQueryClient().invalidateQueries used in LeagueTab after regenerate_invite_code RPC to refresh invite code display without page reload.
 
 ### Todos
 
@@ -66,5 +69,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Phase 2 planning complete — 3 PLAN.md files created (02-01, 02-02, 02-03), plan checker passed (2 blockers resolved in revision loop), VALIDATION.md updated to nyquist_compliant: true, RESEARCH.md Open Questions marked RESOLVED, PATTERNS.md generated.
-**Next Step**: Execute Phase 2 — run `/gsd:execute-phase 2` starting with Plan 02-01 (Wave 1) on branch `phase-02-01`.
+**Last Action**: Plan 02-02 complete — league creation flow (Onboarding fork, LeagueSwitcher, TopBar switcher, LeagueTab regenerate) committed on `phase-02-02`; SUMMARY written; schema applied to live Supabase DB.
+**Next Step**: Execute Plan 02-03 — prediction countdown UX ("Locks in Xh Ym" label on PredictTab) on branch `phase-02-03`.

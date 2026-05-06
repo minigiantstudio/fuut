@@ -36,7 +36,7 @@
   4. Predictions are locked based on kickoff time.
 **Plans**: 3 plans
 - [ ] 02-01-PLAN.md — SessionContext multi-league refactor + Join.tsx fix + Wave 0 test stubs.
-- [ ] 02-02-PLAN.md — League creation flow (Onboarding fork + RPC migration + TopBar switcher + LeagueTab regenerate).
+- [x] 02-02-PLAN.md — League creation flow (Onboarding fork + RPC migration + TopBar switcher + LeagueTab regenerate).
 - [ ] 02-03-PLAN.md — Prediction countdown UX ("Locks in Xh Ym" label on PredictTab).
 **UI hint**: yes
 
