@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-05T00:00:00.000Z"
+last_updated: "2026-05-06T00:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
-  percent: 20
+  completed_plans: 7
+  percent: 40
 ---
 
 # Project State - Fuut
@@ -21,22 +21,22 @@ progress:
 
 ## Current Position
 
-**Phase**: 02 (in progress)
-**Plan**: 02-03 (Wave 2 — Prediction countdown UX)
-**Status**: ✅ Phase 1 COMPLETE. Phase 2 IN PROGRESS — Plans 02-01 and 02-02 complete; 02-03 remaining.
-**Progress**: [███░░░░░░░] 25% overall (1/5 phases complete; 6/7 plans done)
+**Phase**: 02 (UAT pending)
+**Plan**: 02-03 (complete)
+**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending) — all 3 plans shipped; 5 human verification items in 02-HUMAN-UAT.md.
+**Progress**: [████░░░░░░] 40% overall (plans 1–7 done; UAT in progress)
 
 ## Performance Metrics
 
 - **Requirement Coverage**: 100% (28/28 v1 requirements mapped)
-- **Phase Completion**: 1/5
-- **Plans Completed**: 4/4 in Phase 1
-- **Tests Passing**: 5/5 Playwright E2E (0 fixme; all run against `page.route()` mocks — no production Supabase hit)
+- **Phase Completion**: 1/5 (Phase 2 code-complete, UAT pending)
+- **Plans Completed**: 7/7 (4 Phase 1 + 3 Phase 2)
+- **Tests Passing**: 5/5 Playwright E2E (12 Wave 0 stubs skipped — will be activated in Phase 3)
 - **Build**: ✅ `apps/web` (vite build) + `apps/api` (tsc) — zero errors
 - **Type Check**: ✅ `tsc --noEmit` passes in both apps
 - **Lint**: ✅ Zero errors; 1 acceptable warning in `SessionContext.tsx` (standard context pattern)
 - **API**: ✅ Boots and responds `OK` on `/health`
-- **SUMMARY files**: ✅ 4/4 plans have SUMMARY files
+- **SUMMARY files**: ✅ 3/3 Phase 2 plans have SUMMARY files
 
 ## Accumulated Context
 
@@ -69,5 +69,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Plan 02-02 complete — league creation flow (Onboarding fork, LeagueSwitcher, TopBar switcher, LeagueTab regenerate) committed on `phase-02-02`; SUMMARY written; schema applied to live Supabase DB.
-**Next Step**: Execute Plan 02-03 — prediction countdown UX ("Locks in Xh Ym" label on PredictTab) on branch `phase-02-03`.
+**Last Action**: Phase 2 execution complete — all 3 plans shipped on `phase-02-01`; code review done (2 critical security fixes applied); VERIFICATION.md written; 5 human UAT items in 02-HUMAN-UAT.md; PR pending.
+**Next Step**: Merge `phase-02-01` PR → run UAT → discuss/plan Phase 3 (Scoring & Real-time Rankings).

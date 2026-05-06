@@ -2,7 +2,7 @@
 
 ## Phases
 - [ ] **Phase 1: Foundation & Onboarding** - Establish production environment and enable users to join.
-- [ ] **Phase 2: League & Prediction Core** - Create/join leagues and submit match predictions.
+- [x] **Phase 2: League & Prediction Core** - Create/join leagues and submit match predictions.
 - [ ] **Phase 3: Scoring & Real-time Rankings** - Automate match scoring and update leaderboards.
 - [ ] **Phase 4: Social & Bonus Predictions** - Increase engagement with social features and custom bets.
 - [ ] **Phase 5: Global Polish & Tournament Readiness** - Finalize PWA, localization, and performance.
@@ -35,9 +35,9 @@
   3. User can submit and edit predictions for upcoming matches.
   4. Predictions are locked based on kickoff time.
 **Plans**: 3 plans
-- [ ] 02-01-PLAN.md — SessionContext multi-league refactor + Join.tsx fix + Wave 0 test stubs.
+- [x] 02-01-PLAN.md — SessionContext multi-league refactor + Join.tsx fix + Wave 0 test stubs.
 - [x] 02-02-PLAN.md — League creation flow (Onboarding fork + RPC migration + TopBar switcher + LeagueTab regenerate).
-- [ ] 02-03-PLAN.md — Prediction countdown UX ("Locks in Xh Ym" label on PredictTab).
+- [x] 02-03-PLAN.md — Prediction countdown UX ("Locks in Xh Ym" label on PredictTab).
 **UI hint**: yes
 
 ### Phase 3: Scoring & Real-time Rankings
@@ -81,7 +81,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Onboarding | 0/4 | Not started | - |
-| 2. League & Prediction Core | 0/3 | In progress | - |
+| 2. League & Prediction Core | 3/3 | UAT pending | 2026-05-06 |
 | 3. Scoring & Real-time Rankings | 0/1 | Not started | - |
 | 4. Social & Bonus Predictions | 0/1 | Not started | - |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |
