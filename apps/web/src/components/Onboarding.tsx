@@ -112,9 +112,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       if (userErr) throw new Error(userErr.message);
 
       // 3. Call create_league RPC — generates code, inserts league + admin membership atomically
+      // RPC reads auth.uid() internally; do not pass p_user_id (CR-02 fix)
       const { data, error: rpcErr } = await supabase.rpc("create_league", {
         p_name: newLeagueName.trim(),
-        p_user_id: userId,
       });
       if (rpcErr || !data?.[0]) throw new Error(rpcErr?.message ?? "Failed to create league");
       const { invite_code: inviteCode } = data[0];

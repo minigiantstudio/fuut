@@ -12,11 +12,32 @@ BEGIN
   END IF;
 END $$;
 
--- 2. create_league RPC
--- Atomically generates a unique invite code, inserts the league row, and adds the creator as admin.
--- Granted to authenticated role (anonymous Supabase users get the 'authenticated' role after signInAnonymously).
+-- 2. is_league_admin helper
+-- Returns true if the calling user (auth.uid()) is an admin of the given league.
+-- Used by regenerate_invite_code to enforce admin-only access.
+CREATE OR REPLACE FUNCTION public.is_league_admin(p_league_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.league_members
+    WHERE league_id = p_league_id
+      AND user_id = auth.uid()
+      AND role = 'admin'
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_league_admin(uuid) TO authenticated;
+
+-- 3. create_league RPC
+-- Atomically generates a unique invite code, inserts the league row, and adds the caller as admin.
+-- CR-02 fix: uses auth.uid() internally instead of accepting p_user_id from the caller,
+-- preventing privilege escalation where an authenticated user could create a league for any UUID.
 -- Returns { id uuid, invite_code text }.
-CREATE OR REPLACE FUNCTION public.create_league(p_name text, p_user_id uuid)
+CREATE OR REPLACE FUNCTION public.create_league(p_name text)
 RETURNS TABLE(id uuid, invite_code text)
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -24,8 +45,13 @@ AS $$
 DECLARE
   v_code text;
   v_id uuid;
+  v_user_id uuid := auth.uid();
   v_attempts int := 0;
 BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
   -- Generate a unique 4-char uppercase alphanumeric code
   LOOP
     v_code := upper(substring(md5(random()::text || clock_timestamp()::text) from 1 for 4));
@@ -38,23 +64,22 @@ BEGIN
 
   -- Insert league row
   INSERT INTO public.leagues(name, invite_code, created_by)
-    VALUES (p_name, v_code, p_user_id)
+    VALUES (p_name, v_code, v_user_id)
     RETURNING public.leagues.id INTO v_id;
 
-  -- Add creator as admin member
+  -- Add caller as admin member
   INSERT INTO public.league_members(league_id, user_id, role)
-    VALUES (v_id, p_user_id, 'admin');
+    VALUES (v_id, v_user_id, 'admin');
 
   RETURN QUERY SELECT v_id, v_code;
 END;
 $$;
 
--- Grant to authenticated role (Supabase anonymous users use the 'authenticated' role)
-GRANT EXECUTE ON FUNCTION public.create_league(text, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.create_league(text) TO authenticated;
 
--- 3. regenerate_invite_code RPC
+-- 4. regenerate_invite_code RPC
 -- Admin-only: generates a new unique invite code for a league and returns it.
--- RLS enforced by checking caller is the league admin via is_league_admin().
+-- Calls is_league_admin() to verify auth.uid() is an admin before proceeding.
 CREATE OR REPLACE FUNCTION public.regenerate_invite_code(p_league_id uuid)
 RETURNS TABLE(invite_code text)
 LANGUAGE plpgsql
@@ -86,5 +111,4 @@ BEGIN
 END;
 $$;
 
--- Grant to authenticated role
 GRANT EXECUTE ON FUNCTION public.regenerate_invite_code(uuid) TO authenticated;
