@@ -2,9 +2,15 @@
 -- Migration: UNIQUE constraint on leagues.invite_code + create_league + regenerate_invite_code RPCs
 -- Date: 2026-05-04
 
--- 1. Enforce uniqueness on invite_code (idempotent — safe to run even if constraint already exists)
-ALTER TABLE public.leagues
-  ADD CONSTRAINT IF NOT EXISTS leagues_invite_code_key UNIQUE (invite_code);
+-- 1. Enforce uniqueness on invite_code (idempotent — DO block guards against duplicate constraint)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'leagues_invite_code_key'
+  ) THEN
+    ALTER TABLE public.leagues ADD CONSTRAINT leagues_invite_code_key UNIQUE (invite_code);
+  END IF;
+END $$;
 
 -- 2. create_league RPC
 -- Atomically generates a unique invite code, inserts the league row, and adds the creator as admin.
