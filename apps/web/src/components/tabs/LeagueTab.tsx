@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { Session } from "@/lib/supabase/types";
 import ConnectivityCheck from "@/components/ConnectivityCheck";
@@ -28,6 +29,11 @@ const StatusBadge = ({ role, isCurrentUser }: { role: string; isCurrentUser: boo
 };
 
 const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
+  const queryClient = useQueryClient();
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [regenerateLoading, setRegenerateLoading] = useState(false);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
+
   const { data: members = [], isLoading } = useQuery<MemberWithNickname[]>({
     queryKey: ["league-members", session.leagueId],
     queryFn: async () => {
@@ -59,6 +65,21 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
     } else {
       await navigator.clipboard.writeText(url);
     }
+  };
+
+  const handleRegenerate = async () => {
+    setRegenerateLoading(true);
+    setRegenerateError(null);
+    const { error } = await supabase.rpc("regenerate_invite_code", {
+      p_league_id: session.leagueId,
+    });
+    setRegenerateLoading(false);
+    if (error) {
+      setRegenerateError(error.message);
+      return;
+    }
+    setShowRegenerateConfirm(false);
+    queryClient.invalidateQueries({ queryKey: ["league", session.leagueId] });
   };
 
   return (
@@ -119,7 +140,43 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
             <button className="flex items-center gap-3 px-3 py-2.5 w-full text-left">
               <span className="text-foreground text-xs">✎ Rename league</span>
             </button>
+            <button
+              onClick={() => setShowRegenerateConfirm(true)}
+              className="flex items-center gap-3 px-3 py-2.5 w-full text-left"
+            >
+              <span className="text-foreground text-xs">🔄 Regenerate invite code</span>
+            </button>
           </div>
+
+          {/* Confirmation dialog */}
+          {showRegenerateConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-4">
+                <h3 className="text-[10px] text-foreground">Regenerate invite code?</h3>
+                <p className="text-[7px] text-muted-foreground">
+                  The current code <span className="text-foreground font-mono">{league?.invite_code}</span> will stop working immediately. Friends with the old link will need the new code.
+                </p>
+                {regenerateError && (
+                  <p className="text-[6px] text-pixel-red">{regenerateError}</p>
+                )}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleRegenerate}
+                    disabled={regenerateLoading}
+                    className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-pixel-red disabled:opacity-40"
+                  >
+                    {regenerateLoading ? "Regenerating..." : "Yes, regenerate"}
+                  </button>
+                  <button
+                    onClick={() => { setShowRegenerateConfirm(false); setRegenerateError(null); }}
+                    className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
