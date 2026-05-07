@@ -8,6 +8,7 @@ import BonusPrediction from "@/components/BonusPrediction";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
+import LockCountdown from "@/components/LockCountdown";
 
 type MatchStatus = "open" | "saved" | "locked" | "needs_result";
 
@@ -28,14 +29,6 @@ const statusConfig: Record<MatchStatus, { label: string; className: string }> = 
   needs_result: { label: "RESULT?", className: "bg-pixel-gold text-foreground" },
 };
 
-function getLocksInLabel(kickoffAt: string): string | null {
-  const diff = new Date(kickoffAt).getTime() - Date.now();
-  if (diff <= 0 || diff > 24 * 60 * 60 * 1000) return null;
-  const h = Math.floor(diff / 3_600_000);
-  const m = Math.floor((diff % 3_600_000) / 60_000);
-  return h > 0 ? `Locks in ${h}h ${m}m` : `Locks in ${m}m`;
-}
-
 const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
@@ -44,8 +37,9 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const [activeGroup, setActiveGroup] = useState("All");
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Tick every 60 s to re-evaluate match statuses (open → needs_result at kickoff).
+  // LockCountdown has its own independent 30 s timer for the countdown display.
   const [tick, setTick] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 60_000);
     return () => clearInterval(interval);
@@ -226,18 +220,10 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[6px] text-muted-foreground font-mono">
-                        {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
-                        {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                      {match.uiStatus === "open" && (() => {
-                        const label = getLocksInLabel(match.kickoff_at);
-                        return label ? (
-                          <span className="text-[6px] text-pixel-red">{label}</span>
-                        ) : null;
-                      })()}
-                    </div>
+                    <span className="text-[6px] text-muted-foreground font-mono">
+                      {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
+                      {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
                     {isAdmin && match.uiStatus === "needs_result" && (
                       <button
                         className="text-[6px] text-pixel-blue border border-pixel-blue px-2 py-0.5"
@@ -247,6 +233,10 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                       </button>
                     )}
                   </div>
+
+                  {(match.uiStatus === "open" || match.uiStatus === "saved") && (
+                    <LockCountdown kickoffAt={match.kickoff_at} />
+                  )}
                 </div>
                 <BonusPrediction matchId={match.id} />
               </div>
