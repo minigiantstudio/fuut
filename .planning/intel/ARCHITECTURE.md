@@ -30,7 +30,7 @@
 **Data (BaaS):**
 - Purpose: Persistent storage and real-time event broadcasting.
 - Location: Supabase Cloud.
-- Contains: PostgreSQL tables, Auth profiles, and real-time triggers.
+- Contains: PostgreSQL tables, Public users, and real-time triggers.
 - Depends on: None.
 - Used by: Backend and Frontend (read-only for some tables).
 
