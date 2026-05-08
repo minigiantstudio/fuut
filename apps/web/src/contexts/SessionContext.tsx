@@ -34,7 +34,7 @@ async function loadSession(attempt = 0): Promise<{ session: Session | null; leag
   // a PGRST116 error to the console during the retry window between sign-in and
   // the users-row insert.
   const { data: dbUser } = await supabase
-    .from("users")
+    .from("profiles")
     .select("id, nickname")
     .eq("id", user.id)
     .maybeSingle();

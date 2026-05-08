@@ -69,7 +69,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       const userId = authData.user.id;
 
       // 2. Insert user row
-      const { error: userErr } = await supabase.from("users").insert({
+      const { error: userErr } = await supabase.from("profiles").insert({
         id: userId,
         nickname: nickname.trim(),
         email: withEmail && email.trim() ? email.trim() : null,
@@ -104,7 +104,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       const userId = authData.user.id;
 
       // 2. Insert user row (email is REQUIRED for creator — per D-02)
-      const { error: userErr } = await supabase.from("users").insert({
+      const { error: userErr } = await supabase.from("profiles").insert({
         id: userId,
         nickname: nickname.trim(),
         email: email.trim(),
