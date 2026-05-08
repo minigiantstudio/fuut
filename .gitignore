@@ -9,6 +9,7 @@ build/
 
 # Env (real creds belong in .env / .env.local; commit only *.example)
 .env
+.env.prod
 .env.local
 .env.*.local
 apps/*/.env

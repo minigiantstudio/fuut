@@ -1,5 +1,5 @@
 -- Enable Row Level Security (RLS)
-ALTER SYSTEM SET "row_level_security" = ON;
+-- ALTER SYSTEM SET "row_level_security" = ON;
 
 -- Create profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
