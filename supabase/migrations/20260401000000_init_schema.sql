@@ -121,6 +121,48 @@ CREATE POLICY "Users can create leagues" ON public.leagues FOR INSERT WITH CHECK
 CREATE POLICY "League members read" ON public.league_members FOR SELECT USING (true);
 CREATE POLICY "League members insert" ON public.league_members FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+-- Trigger to enforce unique nicknames per league
+CREATE OR REPLACE FUNCTION public.check_unique_nickname_in_league()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM public.league_members lm
+    JOIN public.users u ON u.id = lm.user_id
+    WHERE lm.league_id = NEW.league_id
+      AND u.nickname = (SELECT nickname FROM public.users WHERE id = NEW.user_id)
+      AND lm.user_id != NEW.user_id
+  ) THEN
+    RAISE EXCEPTION 'Nickname already taken in this league';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER enforce_unique_nickname_in_league
+  BEFORE INSERT OR UPDATE ON public.league_members
+  FOR EACH ROW EXECUTE FUNCTION public.check_unique_nickname_in_league();
+
+
+-- RPC to check if email exists (for onboarding routing)
+CREATE OR REPLACE FUNCTION public.check_email_exists(p_email text)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM auth.users
+    WHERE email = p_email
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.check_email_exists(text) TO anon, authenticated;
+
+-- Force schema cache reload (Hint: if using PostgREST directly, run this in SQL Editor)
+-- NOTIFY pgrst, 'reload schema';
+
 
 -- Triggers
 

@@ -18,10 +18,14 @@ interface OnboardingProps {
 const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   const { refreshSession } = useSession();
   const navigate = useNavigate();
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery" | "create-name" | "create-nickname" | "create-email" | "create-confirm">(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery" | "create-name" | "create-nickname" | "create-email" | "create-confirm" | "auth-email" | "auth-password" | "auth-signup">(1);
   const [inviteCode, setInviteCode] = useState(prefilledCode ?? "");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [codeLoading, setCodeLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
@@ -40,6 +44,49 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   const [createError, setCreateError] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  const checkEmail = async (nextStep: "create-nickname" | 2) => {
+    if (!email.trim().includes("@")) return;
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      // 1. Check if user already has an active session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Already logged in, move to next step
+        setStep(nextStep);
+        return;
+      }
+
+      // 2. Check if email exists
+      const { data, error } = await supabase.rpc("check_email_exists", { p_email: email.trim() });
+      if (error) throw error;
+
+      setIsRegistered(!!data);
+      setStep(!!data ? "auth-password" : "auth-signup");
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : "Error checking email");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleAuth = async (isSignup: boolean, nextStep: "create-nickname" | 2) => {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const { error } = isSignup 
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) throw error;
+      setStep(nextStep);
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : "Authentication failed");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   const validateCode = async () => {
     setCodeLoading(true);
     setCodeError(null);
@@ -55,24 +102,24 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     }
     setLeagueId(league.id);
     setLeagueName(league.name);
-    setStep(2);
+    setStep("auth-email");
   };
 
-  const handleComplete = async (withEmail: boolean) => {
+  const handleComplete = async () => {
     if (!leagueId) return;
     setJoinLoading(true);
     setJoinError(null);
     try {
-      // 1. Sign in anonymously
-      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
-      if (authError || !authData.user) throw new Error(authError?.message ?? "Auth failed");
-      const userId = authData.user.id;
+      // 1. Get current user (should be authenticated by now)
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error(authError?.message ?? "Not authenticated");
+      const userId = user.id;
 
-      // 2. Insert user row
+      // 2. Upsert user row (ensure nickname is set)
       const { error: userErr } = await supabase.from("users").upsert({
         id: userId,
         nickname: nickname.trim(),
-        email: withEmail && email.trim() ? email.trim() : null,
+        email: user.email ?? (email.trim() || null),
       });
       if (userErr) throw new Error(userErr.message);
 
@@ -82,7 +129,12 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         league_id: leagueId,
         role: "member",
       });
-      if (memberErr) throw new Error(memberErr.message);
+      if (memberErr) {
+        if (memberErr.message.includes("Nickname already taken")) {
+          throw new Error("Nickname taken in this league. Pick another.");
+        }
+        throw new Error(memberErr.message);
+      }
 
       // 4. Refresh session context
       await refreshSession();
@@ -94,36 +146,38 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   };
 
   const handleCreate = async () => {
-    if (!newLeagueName.trim() || !nickname.trim() || !email.trim()) return;
+    if (!newLeagueName.trim() || !nickname.trim()) return;
     setCreateLoading(true);
     setCreateError(null);
     try {
-      // 1. Sign in anonymously
-      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
-      if (authError || !authData.user) throw new Error(authError?.message ?? "Auth failed");
-      const userId = authData.user.id;
+      // 1. Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error(authError?.message ?? "Not authenticated");
+      const userId = user.id;
 
-      // 2. Insert user row (email is REQUIRED for creator — per D-02)
+      // 2. Upsert user row
       const { error: userErr } = await supabase.from("users").upsert({
         id: userId,
         nickname: nickname.trim(),
-        email: email.trim(),
+        email: user.email ?? (email.trim() || null),
       });
       if (userErr) throw new Error(userErr.message);
 
       // 3. Call create_league RPC — generates code, inserts league + admin membership atomically
-      // RPC reads auth.uid() internally; do not pass p_user_id (CR-02 fix)
       const { data, error: rpcErr } = await supabase.rpc("create_league", {
         p_name: newLeagueName.trim(),
       });
-      if (rpcErr || !data?.[0]) throw new Error(rpcErr?.message ?? "Failed to create league");
-      const { invite_code: inviteCode } = data[0];
+      if (rpcErr) throw new Error(rpcErr.message);
+      
+      const league = Array.isArray(data) ? data[0] : data;
+      if (!league?.invite_code) throw new Error("Failed to create league");
+      const { invite_code: inviteCode } = league;
 
-      // 4. Store invite code for confirmation screen BEFORE refreshSession (avoids race — per Pitfall 3)
+      // 4. Store invite code for confirmation screen BEFORE refreshSession
       setCreatedInviteCode(inviteCode);
       setStep("create-confirm");
 
-      // 5. Load session in background (confirmation screen is already shown)
+      // 5. Load session in background
       refreshSession();
     } catch (e: unknown) {
       setCreateError(e instanceof Error ? e.message : "Something went wrong");
@@ -271,20 +325,138 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 type="text"
                 value={newLeagueName}
                 onChange={(e) => setNewLeagueName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && newLeagueName.trim() && setStep("create-nickname")}
+                onKeyDown={(e) => e.key === "Enter" && newLeagueName.trim() && setStep("create-email")}
                 placeholder="League name..."
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
             </div>
             <button
-              onClick={() => setStep("create-nickname")}
+              onClick={() => setStep("create-email")}
               disabled={!newLeagueName.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
             >
               Next
             </button>
             <button onClick={() => { setNewLeagueName(""); setStep(1); }} className="w-full h-10 text-[7px] text-muted-foreground">
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Create path — Email (Required for creator)
+  if (step === "create-email") {
+    return (
+      <div className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
+          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
+            <div className="space-y-2">
+              <h1 className="text-[12px] text-foreground">Your email</h1>
+              <p className="text-[7px] text-muted-foreground">Identity verification required.</p>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && checkEmail("create-nickname")}
+                placeholder="name@example.com"
+                className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={() => checkEmail("create-nickname")}
+              disabled={authLoading || !email.trim().includes("@")}
+              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue"
+            >
+              {authLoading ? "Checking..." : "Next"}
+            </button>
+            {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
+            <button onClick={() => setStep("create-name")} className="w-full h-10 text-[7px] text-muted-foreground">
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth steps: Password (Login)
+  if (step === "auth-password") {
+    const isJoining = !!leagueId;
+    const nextStep = isJoining ? 2 : "create-nickname";
+    return (
+      <div className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
+          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
+            <div className="space-y-2">
+              <h1 className="text-[12px] text-foreground">Welcome back</h1>
+              <p className="text-[7px] text-muted-foreground">Enter your password for <span className="text-foreground">{email}</span></p>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAuth(false, nextStep)}
+                placeholder="Password"
+                className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={() => handleAuth(false, nextStep)}
+              disabled={authLoading || !password.trim()}
+              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
+            >
+              {authLoading ? "Verifying..." : "Login"}
+            </button>
+            {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
+            <button onClick={() => setStep(isJoining ? "auth-email" : "create-email")} className="w-full h-10 text-[7px] text-muted-foreground">
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth steps: Signup
+  if (step === "auth-signup") {
+    const isJoining = !!leagueId;
+    const nextStep = isJoining ? 2 : "create-nickname";
+    return (
+      <div className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
+          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
+            <div className="space-y-2">
+              <h1 className="text-[12px] text-foreground">Create account</h1>
+              <p className="text-[7px] text-muted-foreground">Set a password for <span className="text-foreground">{email}</span></p>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && password.trim().length >= 6 && handleAuth(true, nextStep)}
+                placeholder="At least 6 characters"
+                className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={() => handleAuth(true, nextStep)}
+              disabled={authLoading || password.trim().length < 6}
+              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
+            >
+              {authLoading ? "Creating..." : "Sign up"}
+            </button>
+            {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
+            <button onClick={() => setStep(isJoining ? "auth-email" : "create-email")} className="w-full h-10 text-[7px] text-muted-foreground">
               ← Back
             </button>
           </div>
@@ -307,55 +479,20 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && nickname.trim() && setStep("create-email")}
+              onKeyDown={(e) => e.key === "Enter" && nickname.trim() && handleCreate()}
               placeholder="Nickname..."
               className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
               autoFocus
             />
             <button
-              onClick={() => setStep("create-email")}
-              disabled={!nickname.trim()}
-              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
-            >
-              Next
-            </button>
-            <button onClick={() => setStep("create-name")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Create path — Email (required for creator)
-  if (step === "create-email") {
-    return (
-      <div className="min-h-screen bg-background flex justify-center">
-        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
-          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
-            <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Your email</h1>
-              <p className="text-[7px] text-muted-foreground">Required to recover your account as league admin.</p>
-            </div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && email.trim().includes("@") && handleCreate()}
-              placeholder="name@example.com"
-              className="w-full h-12 pixel-inset bg-card px-4 text-[8px] text-foreground placeholder:text-muted-foreground focus:outline-none"
-              autoFocus
-            />
-            <button
               onClick={handleCreate}
-              disabled={createLoading || !email.trim().includes("@")}
+              disabled={createLoading || !nickname.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
             >
               {createLoading ? "Creating..." : "Create league"}
             </button>
             {createError && <p className="text-[6px] text-pixel-red text-center">{createError}</p>}
-            <button onClick={() => setStep("create-nickname")} className="w-full h-10 text-[7px] text-muted-foreground">
+            <button onClick={() => setStep("auth-password")} className="w-full h-10 text-[7px] text-muted-foreground">
               ← Back
             </button>
           </div>
@@ -377,8 +514,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
 
     const handleStartPredicting = async () => {
       setConfirmLoading(true);
-      // refreshSession() was already called in handleCreate (fire-and-forget).
-      // Await it here to ensure session is loaded before navigating.
       await refreshSession();
       navigate("/");
     };
@@ -392,7 +527,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               <h1 className="text-foreground text-sm">League created!</h1>
               <p className="text-muted-foreground text-xs">{newLeagueName} is ready. Share this code.</p>
             </div>
-            {/* Invite code in the same style as LeagueTab */}
             <div className="pixel-border bg-card p-4 space-y-3 text-center">
               <p className="text-[7px] text-muted-foreground uppercase">Invite code</p>
               <div className="pixel-inset bg-background py-3 px-4 text-center">
@@ -415,7 +549,45 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     );
   }
 
-  // Step 2 — Nickname
+  // Join path — Email
+  if (step === "auth-email") {
+    return (
+      <div className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
+          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
+            <div className="space-y-2">
+              <h1 className="text-[12px] text-foreground">Your email</h1>
+              <p className="text-[7px] text-muted-foreground">Identity verification required to join <span className="text-foreground">{leagueName}</span>.</p>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && checkEmail(2)}
+                placeholder="name@example.com"
+                className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={() => checkEmail(2)}
+              disabled={authLoading || !email.trim().includes("@")}
+              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue"
+            >
+              {authLoading ? "Checking..." : "Next"}
+            </button>
+            {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
+            <button onClick={() => setStep(1)} className="w-full h-10 text-[7px] text-muted-foreground">
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Join path — Step 2 (Nickname)
   if (step === 2) {
     return (
       <div className="min-h-screen bg-background flex justify-center">
@@ -438,7 +610,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
-              <p className="text-[6px] text-muted-foreground">No password · remembered on this device</p>
             </div>
 
             <button
@@ -446,74 +617,33 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={!nickname.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
             >
-              Let's go
+              Next
             </button>
 
-            <p className="text-center text-[6px] text-muted-foreground">
-              <button onClick={() => setStep(4)} className="underline underline-offset-2">
-                Add email for multi-device
-              </button>
-            </p>
+            <button onClick={() => setStep("auth-password")} className="w-full h-10 text-[7px] text-muted-foreground">
+              ← Back
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Step 4 — Email
-  if (step === 4) {
-    return (
-      <div className="min-h-screen bg-background flex justify-center">
-        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
-          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
-            <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Add email</h1>
-              <p className="text-[7px] text-muted-foreground">Optional — recover your account later.</p>
-            </div>
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              className="w-full h-12 pixel-inset bg-card px-4 text-[8px] text-foreground placeholder:text-muted-foreground focus:outline-none"
-              autoFocus
-            />
-
-            <button
-              onClick={() => handleComplete(true)}
-              disabled={joinLoading}
-              className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
-            >
-              {joinLoading ? "Joining..." : "Save & continue"}
-            </button>
-
-            <button onClick={() => handleComplete(false)} disabled={joinLoading} className="w-full h-10 text-[7px] text-muted-foreground">
-              Skip for now
-            </button>
-
-            {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 3 — You're in
+  // Step 3 — Almost there
   return (
     <div className="min-h-screen bg-background flex justify-center">
       <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
         <div className="flex-1 flex flex-col justify-center w-full space-y-8">
           <div className="space-y-2 text-center">
             <p className="text-2xl">⚽</p>
-            <h1 className="text-foreground text-sm">You're in!</h1>
+            <h1 className="text-foreground text-sm">Almost there!</h1>
             <p className="text-muted-foreground text-xs">
-              Welcome to <span className="text-foreground">{leagueName}</span>, {nickname}
+              Ready to join <span className="text-foreground">{leagueName}</span> as <span className="text-foreground">{nickname}</span>?
             </p>
           </div>
 
           <button
-            onClick={() => handleComplete(false)}
+            onClick={handleComplete}
             disabled={joinLoading}
             className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
           >
@@ -521,6 +651,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
           </button>
 
           {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
+          <button onClick={() => setStep(2)} className="w-full h-10 text-[7px] text-muted-foreground">
+            ← Change nickname
+          </button>
         </div>
       </div>
     </div>
