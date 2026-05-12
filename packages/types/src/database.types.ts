@@ -7,15 +7,37 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
       leaderboard_snapshots: {
         Row: {
+          bonus_points: number
+          exact_matches: number
           id: string
           league_id: string
           rank: number
@@ -25,6 +47,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bonus_points?: number
+          exact_matches?: number
           id?: string
           league_id: string
           rank: number
@@ -34,6 +58,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bonus_points?: number
+          exact_matches?: number
           id?: string
           league_id?: string
           rank?: number
@@ -134,30 +160,39 @@ export type Database = {
         Row: {
           away_score: number | null
           away_team: string
+          bonus_question: string | null
+          bonus_result: boolean | null
           home_score: number | null
           home_team: string
           id: string
           is_final: boolean
+          is_manual_override: boolean
           kickoff_at: string
           stage: string
         }
         Insert: {
           away_score?: number | null
           away_team: string
+          bonus_question?: string | null
+          bonus_result?: boolean | null
           home_score?: number | null
           home_team: string
           id?: string
           is_final?: boolean
+          is_manual_override?: boolean
           kickoff_at: string
           stage: string
         }
         Update: {
           away_score?: number | null
           away_team?: string
+          bonus_question?: string | null
+          bonus_result?: boolean | null
           home_score?: number | null
           home_team?: string
           id?: string
           is_final?: boolean
+          is_manual_override?: boolean
           kickoff_at?: string
           stage?: string
         }
@@ -166,35 +201,47 @@ export type Database = {
       predictions: {
         Row: {
           away_score: number
+          bonus_answer: boolean | null
           created_at: string
           home_score: number
           id: string
+          is_bonus_scored: boolean
           is_scored: boolean
           league_id: string
           match_id: string
           points: number
+          points_bonus: number
+          points_match: number
           user_id: string
         }
         Insert: {
           away_score: number
+          bonus_answer?: boolean | null
           created_at?: string
           home_score: number
           id?: string
+          is_bonus_scored?: boolean
           is_scored?: boolean
           league_id: string
           match_id: string
           points?: number
+          points_bonus?: number
+          points_match?: number
           user_id: string
         }
         Update: {
           away_score?: number
+          bonus_answer?: boolean | null
           created_at?: string
           home_score?: number
           id?: string
+          is_bonus_scored?: boolean
           is_scored?: boolean
           league_id?: string
           match_id?: string
           points?: number
+          points_bonus?: number
+          points_match?: number
           user_id?: string
         }
         Relationships: [
@@ -227,6 +274,7 @@ export type Database = {
           email: string | null
           id: string
           is_anonymous: boolean
+          is_global_admin: boolean
           nickname: string
         }
         Insert: {
@@ -234,6 +282,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
+          is_global_admin?: boolean
           nickname: string
         }
         Update: {
@@ -241,6 +290,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
+          is_global_admin?: boolean
           nickname?: string
         }
         Relationships: []
@@ -250,9 +300,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_email_exists: { Args: { p_email: string }; Returns: boolean }
+      create_league: {
+        Args: { p_name: string }
+        Returns: {
+          id: string
+          invite_code: string
+        }[]
+      }
       get_leaderboard: {
         Args: { p_league_id: string }
         Returns: {
+          bonus_points: number
+          exact_matches: number
           nickname: string
           rank: number
           rank_delta: number
@@ -279,6 +339,12 @@ export type Database = {
         Returns: {
           id: string
           name: string
+        }[]
+      }
+      regenerate_invite_code: {
+        Args: { p_league_id: string }
+        Returns: {
+          invite_code: string
         }[]
       }
     }
@@ -409,7 +475,11 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
+

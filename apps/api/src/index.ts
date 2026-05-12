@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@fuut/types';
 import { authMiddleware } from './middleware/auth';
+import { ScoringJob } from './cron/scoring.job';
 
 dotenv.config();
 
@@ -21,6 +22,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Fully-typed Supabase client — query results are inferred from the DB schema.
 // The Database type is generated from the live project via `bun run gen` in packages/types.
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+// Initialize Scoring Job
+const footballApiKey = process.env.FOOTBALL_DATA_API_KEY;
+if (footballApiKey) {
+  const scoringJob = new ScoringJob(supabase, footballApiKey);
+  scoringJob.start();
+} else {
+  console.warn('FOOTBALL_DATA_API_KEY missing; background scoring job disabled.');
+}
 
 // Middleware
 app.use(cors());
