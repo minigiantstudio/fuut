@@ -99,6 +99,23 @@ For Vite specifically, prefer `bun --bun vite` over `bun run dev` to ensure
 the runtime is bun (avoids a Node x64 / bun arm64 native-binary mismatch on
 some macOS machines).
 
+## Local development — migrations
+
+When running locally, always ensure the database is in sync before starting work:
+
+```bash
+supabase start          # start local Supabase (requires Docker)
+supabase db reset       # apply all migrations + seed fresh
+```
+
+Before adding a new migration:
+1. Check `supabase/migrations/` to understand existing schema.
+2. Name files `YYYYMMDDHHmmss_description.sql` — Supabase applies them in filename order.
+3. After adding a migration, run `supabase db reset` locally to verify it applies cleanly.
+4. Never edit an already-committed migration file; create a new one instead.
+
+If a migration fails on `supabase db reset`, fix the SQL before committing — a broken migration blocks every other dev's local setup.
+
 ## Where the source of truth lives
 
 - **What to build, in what order:** `.planning/ROADMAP.md`

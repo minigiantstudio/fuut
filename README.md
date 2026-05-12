@@ -7,7 +7,8 @@ A retro-cool 2026 World Cup prediction game.
 ### Prerequisites
 
 - [Bun](https://bun.sh/) (package manager)
-- Node.js 18+ (for compatibility)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local Supabase)
+- [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started)
 
 ### Installation
 
@@ -17,41 +18,37 @@ bun install
 
 ## Running Locally
 
-### Frontend (React + Vite)
-
-From the project root or the `apps/web` directory:
+### 1. Start Supabase
 
 ```bash
-cd apps/web && bun run dev
+supabase start        # starts local Supabase (Docker must be running)
+supabase db reset     # apply migrations + seed data
 ```
 
-Or using the bun runtime directly (recommended):
+Studio is available at `http://127.0.0.1:54323`.
+
+### 2. Frontend (React + Vite)
 
 ```bash
 cd apps/web && bun --bun vite
 ```
 
-The frontend will start on `http://localhost:5173`
+Runs on `http://localhost:8080`.
 
-### Backend (Express)
-
-From the project root or the `apps/api` directory:
+### 3. Backend (Express)
 
 ```bash
 cd apps/api && bun run dev
 ```
 
-The backend will start on the port defined in `apps/api/src/index.ts`
+Runs on `http://localhost:3001`.
 
-### Run Both Simultaneously
+### Switching between local and remote Supabase
 
-From the project root, run both in separate terminal windows:
-
-```bash
-bun run dev
-```
-
-This runs the dev script in all workspaces that have one.
+| | Frontend | Backend |
+|---|---|---|
+| **Local** | `cd apps/web && bun --bun vite` | `cd apps/api && bun run dev` |
+| **Remote** | `cd apps/web && bun --bun vite --mode remote` | `cd apps/api && bun run dev:remote` |
 
 ## Project Structure
 
