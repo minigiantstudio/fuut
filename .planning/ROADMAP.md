@@ -49,7 +49,11 @@
   2. Points are calculated and assigned to users correctly.
   3. Leaderboard updates in real-time without page refresh.
   4. Admins can manually override scores if needed.
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 03-01-PLAN.md — Database schema expansion and Football API client foundation.
+- [ ] 03-02-PLAN.md — Scoring engine implementation and background cron job.
+- [ ] 03-03-PLAN.md — Global Admin Dashboard for manual score overrides.
+- [ ] 03-04-PLAN.md — Real-time leaderboard reactivity and functional bonus predictions.
 **UI hint**: yes
 
 ### Phase 4: Social & Bonus Predictions
@@ -82,6 +86,6 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation & Onboarding | 0/4 | Not started | - |
 | 2. League & Prediction Core | 3/3 | UAT pending | 2026-05-06 |
-| 3. Scoring & Real-time Rankings | 0/1 | Not started | - |
+| 3. Scoring & Real-time Rankings | 0/4 | Not started | - |
 | 4. Social & Bonus Predictions | 0/1 | Not started | - |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |
