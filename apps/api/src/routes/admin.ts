@@ -36,7 +36,6 @@ const requireGlobalAdmin = async (req: UserRequest, res: Response, next: NextFun
 };
 
 const adminRouter = Router();
-const scoringService = new ScoringService(supabase);
 
 /**
  * POST /api/admin/match-result
@@ -78,7 +77,11 @@ adminRouter.post('/match-result', async (req: UserRequest, res: Response) => {
       return res.status(500).json({ message: 'Failed to update match result' });
     }
 
-    // Score all predictions for this match
+    // Score all predictions for this match.
+    // Instantiated here (not at module load) because `supabase` from ../index
+    // is still in the TDZ when this module is evaluated — admin.ts is imported
+    // before the `export const supabase = createClient(...)` line runs.
+    const scoringService = new ScoringService(supabase);
     await scoringService.scoreMatch(matchId);
 
     return res.status(200).json({ message: 'Match result finalized and scores updated' });
