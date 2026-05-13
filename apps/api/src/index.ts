@@ -26,6 +26,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // The Database type is generated from the live project via `bun run gen` in packages/types.
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
+// Server-only service-role client for operations that must bypass RLS (admin
+// match overrides, ScoringService writes). Never exposed to clients. Falls back
+// to the anon client with a warning if SUPABASE_SERVICE_ROLE_KEY is not set,
+// which lets local dev boot but writes to RLS-protected tables will silently
+// affect 0 rows — set the env var for any real testing.
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseServiceRoleKey) {
+  console.warn(
+    '[supabaseAdmin] SUPABASE_SERVICE_ROLE_KEY missing — falling back to anon key. ' +
+    'Admin overrides and scoring writes will be RLS-blocked.'
+  );
+}
+export const supabaseAdmin = createClient<Database>(
+  supabaseUrl,
+  supabaseServiceRoleKey ?? supabaseAnonKey,
+  { auth: { persistSession: false, autoRefreshToken: false } }
+);
+
 // Initialize Scoring Job
 const footballApiKey = process.env.FOOTBALL_DATA_API_KEY;
 if (footballApiKey) {
