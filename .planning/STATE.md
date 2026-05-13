@@ -65,5 +65,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Plan 03-03 PIVOTED — DB-flag admin guard (DEC-016/017) superseded by dedicated `apps/admin/` app with env-var creds + HMAC JWT (DEC-018). Rework in progress on branch `phase-03-03`.
-**Next Step**: Finish 03-03 rework (apps/admin workspace, admin-auth backend, revert is_global_admin from web + DB), UAT, then `03-04-PLAN.md`.
+**Last Action**: Plan 03-03 COMPLETE (pivoted) — env-var admin auth with HMAC JWT (DEC-018) shipped; admin lives in isolated subtree `apps/web/src/admin/`. UAT confirmed end-to-end (browser login → finalize match → DB row + scoring). Branch `phase-03-03` ready for PR.
+**Next Step**: Open PR for `phase-03-03`, then plan/execute `03-04-PLAN.md` on a fresh `phase-03-04` branch.
