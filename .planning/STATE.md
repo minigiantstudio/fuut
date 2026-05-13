@@ -48,8 +48,9 @@ progress:
 - **DEC-013**: Standard 3/1 point system + 2 bonus points (D-03, D-04).
 - **DEC-014**: Tie-breaker: Bonus Points > Most Exact Scores (D-05).
 - **DEC-015**: Supabase Realtime (CDC) for leaderboard updates (D-06).
-- **DEC-016**: Admin authorization uses DB lookup of `is_global_admin` (never client header) to mitigate T-03-04 elevation-of-privilege (D-07, D-08).
-- **DEC-017**: `Session` type extended with `isGlobalAdmin: boolean` fetched at login bootstrap for frontend admin guard.
+- ~~**DEC-016**: Admin authorization uses DB lookup of `is_global_admin`~~ — **SUPERSEDED by DEC-018**.
+- ~~**DEC-017**: `Session` type extended with `isGlobalAdmin`~~ — **SUPERSEDED by DEC-018** (frontend no longer carries admin state; admin lives in a separate app).
+- **DEC-018**: Admin lives in a **dedicated app** (`apps/admin/`), not in the user-facing app. Credentials are read from API env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` bcrypt) — DB is not consulted for admin identity. Login issues an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry) verified by a new `requireAdminToken` middleware. Picks the env-var branch of D-08, replacing the DB-flag branch chosen by the now-superseded DEC-016.
 
 ### Todos
 
@@ -64,5 +65,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Plan 03-03 complete — Global Admin Dashboard with secure DB-backed admin guard implemented.
-**Next Step**: Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
+**Last Action**: Plan 03-03 PIVOTED — DB-flag admin guard (DEC-016/017) superseded by dedicated `apps/admin/` app with env-var creds + HMAC JWT (DEC-018). Rework in progress on branch `phase-03-03`.
+**Next Step**: Finish 03-03 rework (apps/admin workspace, admin-auth backend, revert is_global_admin from web + DB), UAT, then `03-04-PLAN.md`.

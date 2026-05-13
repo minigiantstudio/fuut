@@ -46,6 +46,7 @@ Phase 3 implements the automated backend that makes the game "live." It fetches 
 
 - **D-07: Global Admin Dashboard**: Create a new route at **`/admin`** specifically for manual match result entry.
 - **D-08: Global Admin Role**: Only users with a "Global Admin" flag (likely a boolean in the `users` table or an env var check) can access this dashboard. League creators cannot override global match results.
+  - **D-08-LOCKED (2026-05-13)**: Picked the **env-var-check** branch and added a structural choice — admin lives in a **dedicated app** (`apps/admin/`), not behind a guard inside the user-facing app. Credentials are `ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` (bcrypt) read by `apps/api`. Login returns an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry). The original DB-flag implementation (`users.is_global_admin`) is being reverted. See STATE.md DEC-018.
 
 ### Bonus Prediction UI
 
