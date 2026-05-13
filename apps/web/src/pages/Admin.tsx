@@ -107,7 +107,8 @@ const AdminPage = () => {
       const token = authSession?.access_token;
       if (!token) throw new Error("Not authenticated");
 
-      const apiUrl = import.meta.env.VITE_API_URL as string;
+      const apiUrl =
+        (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3001";
       const response = await fetch(`${apiUrl}/api/admin/match-result`, {
         method: "POST",
         headers: {
