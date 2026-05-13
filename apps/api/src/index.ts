@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@fuut/types';
 import { authMiddleware } from './middleware/auth';
+import { requireAdminToken } from './middleware/admin-token';
 import { ScoringJob } from './cron/scoring.job';
-import { adminRouter, requireGlobalAdmin } from './routes/admin';
+import { adminRouter } from './routes/admin';
+import { adminAuthRouter } from './routes/admin-auth';
 
 dotenv.config();
 
@@ -54,8 +56,13 @@ app.get('/api/me', authMiddleware, (req, res) => {
   });
 });
 
-// Admin routes — protected by authMiddleware + requireGlobalAdmin
-app.use('/api/admin', authMiddleware, requireGlobalAdmin, adminRouter);
+// Admin auth — public POST /api/admin/login (verifies env-var creds, issues JWT).
+// Mounted BEFORE the admin router so /login isn't itself behind requireAdminToken.
+app.use('/api/admin', adminAuthRouter);
+
+// Admin actions — protected by requireAdminToken (HMAC JWT from /api/admin/login).
+// DEC-018: env-var admin replaces the prior DB-flag path (DEC-016/017 superseded).
+app.use('/api/admin', requireAdminToken, adminRouter);
 
 // Start Server
 app.listen(port, () => {

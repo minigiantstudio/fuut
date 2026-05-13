@@ -1,51 +1,22 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase } from '../index';
 import { ScoringService } from '../services/scoring.service';
-
-interface UserRequest extends Request {
-  user?: { id: string; email: string };
-}
-
-/**
- * requireGlobalAdmin middleware
- * Mitigates T-03-04 (Elevation of Privilege): reads `is_global_admin` from
- * the database using the authenticated user's id — NEVER trusts a client header.
- */
-const requireGlobalAdmin = async (req: UserRequest, res: Response, next: NextFunction) => {
-  const userId = req.user?.id;
-  if (!userId) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('is_global_admin')
-    .eq('id', userId)
-    .single();
-
-  if (error || !data) {
-    console.error('[requireGlobalAdmin] DB lookup error:', error?.message);
-    return res.status(500).json({ message: 'Internal server error during authorization' });
-  }
-
-  if (!data.is_global_admin) {
-    return res.status(403).json({ message: 'Forbidden: Global admin access required' });
-  }
-
-  next();
-};
 
 const adminRouter = Router();
 
 /**
  * POST /api/admin/match-result
+ *
  * Manually enter match scores and trigger re-scoring + leaderboard recalculation.
  * Body: { matchId: string, homeScore: number, awayScore: number, bonusResult: boolean }
+ *
+ * Authorization: must be mounted behind `requireAdminToken` middleware in
+ * apps/api/src/index.ts. The route itself does not re-check auth — it trusts
+ * the middleware chain (DEC-018: env-var admin, HMAC JWT).
  */
-adminRouter.post('/match-result', async (req: UserRequest, res: Response) => {
+adminRouter.post('/match-result', async (req: Request, res: Response) => {
   const { matchId, homeScore, awayScore, bonusResult } = req.body;
 
-  // Input validation
   if (!matchId || typeof matchId !== 'string') {
     return res.status(400).json({ message: 'matchId is required and must be a string' });
   }
@@ -60,7 +31,6 @@ adminRouter.post('/match-result', async (req: UserRequest, res: Response) => {
   }
 
   try {
-    // Update the match record with manual override
     const { error: updateError } = await supabase
       .from('matches')
       .update({
@@ -77,7 +47,6 @@ adminRouter.post('/match-result', async (req: UserRequest, res: Response) => {
       return res.status(500).json({ message: 'Failed to update match result' });
     }
 
-    // Score all predictions for this match.
     // Instantiated here (not at module load) because `supabase` from ../index
     // is still in the TDZ when this module is evaluated — admin.ts is imported
     // before the `export const supabase = createClient(...)` line runs.
@@ -91,4 +60,4 @@ adminRouter.post('/match-result', async (req: UserRequest, res: Response) => {
   }
 });
 
-export { adminRouter, requireGlobalAdmin };
+export { adminRouter };
