@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@fuut/types';
 import { authMiddleware } from './middleware/auth';
 import { ScoringJob } from './cron/scoring.job';
+import { adminRouter, requireGlobalAdmin } from './routes/admin';
 
 dotenv.config();
 
@@ -53,8 +54,8 @@ app.get('/api/me', authMiddleware, (req, res) => {
   });
 });
 
-// Routes will be added here
-// Example: app.use('/api/users', userRouter);
+// Admin routes — protected by authMiddleware + requireGlobalAdmin
+app.use('/api/admin', authMiddleware, requireGlobalAdmin, adminRouter);
 
 // Start Server
 app.listen(port, () => {
