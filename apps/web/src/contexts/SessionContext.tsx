@@ -86,7 +86,7 @@ async function loadSession(attempt = 0): Promise<{ session: Session | null; leag
   // the users-row insert.
   const { data: dbUser, error: dbUserErr } = await supabase
     .from("users")
-    .select("id, nickname")
+    .select("id, nickname, is_global_admin")
     .eq("id", user.id)
     .maybeSingle();
   console.debug("[loadSession] users row:", dbUser, "err:", dbUserErr);
@@ -129,6 +129,7 @@ async function loadSession(attempt = 0): Promise<{ session: Session | null; leag
     leagueId: active.leagueId,
     leagueName: active.leagueName,
     role: active.role,
+    isGlobalAdmin: dbUser.is_global_admin ?? false,
   };
 
   return { session, leagues };

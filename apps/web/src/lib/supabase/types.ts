@@ -62,4 +62,5 @@ export interface Session {
   leagueId: string;
   leagueName: string;
   role: string;
+  isGlobalAdmin: boolean;
 }
