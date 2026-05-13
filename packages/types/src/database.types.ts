@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -274,7 +275,6 @@ export type Database = {
           email: string | null
           id: string
           is_anonymous: boolean
-          is_global_admin: boolean
           nickname: string
         }
         Insert: {
@@ -282,7 +282,6 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
-          is_global_admin?: boolean
           nickname: string
         }
         Update: {
@@ -290,7 +289,6 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
-          is_global_admin?: boolean
           nickname?: string
         }
         Relationships: []
@@ -483,3 +481,6 @@ export const Constants = {
   },
 } as const
 
+<claude-code-hint v="1" type="plugin" value="supabase@claude-plugins-official" />
+A new version of Supabase CLI is available: v2.98.2 (currently installed v2.98.1)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
