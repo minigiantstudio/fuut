@@ -1,0 +1,11 @@
+<!--
+  Local-dev recovery email template — same workaround as magic_link.html.
+-->
+<h2>Reset your password</h2>
+<p>Follow this link to reset your password:</p>
+<p>
+  <a href="http://127.0.0.1:54321/auth/v1/verify?token={{ .TokenHash }}&type=recovery&redirect_to={{ .RedirectTo }}">
+    Reset Password
+  </a>
+</p>
+<p>Or enter the code: {{ .Token }}</p>
