@@ -22,9 +22,9 @@ progress:
 ## Current Position
 
 **Phase**: 03 (In progress)
-**Plan**: 03-03 (next)
-**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE.
-**Progress**: [████████░░] 81% overall (plans 1–9 done; plans 10-11 ready)
+**Plan**: 03-04 (next)
+**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE. ✅ Phase 3, Plan 03 COMPLETE.
+**Progress**: [█████████░] 86% overall (plans 1–10 done; plan 11 ready)
 
 ## Performance Metrics
 
@@ -48,12 +48,14 @@ progress:
 - **DEC-013**: Standard 3/1 point system + 2 bonus points (D-03, D-04).
 - **DEC-014**: Tie-breaker: Bonus Points > Most Exact Scores (D-05).
 - **DEC-015**: Supabase Realtime (CDC) for leaderboard updates (D-06).
+- **DEC-016**: Admin authorization uses DB lookup of `is_global_admin` (never client header) to mitigate T-03-04 elevation-of-privilege (D-07, D-08).
+- **DEC-017**: `Session` type extended with `isGlobalAdmin: boolean` fetched at login bootstrap for frontend admin guard.
 
 ### Todos
 
 - [X] Execute `03-01-PLAN.md` — Database schema expansion and Football API client foundation.
 - [X] Execute `03-02-PLAN.md` — Scoring engine implementation and background cron job.
-- [ ] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
+- [X] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
 - [ ] Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
 
 ### Blockers
@@ -62,5 +64,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Phase 3 planning complete — 4 plans verified and VALIDATION.md created.
-**Next Step**: Run `/gsd-execute-phase 3` to begin implementation of Scoring & Real-time Rankings.
+**Last Action**: Plan 03-03 complete — Global Admin Dashboard with secure DB-backed admin guard implemented.
+**Next Step**: Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
