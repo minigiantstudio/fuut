@@ -49,8 +49,8 @@ progress:
 - **DEC-014**: Tie-breaker: Bonus Points > Most Exact Scores (D-05).
 - **DEC-015**: Supabase Realtime (CDC) for leaderboard updates (D-06).
 - ~~**DEC-016**: Admin authorization uses DB lookup of `is_global_admin`~~ — **SUPERSEDED by DEC-018**.
-- ~~**DEC-017**: `Session` type extended with `isGlobalAdmin`~~ — **SUPERSEDED by DEC-018** (frontend no longer carries admin state; admin lives in a separate app).
-- **DEC-018**: Admin lives in a **dedicated app** (`apps/admin/`), not in the user-facing app. Credentials are read from API env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` bcrypt) — DB is not consulted for admin identity. Login issues an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry) verified by a new `requireAdminToken` middleware. Picks the env-var branch of D-08, replacing the DB-flag branch chosen by the now-superseded DEC-016.
+- ~~**DEC-017**: `Session` type extended with `isGlobalAdmin`~~ — **SUPERSEDED by DEC-018** (frontend no longer carries admin state; admin manages its own JWT in localStorage, separate from `SessionContext`).
+- **DEC-018**: Admin lives in an **isolated subtree** inside `apps/web/src/admin/` (own routes `/admin/login` + `/admin`, own auth state, no `SessionContext` coupling) — not a separate Vite workspace. Credentials are read from API env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` bcrypt) — DB is not consulted for admin identity. Login issues an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry) verified by a new `requireAdminToken` middleware. Picks the env-var branch of D-08, replacing the DB-flag branch chosen by the now-superseded DEC-016.
 
 ### Todos
 
