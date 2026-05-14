@@ -274,7 +274,6 @@ export type Database = {
           email: string | null
           id: string
           is_anonymous: boolean
-          is_global_admin: boolean
           nickname: string
         }
         Insert: {
@@ -282,7 +281,6 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
-          is_global_admin?: boolean
           nickname: string
         }
         Update: {
@@ -290,7 +288,6 @@ export type Database = {
           email?: string | null
           id?: string
           is_anonymous?: boolean
-          is_global_admin?: boolean
           nickname?: string
         }
         Relationships: []

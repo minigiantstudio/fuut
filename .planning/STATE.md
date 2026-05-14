@@ -22,9 +22,9 @@ progress:
 ## Current Position
 
 **Phase**: 03 (In progress)
-**Plan**: 03-03 (next)
-**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE.
-**Progress**: [████████░░] 81% overall (plans 1–9 done; plans 10-11 ready)
+**Plan**: 03-04 (next)
+**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE. ✅ Phase 3, Plan 03 COMPLETE.
+**Progress**: [█████████░] 86% overall (plans 1–10 done; plan 11 ready)
 
 ## Performance Metrics
 
@@ -48,12 +48,15 @@ progress:
 - **DEC-013**: Standard 3/1 point system + 2 bonus points (D-03, D-04).
 - **DEC-014**: Tie-breaker: Bonus Points > Most Exact Scores (D-05).
 - **DEC-015**: Supabase Realtime (CDC) for leaderboard updates (D-06).
+- ~~**DEC-016**: Admin authorization uses DB lookup of `is_global_admin`~~ — **SUPERSEDED by DEC-018**.
+- ~~**DEC-017**: `Session` type extended with `isGlobalAdmin`~~ — **SUPERSEDED by DEC-018** (frontend no longer carries admin state; admin manages its own JWT in localStorage, separate from `SessionContext`).
+- **DEC-018**: Admin lives in an **isolated subtree** inside `apps/web/src/admin/` (own routes `/admin/login` + `/admin`, own auth state, no `SessionContext` coupling) — not a separate Vite workspace. Credentials are read from API env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` bcrypt) — DB is not consulted for admin identity. Login issues an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry) verified by a new `requireAdminToken` middleware. Picks the env-var branch of D-08, replacing the DB-flag branch chosen by the now-superseded DEC-016.
 
 ### Todos
 
 - [X] Execute `03-01-PLAN.md` — Database schema expansion and Football API client foundation.
 - [X] Execute `03-02-PLAN.md` — Scoring engine implementation and background cron job.
-- [ ] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
+- [X] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
 - [ ] Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
 
 ### Blockers
@@ -62,5 +65,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Phase 3 planning complete — 4 plans verified and VALIDATION.md created.
-**Next Step**: Run `/gsd-execute-phase 3` to begin implementation of Scoring & Real-time Rankings.
+**Last Action**: Plan 03-03 COMPLETE (pivoted) — env-var admin auth with HMAC JWT (DEC-018) shipped; admin lives in isolated subtree `apps/web/src/admin/`. UAT confirmed end-to-end (browser login → finalize match → DB row + scoring). Branch `phase-03-03` ready for PR.
+**Next Step**: Open PR for `phase-03-03`, then plan/execute `03-04-PLAN.md` on a fresh `phase-03-04` branch.

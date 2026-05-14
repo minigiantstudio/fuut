@@ -61,8 +61,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       const { data, error } = await supabase.rpc("check_email_exists", { p_email: email.trim() });
       if (error) throw error;
 
-      setIsRegistered(!!data);
-      setStep(!!data ? "auth-password" : "auth-signup");
+      const emailExists = !!data;
+      setIsRegistered(emailExists);
+      setStep(emailExists ? "auth-password" : "auth-signup");
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : "Error checking email");
     } finally {
