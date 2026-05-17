@@ -43,7 +43,66 @@ function clearStaleSupabaseTokens() {
     .forEach((k) => window.localStorage.removeItem(k));
 }
 
-async function loadSession(attempt = 0): Promise<{ session: Session | null; leagues: LeagueSummary[] }> {
+// Pure DB-context loader. No auth calls. Safe to invoke from inside an
+// onAuthStateChange callback — see the comment on the subscriber below.
+async function loadUserContext(
+  userId: string,
+  attempt = 0,
+): Promise<{ session: Session | null; leagues: LeagueSummary[] }> {
+  // maybeSingle() returns { data: null } cleanly when 0 rows; single() would log
+  // a PGRST116 error to the console during the retry window between sign-in and
+  // the users-row insert.
+  const { data: dbUser, error: dbUserErr } = await supabase
+    .from("users")
+    .select("id, nickname")
+    .eq("id", userId)
+    .maybeSingle();
+  console.debug("[loadUserContext] users row:", dbUser, "err:", dbUserErr);
+
+  if (!dbUser) {
+    // Race condition: auth row exists but DB row not yet inserted → retry
+    if (attempt < 5) {
+      await new Promise((r) => setTimeout(r, 500));
+      return loadUserContext(userId, attempt + 1);
+    }
+    return { session: null, leagues: [] };
+  }
+
+  const { data: memberships, error: membershipErr } = await supabase
+    .from("league_members")
+    .select("id, role, joined_at, leagues(id, name)")
+    .eq("user_id", userId)
+    .order("joined_at", { ascending: true });
+  console.debug("[loadUserContext] memberships:", memberships, "err:", membershipErr);
+
+  const leagues: LeagueSummary[] = (memberships ?? [])
+    .filter((m) => m.leagues)
+    .map((m) => ({
+      leagueId: (m.leagues as { id: string; name: string }).id,
+      leagueName: (m.leagues as { id: string; name: string }).name,
+      role: m.role,
+    }));
+
+  if (leagues.length === 0) return { session: null, leagues: [] };
+
+  // Restore active league from localStorage if valid; else use first
+  const stored = typeof window !== "undefined" ? localStorage.getItem("activeLeagueId") : null;
+  const active = stored && leagues.find((l) => l.leagueId === stored)
+    ? leagues.find((l) => l.leagueId === stored)!
+    : leagues[0];
+
+  const session: Session = {
+    userId,
+    nickname: dbUser.nickname,
+    leagueId: active.leagueId,
+    leagueName: active.leagueName,
+    role: active.role,
+  };
+
+  return { session, leagues };
+}
+
+async function loadSession(): Promise<{ session: Session | null; leagues: LeagueSummary[] }> {
   // getSession() reads from storage (fast); getUser() triggers a network roundtrip
   // that can hang on stale refresh tokens. The Supabase queries below will fail
   // with RLS if the token is actually invalid, so we don't need server verification.
@@ -78,60 +137,9 @@ async function loadSession(attempt = 0): Promise<{ session: Session | null; leag
     window.sessionStorage.removeItem("supabase-auth-recovery-attempted");
   }
   const user = authSession?.user;
-  console.debug("[loadSession] authSession user:", user?.id ?? null, "attempt:", attempt);
+  console.debug("[loadSession] authSession user:", user?.id ?? null);
   if (!user) return { session: null, leagues: [] };
-
-  // maybeSingle() returns { data: null } cleanly when 0 rows; single() would log
-  // a PGRST116 error to the console during the retry window between sign-in and
-  // the users-row insert.
-  const { data: dbUser, error: dbUserErr } = await supabase
-    .from("users")
-    .select("id, nickname")
-    .eq("id", user.id)
-    .maybeSingle();
-  console.debug("[loadSession] users row:", dbUser, "err:", dbUserErr);
-
-  if (!dbUser) {
-    // Race condition: auth row exists but DB row not yet inserted → retry
-    if (attempt < 5) {
-      await new Promise((r) => setTimeout(r, 500));
-      return loadSession(attempt + 1);
-    }
-    return { session: null, leagues: [] };
-  }
-
-  const { data: memberships, error: membershipErr } = await supabase
-    .from("league_members")
-    .select("id, role, joined_at, leagues(id, name)")
-    .eq("user_id", user.id)
-    .order("joined_at", { ascending: true });
-  console.debug("[loadSession] memberships:", memberships, "err:", membershipErr);
-
-  const leagues: LeagueSummary[] = (memberships ?? [])
-    .filter((m) => m.leagues)
-    .map((m) => ({
-      leagueId: (m.leagues as { id: string; name: string }).id,
-      leagueName: (m.leagues as { id: string; name: string }).name,
-      role: m.role,
-    }));
-
-  if (leagues.length === 0) return { session: null, leagues: [] };
-
-  // Restore active league from localStorage if valid; else use first
-  const stored = typeof window !== "undefined" ? localStorage.getItem("activeLeagueId") : null;
-  const active = stored && leagues.find((l) => l.leagueId === stored)
-    ? leagues.find((l) => l.leagueId === stored)!
-    : leagues[0];
-
-  const session: Session = {
-    userId: user.id,
-    nickname: dbUser.nickname,
-    leagueId: active.leagueId,
-    leagueName: active.leagueName,
-    role: active.role,
-  };
-
-  return { session, leagues };
+  return loadUserContext(user.id);
 }
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
@@ -167,18 +175,31 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       })
       .finally(() => setLoading(false));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, authSession) => {
+      // CRITICAL: this callback fires from inside Supabase's auth lock. Calling
+      // any awaiting supabase.auth.* method here (getSession, getUser, refreshSession)
+      // deadlocks the client — _recoverAndRefresh is still holding the lock that
+      // those calls need. Use the `authSession` arg directly; only run DB queries
+      // via loadUserContext, which never touches supabase.auth.
       if (event === "SIGNED_OUT") {
         setSession(null);
         setLeagues([]);
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        return;
+      }
+      if (event === "SIGNED_IN") {
+        if (!authSession?.user) return;
         try {
-          const result = await loadSession();
+          const result = await loadUserContext(authSession.user.id);
           applySessionResult(result);
         } catch (err) {
-          console.error("Failed to reload session after auth event:", err);
+          console.error("Failed to load session after SIGNED_IN:", err);
         }
+        return;
       }
+      // TOKEN_REFRESHED: user identity unchanged, only the access token rotated.
+      // No DB re-fetch needed. Re-fetching here was the cause of the deadlock
+      // that triggered the 5-second getSession timeout and forced page reloads
+      // on tab visibility change.
     });
 
     return () => subscription.unsubscribe();
