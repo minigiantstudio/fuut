@@ -23,6 +23,7 @@ key_files:
     - apps/web/src/components/tabs/PredictTab.tsx
     - apps/web/src/components/tabs/RankingTab.tsx
     - apps/web/src/lib/supabase/types.ts
+    - apps/web/src/contexts/SessionContext.tsx
 decisions:
   - "BonusPrediction uses booleans throughout (matches DB column type); no 'yes'/'no' string layer"
   - "Bonus button disabled until home_score and away_score are set (predictions NOT NULL constraint), in addition to the kickoff lock"
@@ -32,7 +33,7 @@ metrics:
   duration: "~45 minutes"
   completed: "2026-05-17"
   tasks_completed: 2
-  files_changed: 4
+  files_changed: 5
 ---
 
 # Phase 03 Plan 04: Functional Bonus Predictions & Real-time Leaderboard
@@ -118,6 +119,20 @@ SCORE-03 ("Update leaderboards in real-time") and D-09 ("PredictTab Integration"
    prior upsert sites (`handleScoreChange`, `MatchDetail.onSave`) passed
    `bonus_answer`, so an upsert after a bonus had been saved would reset it
    to NULL. Both now pass through `existing?.bonus_answer ?? null`. Rule 1.
+3. **`SessionContext` deadlock on tab visibility change** — surfaced during
+   manual UAT of the realtime subscription, but the root cause is pre-existing:
+   the `onAuthStateChange` callback called `loadSession()` which calls
+   `supabase.auth.getSession()` from inside Supabase's auth lock, deadlocking
+   `_recoverAndRefresh` against the subscriber. The 5-second `getSession`
+   timeout then triggered the destructive recovery path
+   (`clearStaleSupabaseTokens` + `window.location.reload`), silently logging
+   the player out whenever the tab regained focus. Realtime made the symptom
+   more visible (websocket keeps the auth client active), but the bug pre-dates
+   03-04. Fix bundled into this PR via cherry-pick of `fix(session): avoid
+   getSession deadlock inside onAuthStateChange`. Split `loadSession` into
+   `loadUserContext` (DB-only, safe to call from the subscriber) and a thin
+   `loadSession` (initial mount only). The subscriber now uses the
+   `authSession` arg Supabase already provides; `TOKEN_REFRESHED` is a no-op.
 
 ## Threat Model Compliance
 
