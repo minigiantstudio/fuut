@@ -1,10 +1,7 @@
-<!--
-  Local-dev signup confirmation email template — same workaround as magic_link.html.
--->
 <h2>Confirm your email</h2>
 <p>Follow this link to confirm your account:</p>
 <p>
-  <a href="http://127.0.0.1:54321/auth/v1/verify?token={{ .TokenHash }}&type=signup&redirect_to={{ .RedirectTo }}">
+  <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup&next={{ .RedirectTo }}">
     Confirm
   </a>
 </p>

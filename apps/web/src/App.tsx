@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "@/contexts/SessionContext";
 import Index from "./pages/Index.tsx";
 import JoinPage from "./pages/Join.tsx";
+import AuthCallback from "./pages/AuthCallback.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./admin/AdminLogin.tsx";
 import AdminDashboard from "./admin/AdminDashboard.tsx";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/join/:code" element={<JoinPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             {/* Admin subtree (DEC-018): env-var auth, separate from SessionContext */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
