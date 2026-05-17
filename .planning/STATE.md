@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-11T12:00:00.000Z"
+last_updated: "2026-05-17T00:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 9
-  percent: 81
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State - Fuut
@@ -21,10 +21,10 @@ progress:
 
 ## Current Position
 
-**Phase**: 03 (In progress)
-**Plan**: 03-04 (next)
-**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE. ✅ Phase 3, Plan 03 COMPLETE.
-**Progress**: [█████████░] 86% overall (plans 1–10 done; plan 11 ready)
+**Phase**: 03 (Code complete, UAT pending)
+**Plan**: 03-04 (complete)
+**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE. ✅ Phase 3, Plan 03 COMPLETE. ✅ Phase 3, Plan 04 COMPLETE (UAT pending). ✅ Phase 3 CODE COMPLETE.
+**Progress**: [██████████] 91% overall (plans 1–10 done; phase 4 next)
 
 ## Performance Metrics
 
@@ -57,7 +57,7 @@ progress:
 - [X] Execute `03-01-PLAN.md` — Database schema expansion and Football API client foundation.
 - [X] Execute `03-02-PLAN.md` — Scoring engine implementation and background cron job.
 - [X] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
-- [ ] Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
+- [X] Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
 
 ### Blockers
 
@@ -65,5 +65,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Plan 03-03 COMPLETE (pivoted) — env-var admin auth with HMAC JWT (DEC-018) shipped; admin lives in isolated subtree `apps/web/src/admin/`. UAT confirmed end-to-end (browser login → finalize match → DB row + scoring). Branch `phase-03-03` ready for PR.
-**Next Step**: Open PR for `phase-03-03`, then plan/execute `03-04-PLAN.md` on a fresh `phase-03-04` branch.
+**Last Action**: Plan 03-04 COMPLETE — bonus predictions persist to `predictions.bonus_answer` (boolean, locked at kickoff + before scores are set due to NOT NULL); RankingTab subscribes to a per-league `supabase.channel` on `leaderboard_snapshots` and invalidates the React Query on INSERT/UPDATE. Branch `phase-03-04` carries 3 commits, tsc + lint clean. Manual UAT (browser persist + 2-window realtime) deferred.
+**Next Step**: Open PR for `phase-03-04` (Phase 3 code-complete), then plan Phase 4 (Social).

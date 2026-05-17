@@ -133,6 +133,36 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
         match_id: matchId,
         home_score: updatedHome,
         away_score: updatedAway,
+        // Preserve any existing bonus answer; the upsert overwrites the row.
+        bonus_answer: existing?.bonus_answer ?? null,
+      },
+      { onConflict: "user_id,league_id,match_id" }
+    );
+    queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
+  };
+
+  // Save just the bonus_answer for a match. Requires existing home/away scores
+  // because predictions.home_score / away_score are NOT NULL in the DB; the
+  // BonusPrediction button is disabled until those are set.
+  const handleBonusSave = async (matchId: string, answer: boolean) => {
+    const existing = predictionMap.get(matchId);
+    if (existing?.home_score == null || existing?.away_score == null) {
+      // Defensive guard — UI should disable this path, but never silently
+      // attempt an upsert that would violate the NOT NULL constraint.
+      console.warn(
+        "Refused bonus upsert: scores not yet set for match",
+        matchId
+      );
+      return;
+    }
+    await supabase.from("predictions").upsert(
+      {
+        user_id: session.userId,
+        league_id: session.leagueId,
+        match_id: matchId,
+        home_score: existing.home_score,
+        away_score: existing.away_score,
+        bonus_answer: answer,
       },
       { onConflict: "user_id,league_id,match_id" }
     );
@@ -238,7 +268,19 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                     <LockCountdown kickoffAt={match.kickoff_at} />
                   )}
                 </div>
-                <BonusPrediction matchId={match.id} />
+                <BonusPrediction
+                  matchId={match.id}
+                  bonusQuestion={match.bonus_question}
+                  initialAnswer={match.prediction?.bonus_answer ?? null}
+                  // Lock at kickoff AND when no score prediction exists yet
+                  // (predictions.home_score / away_score are NOT NULL in DB).
+                  disabled={
+                    isLocked ||
+                    match.prediction?.home_score == null ||
+                    match.prediction?.away_score == null
+                  }
+                  onSave={(answer) => handleBonusSave(match.id, answer)}
+                />
               </div>
             );
           })}
@@ -261,6 +303,8 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                 match_id: selectedMatch.id,
                 home_score: homeScore,
                 away_score: awayScore,
+                // Preserve any existing bonus answer through this upsert.
+                bonus_answer: selectedMatch.prediction?.bonus_answer ?? null,
               },
               { onConflict: "user_id,league_id,match_id" }
             );

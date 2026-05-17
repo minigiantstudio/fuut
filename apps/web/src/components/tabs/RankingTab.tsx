@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { LeaderboardEntry, Session } from "@/lib/supabase/types";
 
@@ -13,6 +14,7 @@ const MovementIndicator = ({ movement }: { movement: number }) => {
 };
 
 const RankingTab = ({ session }: RankingTabProps) => {
+  const queryClient = useQueryClient();
   const { data: leaderboard = [], isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["leaderboard", session.leagueId],
     queryFn: async () => {
@@ -23,6 +25,44 @@ const RankingTab = ({ session }: RankingTabProps) => {
       return data ?? [];
     },
   });
+
+  // Realtime leaderboard (D-06): subscribe to INSERT/UPDATE events on
+  // leaderboard_snapshots filtered to this league, and invalidate the
+  // get_leaderboard query when anything changes. The channel name is
+  // namespaced per league to avoid cross-league bleed when multiple
+  // RankingTabs would otherwise share a channel.
+  useEffect(() => {
+    const channel = supabase.channel(`leaderboard-${session.leagueId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "leaderboard_snapshots",
+          filter: `league_id=eq.${session.leagueId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["leaderboard", session.leagueId] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "leaderboard_snapshots",
+          filter: `league_id=eq.${session.leagueId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["leaderboard", session.leagueId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session.leagueId, queryClient]);
 
   return (
     <div className="py-5 space-y-4">

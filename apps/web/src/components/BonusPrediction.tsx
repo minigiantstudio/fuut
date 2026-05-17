@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Star } from "lucide-react";
 
+// Fallback list used when matches.bonus_question is null in the DB.
 const BONUS_QUESTIONS = [
   "Will there be a pitch invader?",
   "Will the coach get a yellow card?",
@@ -14,28 +15,74 @@ const BONUS_QUESTIONS = [
   "Will a substitute score?",
 ];
 
+/**
+ * Deterministic positive index from a matchId string.
+ * Matches use UUIDs, so the original `parseInt(matchId)` produced NaN and the
+ * fallback question was always `undefined`. Sum the char codes instead so any
+ * stable id (UUID, numeric string, etc.) maps to a stable slot.
+ */
+const fallbackQuestionIndex = (matchId: string, modulus: number) => {
+  if (modulus <= 0) return 0;
+  let acc = 0;
+  for (let i = 0; i < matchId.length; i++) {
+    acc = (acc + matchId.charCodeAt(i)) % modulus;
+  }
+  return acc;
+};
+
 interface BonusPredictionProps {
   matchId: string;
+  /** From matches.bonus_question. Null → use the hardcoded fallback list. */
+  bonusQuestion: string | null;
+  /** Current persisted answer (or null if the user hasn't answered yet). */
+  initialAnswer: boolean | null;
+  /** Persist the answer. Parent is responsible for DB write + cache invalidation. */
+  onSave: (answer: boolean) => void | Promise<void>;
+  /** Disabled at kickoff (lock) and when there's no score prediction yet (FK constraint). */
   disabled?: boolean;
 }
 
-const BonusPrediction = ({ matchId, disabled = false }: BonusPredictionProps) => {
+const BonusPrediction = ({
+  matchId,
+  bonusQuestion,
+  initialAnswer,
+  onSave,
+  disabled = false,
+}: BonusPredictionProps) => {
   const [expanded, setExpanded] = useState(false);
-  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
+  // Optimistic local copy so the UI reflects clicks immediately even while the
+  // upsert is in-flight. Synced from initialAnswer (parent prop) on each render
+  // by using it as the seed and updating on click.
+  const [optimisticAnswer, setOptimisticAnswer] = useState<boolean | null>(initialAnswer);
 
-  const question = useMemo(
-    () => BONUS_QUESTIONS[parseInt(matchId) % BONUS_QUESTIONS.length],
-    [matchId]
-  );
+  // Re-seed the optimistic copy when the persisted value changes from elsewhere
+  // (e.g. after queryClient invalidation following another tab's edit).
+  useEffect(() => {
+    setOptimisticAnswer(initialAnswer);
+  }, [initialAnswer]);
+
+  const question = useMemo(() => {
+    if (bonusQuestion) return bonusQuestion;
+    return BONUS_QUESTIONS[fallbackQuestionIndex(matchId, BONUS_QUESTIONS.length)];
+  }, [bonusQuestion, matchId]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!disabled) setExpanded((v) => !v);
   };
 
-  const handleAnswer = (e: React.MouseEvent, val: "yes" | "no") => {
+  const handleAnswer = async (e: React.MouseEvent, val: boolean) => {
     e.stopPropagation();
-    if (!disabled) setAnswer(val);
+    if (disabled) return;
+    setOptimisticAnswer(val);
+    try {
+      await onSave(val);
+    } catch (err) {
+      // Roll back on failure so the UI matches reality.
+      setOptimisticAnswer(initialAnswer);
+      // Surface for debugging; parent owns user-facing error UI if it wants any.
+      console.error("BonusPrediction onSave failed", err);
+    }
   };
 
   return (
@@ -44,7 +91,7 @@ const BonusPrediction = ({ matchId, disabled = false }: BonusPredictionProps) =>
         onClick={handleToggle}
         disabled={disabled}
         className={`w-full flex items-center justify-between px-2 py-1.5 text-[6px] uppercase tracking-wider border-2 border-foreground transition-all pixel-press ${
-          answer
+          optimisticAnswer !== null
             ? "bg-pixel-green text-primary-foreground"
             : "bg-accent text-accent-foreground"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -61,27 +108,29 @@ const BonusPrediction = ({ matchId, disabled = false }: BonusPredictionProps) =>
           <p className="text-[7px] text-foreground leading-relaxed">{question}</p>
           <div className="flex gap-2">
             <button
-              onClick={(e) => handleAnswer(e, "yes")}
+              onClick={(e) => handleAnswer(e, true)}
+              disabled={disabled}
               className={`flex-1 py-1.5 text-[7px] uppercase tracking-wider border-2 border-foreground pixel-press transition-all ${
-                answer === "yes"
+                optimisticAnswer === true
                   ? "bg-pixel-green text-primary-foreground"
                   : "bg-card text-foreground"
-              }`}
+              } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               Yes
             </button>
             <button
-              onClick={(e) => handleAnswer(e, "no")}
+              onClick={(e) => handleAnswer(e, false)}
+              disabled={disabled}
               className={`flex-1 py-1.5 text-[7px] uppercase tracking-wider border-2 border-foreground pixel-press transition-all ${
-                answer === "no"
+                optimisticAnswer === false
                   ? "bg-pixel-red text-primary-foreground"
                   : "bg-card text-foreground"
-              }`}
+              } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               No
             </button>
           </div>
-          {answer && (
+          {optimisticAnswer !== null && (
             <p className="text-[6px] text-pixel-green text-center">✓ Bonus saved!</p>
           )}
         </div>
