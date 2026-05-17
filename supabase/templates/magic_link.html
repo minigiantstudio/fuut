@@ -1,15 +1,7 @@
-<!--
-  Local-dev magic-link email template.
-
-  The default Supabase CLI email link points at
-  http://127.0.0.1:54321/verify, which 404s because the real GoTrue route
-  lives at /auth/v1/verify. We override the template to hardcode the
-  correct path so clicking from Mailpit Just Works.
--->
 <h2>Log in to Fuut</h2>
 <p>Follow this link to log in:</p>
 <p>
-  <a href="http://127.0.0.1:54321/auth/v1/verify?token={{ .TokenHash }}&type=magiclink&redirect_to={{ .RedirectTo }}">
+  <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&next={{ .RedirectTo }}">
     Log In
   </a>
 </p>
