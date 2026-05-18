@@ -223,7 +223,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         min={0}
                         max={99}
                         value={homeVal}
-                        disabled={isLocked}
+                        disabled={true}
                         placeholder="–"
                         onChange={(e) => handleScoreChange(match.id, "home_score", e.target.value)}
                         onBlur={() => { blurTimeout.current = setTimeout(() => {}, 100); }}
@@ -235,7 +235,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         min={0}
                         max={99}
                         value={awayVal}
-                        disabled={isLocked}
+                        disabled={true}
                         placeholder="–"
                         onChange={(e) => handleScoreChange(match.id, "away_score", e.target.value)}
                         className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
