@@ -14,7 +14,13 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("predict");
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (e) {
+      console.warn("[logout] global signOut failed, falling back to local", e);
+      await supabase.auth.signOut({ scope: "local" });
+    }
   };
 
   if (loading) {
