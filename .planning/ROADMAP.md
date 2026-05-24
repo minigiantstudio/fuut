@@ -1,9 +1,9 @@
 # Roadmap - Fuut
 
 ## Phases
-- [ ] **Phase 1: Foundation & Onboarding** - Establish production environment and enable users to join.
+- [x] **Phase 1: Foundation & Onboarding** - Establish production environment and enable users to join.
 - [x] **Phase 2: League & Prediction Core** - Create/join leagues and submit match predictions.
-- [ ] **Phase 3: Scoring & Real-time Rankings** - Automate match scoring and update leaderboards.
+- [x] **Phase 3: Scoring & Real-time Rankings** - Automate match scoring and update leaderboards.
 - [ ] **Phase 4: Social & Bonus Predictions** - Increase engagement with social features and custom bets.
 - [ ] **Phase 5: Global Polish & Tournament Readiness** - Finalize PWA, localization, and performance.
 
@@ -19,10 +19,10 @@
   3. Database schema is deployed and accessible.
   4. Backend Express service is running and connected to Supabase.
 **Plans**:
-- [ ] 01-01-PLAN.md — Initialize monorepo structure and shared types.
-- [ ] 01-02-PLAN.md — Setup Supabase schema and Express auth middleware.
-- [ ] 01-03-PLAN.md — Implement frontend auth flow (Anonymous -> Email).
-- [ ] 01-04-PLAN.md — End-to-end auth verification and connectivity tests.
+- [x] 01-01-PLAN.md — Initialize monorepo structure and shared types.
+- [x] 01-02-PLAN.md — Setup Supabase schema and Express auth middleware.
+- [x] 01-03-PLAN.md — Implement frontend auth flow (Anonymous -> Email).
+- [x] 01-04-PLAN.md — End-to-end auth verification and connectivity tests.
 **UI hint**: yes
 
 ### Phase 2: League & Prediction Core
@@ -34,7 +34,7 @@
   2. User can join a league using a code.
   3. User can submit and edit predictions for upcoming matches.
   4. Predictions are locked based on kickoff time.
-**Plans**: 3 plans
+**Plans**:
 - [x] 02-01-PLAN.md — SessionContext multi-league refactor + Join.tsx fix + Wave 0 test stubs.
 - [x] 02-02-PLAN.md — League creation flow (Onboarding fork + RPC migration + TopBar switcher + LeagueTab regenerate).
 - [x] 02-03-PLAN.md — Prediction countdown UX ("Locks in Xh Ym" label on PredictTab).
@@ -49,11 +49,11 @@
   2. Points are calculated and assigned to users correctly.
   3. Leaderboard updates in real-time without page refresh.
   4. Admins can manually override scores if needed.
-**Plans**: 4 plans
+**Plans**:
 - [x] 03-01-PLAN.md — Database schema expansion and Football API client foundation.
 - [x] 03-02-PLAN.md — Scoring engine implementation and background cron job.
 - [x] 03-03-PLAN.md — Global Admin Dashboard for manual score overrides.
-- [ ] 03-04-PLAN.md — Real-time leaderboard reactivity and functional bonus predictions.
+- [x] 03-04-PLAN.md — Real-time leaderboard reactivity and functional bonus predictions.
 **UI hint**: yes
 
 ### Phase 4: Social & Bonus Predictions
@@ -65,7 +65,12 @@
   2. Users can see each other's predictions after matches start.
   3. Users can share ranking snapshots to WhatsApp/Telegram.
   4. League limits and premium features are enforced.
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 04-01-PLAN.md — Database foundation and curated bonus question catalog seeding.
+- [ ] 04-02-PLAN.md — Global Admin controls for reveal timing and league tier enforcement.
+- [ ] 04-03-PLAN.md — Micro-predictions UI with countdown reveal and live scoring feedback.
+- [ ] 04-04-PLAN.md — Peer visibility expansion and League Admin tools (rename/remove).
+- [ ] 04-05-PLAN.md — Shareable ranking snapshots with pixel-art PNG generation.
 **UI hint**: yes
 
 ### Phase 5: Global Polish & Tournament Readiness
@@ -84,8 +89,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Onboarding | 0/4 | Not started | - |
-| 2. League & Prediction Core | 3/3 | UAT pending | 2026-05-06 |
-| 3. Scoring & Real-time Rankings | 3/4 | In progress | - |
-| 4. Social & Bonus Predictions | 0/1 | Not started | - |
+| 1. Foundation & Onboarding | 4/4 | Completed | 2026-04-20 |
+| 2. League & Prediction Core | 3/3 | Completed | 2026-05-06 |
+| 3. Scoring & Real-time Rankings | 4/4 | Completed | 2026-05-20 |
+| 4. Social & Bonus Predictions | 0/5 | Not started | - |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |

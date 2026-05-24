@@ -1,18 +1,13 @@
 import { useRef, useEffect } from "react";
 
 interface StageNavProps {
-  stages?: string[];
+  stages: string[];
   active: string;
   onSelect?: (stage: string) => void;
   onChange?: (stage: string) => void;
 }
 
-const defaultStages = [
-  "Matchday 1", "Matchday 2", "Matchday 3",
-  "Round of 16", "Quarter-finals", "Semi-finals", "Final",
-];
-
-const StageNav = ({ stages = defaultStages, active, onSelect, onChange }: StageNavProps) => {
+const StageNav = ({ stages, active, onSelect, onChange }: StageNavProps) => {
   const handleSelect = (stage: string) => {
     onSelect?.(stage);
     onChange?.(stage);

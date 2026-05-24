@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-05-20T00:00:00.000Z"
+last_updated: "2026-05-23T10:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 10
-  percent: 91
+  total_plans: 16
+  completed_plans: 11
+  percent: 68
 ---
 
 # Project State - Fuut
@@ -17,47 +17,35 @@ progress:
 ## Project Reference
 
 **Core Value**: Frictionless, retro-cool 2026 World Cup prediction game for friends.
-**Current Focus**: Phase 4 — Social & Bonus Predictions (context gathered, ready to plan).
+**Current Focus**: Phase 4 — Social & Bonus Predictions (Planning).
 
 ## Current Position
 
-**Phase**: 04 (Context gathered)
-**Plan**: — (no plans yet)
-**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE (UAT pending). ✅ Phase 3 PLANNING COMPLETE. ✅ Phase 3, Plan 01 COMPLETE. ✅ Phase 3, Plan 02 COMPLETE. ✅ Phase 3, Plan 03 COMPLETE. ✅ Phase 3, Plan 04 COMPLETE (UAT pending). ✅ Phase 3 CODE COMPLETE. ✅ Phase 4 CONTEXT.md captured (4 areas, 23 decisions). Ready for `/gsd-plan-phase 04`.
-**Progress**: [██████████] 91% overall (plans 1–10 done; phase 4 next)
+**Phase**: 04 (Planning)
+**Plan**: —
+**Status**: ✅ Phase 1 COMPLETE. ✅ Phase 2 COMPLETE. ✅ Phase 3 COMPLETE. Phase 4 planning in progress (5 plans identified).
+**Progress**: [███████░░░] 68% overall
 
 ## Performance Metrics
 
 - **Requirement Coverage**: 100% (28/28 v1 requirements mapped)
-- **Phase Completion**: 2/5 (Phase 2 code-complete, UAT pending; Phase 3 planned)
-- **Plans Completed**: 7/11 (4 Phase 1 + 3 Phase 2 + 0/4 Phase 3)
-- **Tests Passing**: 5/5 Playwright E2E (12 Wave 0 stubs skipped — will be activated in Phase 3)
-- **Build**: ✅ `apps/web` (vite build) + `apps/api` (tsc) — zero errors
-- **Type Check**: ✅ `tsc --noEmit` passes in both apps
-- **Lint**: ✅ Zero errors
-- **API**: ✅ Boots and responds `OK` on `/health`
+- **Phase Completion**: 3/5
+- **Plans Completed**: 11/16
+- **Tests Passing**: 5/5 Playwright E2E
 
 ## Accumulated Context
 
 ### Decisions
 
-- **DEC-001**: Use Supabase for Auth, DB, and Real-time updates.
-- **DEC-002**: Use Express for backend scoring jobs and complex business logic.
-- **DEC-011**: Football-Data.org as primary scoring source (D-01).
-- **DEC-012**: 5-minute polling window during live matches (D-02).
-- **DEC-013**: Standard 3/1 point system + 2 bonus points (D-03, D-04).
-- **DEC-014**: Tie-breaker: Bonus Points > Most Exact Scores (D-05).
-- **DEC-015**: Supabase Realtime (CDC) for leaderboard updates (D-06).
-- ~~**DEC-016**: Admin authorization uses DB lookup of `is_global_admin`~~ — **SUPERSEDED by DEC-018**.
-- ~~**DEC-017**: `Session` type extended with `isGlobalAdmin`~~ — **SUPERSEDED by DEC-018** (frontend no longer carries admin state; admin manages its own JWT in localStorage, separate from `SessionContext`).
-- **DEC-018**: Admin lives in an **isolated subtree** inside `apps/web/src/admin/` (own routes `/admin/login` + `/admin`, own auth state, no `SessionContext` coupling) — not a separate Vite workspace. Credentials are read from API env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` bcrypt) — DB is not consulted for admin identity. Login issues an HMAC-signed JWT (`ADMIN_JWT_SECRET`, 8h expiry) verified by a new `requireAdminToken` middleware. Picks the env-var branch of D-08, replacing the DB-flag branch chosen by the now-superseded DEC-016.
+- **DEC-019**: Phase 4 focuses on engagement: curated bonus questions, peer visibility, shareable snapshots, and league limits. (D-01 to D-23 in 04-CONTEXT.md).
 
 ### Todos
 
-- [X] Execute `03-01-PLAN.md` — Database schema expansion and Football API client foundation.
-- [X] Execute `03-02-PLAN.md` — Scoring engine implementation and background cron job.
-- [X] Execute `03-03-PLAN.md` — Global Admin Dashboard for manual score overrides.
-- [X] Execute `03-04-PLAN.md` — Real-time leaderboard reactivity and functional bonus predictions.
+- [ ] Execute 04-01-PLAN.md — Database foundation and curated bonus question catalog seeding.
+- [ ] Execute 04-02-PLAN.md — Global Admin controls for reveal timing and league tier enforcement.
+- [ ] Execute 04-03-PLAN.md — Micro-predictions UI with countdown reveal and live scoring feedback.
+- [ ] Execute 04-04-PLAN.md — Peer visibility expansion and League Admin tools (rename/remove).
+- [ ] Execute 04-05-PLAN.md — Shareable ranking snapshots with pixel-art PNG generation.
 
 ### Blockers
 
@@ -65,5 +53,5 @@ progress:
 
 ## Session Continuity
 
-**Last Action**: Plan 03-04 COMPLETE — bonus predictions persist to `predictions.bonus_answer` (boolean, locked at kickoff + before scores are set due to NOT NULL); RankingTab subscribes to a per-league `supabase.channel` on `leaderboard_snapshots` and invalidates the React Query on INSERT/UPDATE. Branch `phase-03-04` carries 3 commits, tsc + lint clean. Manual UAT (browser persist + 2-window realtime) deferred.
-**Next Step**: Open PR for `phase-03-04` (Phase 3 code-complete), then plan Phase 4 (Social).
+**Last Action**: Completed Phase 3 execution and updated ROADMAP.md with Phase 4 plans.
+**Next Step**: Create individual PLAN.md files for Phase 4. Execute /gsd-execute-phase 04
