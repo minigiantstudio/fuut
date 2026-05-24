@@ -54,7 +54,12 @@ if (footballApiKey) {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
 app.use(express.json());
 
 // Health Check Endpoint
