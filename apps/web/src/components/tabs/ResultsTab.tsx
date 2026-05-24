@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-import type { Session } from "@/lib/supabase/types";
+import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
 
 interface ScoredPrediction {
   id: string;
