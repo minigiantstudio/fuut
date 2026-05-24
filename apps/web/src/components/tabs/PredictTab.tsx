@@ -33,7 +33,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [resultMatchId, setResultMatchId] = useState<string | null>(null);
-  const [activeStage, setActiveStage] = useState("Matchday 1");
+  const [activeStage, setActiveStage] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState("All");
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -95,7 +95,38 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawMatches, predictionMap, tick]);
 
-  const stages = useMemo(() => [...new Set(matches.map((m) => m.stage))], [matches]);
+  const getStageName = (match: DbMatch) => {
+    if (match.stage === "group") {
+      return new Date(match.kickoff_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }) + " Matches";
+    }
+    const knockoutMap: Record<string, string> = {
+      r16: "Round of 16",
+      qf: "Quarter-finals",
+      sf: "Semi-finals",
+      final: "Final",
+    };
+    return knockoutMap[match.stage] || match.stage;
+  };
+
+  const stages = useMemo(() => {
+    const s = matches.map(getStageName);
+    return [...new Set(s)];
+  }, [matches]);
+
+  // Auto-select the next relevant stage
+  useEffect(() => {
+    if (matches.length > 0 && activeStage === "") {
+      const now = new Date();
+      const nextMatch = matches.find((m) => !m.is_final && new Date(m.kickoff_at) > now) || matches[0];
+      if (nextMatch) {
+        setActiveStage(getStageName(nextMatch));
+      }
+    }
+  }, [matches, activeStage]);
+
   const groups = useMemo(() => {
     const gs = matches.filter((m) => m.group_name).map((m) => m.group_name as string);
     return ["All", ...new Set(gs)];
@@ -105,7 +136,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
 
   const filteredMatches = useMemo(() => {
     if (isGroupFiltered) return matches.filter((m) => m.group_name === activeGroup);
-    return matches.filter((m) => m.stage === activeStage);
+    return matches.filter((m) => getStageName(m) === activeStage);
   }, [matches, activeStage, activeGroup, isGroupFiltered]);
 
   const subtitle = useMemo(() => {
