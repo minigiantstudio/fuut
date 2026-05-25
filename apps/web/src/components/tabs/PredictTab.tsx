@@ -326,6 +326,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
           away={selectedMatch.away_team}
           initialHome={selectedMatch.prediction?.home_score ?? 0}
           initialAway={selectedMatch.prediction?.away_score ?? 0}
+          kickoffAt={selectedMatch.kickoff_at}
           onSave={async (homeScore, awayScore) => {
             await supabase.from("predictions").upsert(
               {
