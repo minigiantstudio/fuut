@@ -55,7 +55,7 @@ if (footballApiKey) {
 
 // Middleware
 app.use(cors({
-  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
+  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173', 'http://localhost:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -63,7 +63,7 @@ app.use(cors({
 
 // Explicitly handle preflight OPTIONS
 app.options('*', cors({
-  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
+  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173', 'http://localhost:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -97,3 +97,9 @@ app.use('/api/admin', adminAuthRouter);
 app.use('/api/admin', requireAdminToken, adminRouter);
 
 export default app;
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
