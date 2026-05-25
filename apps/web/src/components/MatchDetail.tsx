@@ -8,6 +8,7 @@ interface MatchDetailProps {
   away: string;
   initialHome?: number;
   initialAway?: number;
+  kickoffAt: string;
   onSave: (homeScore: number, awayScore: number) => void;
 }
 
@@ -47,10 +48,24 @@ const MatchDetail = ({
   away,
   initialHome = 0,
   initialAway = 0,
+  kickoffAt,
   onSave,
 }: MatchDetailProps) => {
   const [homeScore, setHomeScore] = useState(initialHome);
   const [awayScore, setAwayScore] = useState(initialAway);
+
+  const date = new Date(kickoffAt);
+  const formattedDate = `${date.toLocaleString("en-US", { month: "short" })} ${date.getDate()} · ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  
+  const remainingMs = date.getTime() - Date.now();
+  const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const days = Math.floor(hours / 24);
+
+  const countdown = hours > 23 
+    ? `${days} Days` 
+    : `${hours}h ${minutes}m`;
 
   const handleSave = () => {
     onSave(homeScore, awayScore);
@@ -64,16 +79,14 @@ const MatchDetail = ({
           <SheetTitle className="sr-only">Match prediction</SheetTitle>
         </SheetHeader>
 
-        <div className="flex items-center justify-between text-center">
-          <span className="text-foreground flex-1 text-xs">{home}</span>
-          <div className="flex flex-col items-center px-3">
-            <span className="text-[6px] text-muted-foreground">Jun 12 · 18:00</span>
+        <div className=" text-center items-center justify-between text-center">
+          <div className=" flex-col items-center px-3">
+            <span className="text-[6px] text-muted-foreground">{formattedDate}</span>
           </div>
-          <span className="text-foreground flex-1 text-right text-xs">{away}</span>
         </div>
 
         <p className="text-center text-[7px] text-muted-foreground mt-1 mb-6">
-          ⏱ Locks in 2h 14m
+          ⏱ Locks in {countdown}
         </p>
 
         <div className="flex items-center justify-center gap-10 mb-8">
