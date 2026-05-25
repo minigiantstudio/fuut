@@ -48,12 +48,13 @@ AS $$
         SUM(p.points_bonus) DESC, 
         (SUM(p.points_match) FILTER (WHERE p.points_match = 3)) DESC
     ) as rank,
-    0 as rank_delta -- Placeholder for now, will be updated by snapshots
+    0 as rank_delta
   FROM public.users u
   JOIN public.league_members lm ON lm.user_id = u.id
   LEFT JOIN public.predictions p ON p.user_id = u.id AND p.league_id = p_league_id
   WHERE lm.league_id = p_league_id
-  GROUP BY u.id, u.nickname;
+  GROUP BY u.id, u.nickname
+  ORDER BY total_points DESC, bonus_points DESC, exact_matches DESC;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_leaderboard(uuid) TO authenticated;
