@@ -22,7 +22,7 @@ const RankingTab = ({ session }: RankingTabProps) => {
         p_league_id: session.leagueId,
       });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).sort((a, b) => a.rank - b.rank);
     },
   });
 
