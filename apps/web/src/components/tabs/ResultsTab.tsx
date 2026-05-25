@@ -35,7 +35,7 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("matches")
-        .select("*")
+        .select("id, home_team, away_team, home_score, away_score, kickoff_at, stage, bonus_question, bonus_result")
         .eq("is_final", true)
         .order("kickoff_at", { ascending: false });
       if (error) throw error;
@@ -48,7 +48,7 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("predictions")
-        .select("*")
+        .select("id, match_id, home_score, away_score, points, points_match, points_bonus, bonus_answer")
         .eq("user_id", session.userId)
         .eq("league_id", session.leagueId);
       if (error) throw error;
@@ -106,9 +106,29 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
                 <div className="flex items-center justify-between">
                   <span className="text-[7px] text-muted-foreground">
                     Pred: {pred ? `${pred.home_score}–${pred.away_score}` : "–"}
+                    {m.bonus_question && (
+                      <span className="block mt-1">
+                        Bonus: {pred?.bonus_answer ? "Yes" : "No"}
+                      </span>
+                    )}
                   </span>
-                  <PointsBadge points={pred?.points ?? 0} />
+                  <div className="flex flex-col items-end">
+                    <PointsBadge points={pred?.points ?? 0} />
+                    {m.bonus_question && (
+                      <span className="text-[6px] text-muted-foreground">
+                        Bonus: {pred?.points_bonus ?? 0} pts
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {m.bonus_question && (
+                  <div className="pt-2 border-t border-dashed border-border mt-2">
+                    <p className="text-[7px] text-foreground">{m.bonus_question}</p>
+                    <p className="text-[6px] text-muted-foreground mt-1">
+                      Result: {m.bonus_result ? "Yes" : "No"}
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}
