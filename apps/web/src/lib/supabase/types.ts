@@ -32,8 +32,8 @@ export interface DbMatch {
   home_score: number | null;
   away_score: number | null;
   is_final: boolean;
-  // Phase 3 bonus question for this match — null means "use frontend fallback list".
   bonus_question: string | null;
+  bonus_result: boolean | null;
 }
 
 export interface DbPrediction {
@@ -44,10 +44,12 @@ export interface DbPrediction {
   home_score: number | null;
   away_score: number | null;
   points: number | null;
+  points_match: number | null;
+  points_bonus: number | null;
   is_scored: boolean;
+  is_bonus_scored: boolean;
   created_at: string;
   updated_at: string;
-  // Phase 3 bonus answer — null means the user hasn't answered yet.
   bonus_answer: boolean | null;
 }
 
