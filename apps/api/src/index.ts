@@ -53,21 +53,21 @@ if (footballApiKey) {
   console.warn('FOOTBALL_DATA_API_KEY missing; background scoring job disabled.');
 }
 
-// Middleware
-app.use(cors({
-  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+// // Middleware
+// app.use(cors({
+//   origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+// }));
 
-// Explicitly handle preflight OPTIONS
-app.options('*', cors({
-  origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+// // Explicitly handle preflight OPTIONS
+// app.options('*', cors({
+//   origin: ['https://fuut-web.vercel.app', 'http://localhost:5173'],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+// }));
 
 app.use(express.json());
 
