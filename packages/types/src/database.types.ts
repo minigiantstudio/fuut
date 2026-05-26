@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_config: {
+        Row: {
+          key: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      bonus_question_catalog: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          prompt_text: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          prompt_text: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          prompt_text?: string
+        }
+        Relationships: []
+      }
       leaderboard_snapshots: {
         Row: {
           bonus_points: number
@@ -131,6 +167,7 @@ export type Database = {
           id: string
           invite_code: string
           name: string
+          tier: string
         }
         Insert: {
           created_at?: string
@@ -138,6 +175,7 @@ export type Database = {
           id?: string
           invite_code: string
           name: string
+          tier?: string
         }
         Update: {
           created_at?: string
@@ -145,6 +183,7 @@ export type Database = {
           id?: string
           invite_code?: string
           name?: string
+          tier?: string
         }
         Relationships: [
           {
@@ -264,6 +303,45 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snapshot_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          league_id: string
+          snapshot_payload: Json
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          league_id: string
+          snapshot_payload: Json
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          league_id?: string
+          snapshot_payload?: Json
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snapshot_tokens_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snapshot_tokens_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
             referencedColumns: ["id"]
           },
         ]
