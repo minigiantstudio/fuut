@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase/client";
-import { adminFinalizeMatch, adminLogout, getAdminToken } from "./adminClient";
+import {
+  adminFinalizeMatch,
+  adminLogout,
+  getAdminToken,
+  getAppConfig,
+  updateAppConfigKey,
+  listLeagues,
+  setLeagueTier,
+  type AdminLeague,
+  type AppConfig,
+} from "./adminClient";
 
 interface Match {
   id: string;
@@ -33,6 +43,19 @@ const AdminDashboard = () => {
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [matchesError, setMatchesError] = useState<string | null>(null);
   const [formStates, setFormStates] = useState<Record<string, MatchFormState>>({});
+
+  // Plan 04-02: app_config editor (currently just bonus_reveal_lead_minutes).
+  const [appConfig, setAppConfig] = useState<AppConfig>({});
+  const [leadInput, setLeadInput] = useState("");
+  const [leadSaving, setLeadSaving] = useState(false);
+  const [leadError, setLeadError] = useState<string | null>(null);
+  const [leadSuccess, setLeadSuccess] = useState(false);
+
+  // Plan 04-02: leagues list with tier toggle.
+  const [leagues, setLeagues] = useState<AdminLeague[]>([]);
+  const [leaguesLoading, setLeaguesLoading] = useState(false);
+  const [leaguesError, setLeaguesError] = useState<string | null>(null);
+  const [tierPendingId, setTierPendingId] = useState<string | null>(null);
 
   // Guard: any time this view mounts (or remounts after a token expiry),
   // bounce to the admin login if there's no live token.
@@ -70,6 +93,71 @@ const AdminDashboard = () => {
         setFormStates(initial);
       });
   }, []);
+
+  // Plan 04-02: load app_config and leagues for the new admin sections.
+  useEffect(() => {
+    if (!getAdminToken()) return;
+    getAppConfig()
+      .then((c) => {
+        setAppConfig(c);
+        const lead = typeof c.bonus_reveal_lead_minutes === "number"
+          ? c.bonus_reveal_lead_minutes
+          : Number(c.bonus_reveal_lead_minutes ?? 60);
+        setLeadInput(String(lead || 60));
+      })
+      .catch((err) =>
+        setLeadError(err instanceof Error ? err.message : "Failed to load app config")
+      );
+    setLeaguesLoading(true);
+    listLeagues()
+      .then((rows) => setLeagues(rows))
+      .catch((err) =>
+        setLeaguesError(err instanceof Error ? err.message : "Failed to load leagues")
+      )
+      .finally(() => setLeaguesLoading(false));
+  }, []);
+
+  const handleSaveLeadTime = async () => {
+    const v = Number(leadInput);
+    if (!Number.isInteger(v) || v < 1) {
+      setLeadError("Lead minutes must be a positive integer");
+      return;
+    }
+    setLeadSaving(true);
+    setLeadError(null);
+    setLeadSuccess(false);
+    try {
+      await updateAppConfigKey("bonus_reveal_lead_minutes", v);
+      setAppConfig((prev) => ({ ...prev, bonus_reveal_lead_minutes: v }));
+      setLeadSuccess(true);
+    } catch (err) {
+      if (!getAdminToken()) {
+        navigate("/admin/login", { replace: true });
+        return;
+      }
+      setLeadError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setLeadSaving(false);
+    }
+  };
+
+  const handleFlipTier = async (id: string, currentTier: "free" | "premium") => {
+    const next: "free" | "premium" = currentTier === "free" ? "premium" : "free";
+    setTierPendingId(id);
+    setLeaguesError(null);
+    try {
+      await setLeagueTier(id, next);
+      setLeagues((prev) => prev.map((l) => (l.id === id ? { ...l, tier: next } : l)));
+    } catch (err) {
+      if (!getAdminToken()) {
+        navigate("/admin/login", { replace: true });
+        return;
+      }
+      setLeaguesError(err instanceof Error ? err.message : "Tier flip failed");
+    } finally {
+      setTierPendingId(null);
+    }
+  };
 
   const updateFormState = (matchId: string, patch: Partial<MatchFormState>) => {
     setFormStates((prev) => ({
@@ -149,6 +237,104 @@ const AdminDashboard = () => {
         {matchesError && (
           <p className="text-[8px] text-pixel-red text-center">{matchesError}</p>
         )}
+
+        {/* Plan 04-02: Global settings (bonus reveal lead time). */}
+        <div className="space-y-3">
+          <h2 className="text-foreground text-[8px] uppercase tracking-widest border-b border-border pb-2">
+            Global Settings
+          </h2>
+          <div className="pixel-border p-4 space-y-3 bg-background">
+            <div className="space-y-1">
+              <label className="text-[7px] text-foreground uppercase tracking-widest">
+                Bonus reveal lead minutes
+              </label>
+              <p className="text-[6px] text-muted-foreground">
+                How long before kickoff the bonus question text becomes visible to predictors.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                value={leadInput}
+                onChange={(e) => {
+                  setLeadInput(e.target.value);
+                  setLeadSuccess(false);
+                  setLeadError(null);
+                }}
+                className="w-20 h-10 text-center text-[10px] bg-background border-2 border-border text-foreground pixel-border focus:outline-none focus:border-primary"
+              />
+              <button
+                onClick={handleSaveLeadTime}
+                disabled={leadSaving}
+                className="h-10 px-4 pixel-border text-primary-foreground text-[7px] uppercase tracking-widest bg-foreground active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-40"
+              >
+                {leadSaving ? "Saving..." : "Save"}
+              </button>
+            </div>
+            {leadError && <p className="text-[7px] text-pixel-red">{leadError}</p>}
+            {leadSuccess && <p className="text-[7px] text-pixel-green">Saved.</p>}
+          </div>
+        </div>
+
+        {/* Plan 04-02: Leagues list with tier flip + free-cap warning. */}
+        <div className="space-y-3">
+          <h2 className="text-foreground text-[8px] uppercase tracking-widest border-b border-border pb-2">
+            Leagues ({leagues.length})
+          </h2>
+          {leaguesError && (
+            <p className="text-[7px] text-pixel-red text-center">{leaguesError}</p>
+          )}
+          {leaguesLoading && (
+            <p className="text-muted-foreground text-[7px] text-center py-2">Loading…</p>
+          )}
+          {!leaguesLoading && leagues.length === 0 && (
+            <p className="text-muted-foreground text-[7px] text-center py-4">No leagues yet.</p>
+          )}
+          {leagues.map((l) => {
+            const rawMax = appConfig.LEAGUE_FREE_MAX_MEMBERS;
+            const max = typeof rawMax === "number" ? rawMax : Number(rawMax ?? 10);
+            const atCap = l.tier === "free" && l.member_count >= max;
+            return (
+              <div
+                key={l.id}
+                className="pixel-border p-3 flex items-center justify-between gap-3 bg-background"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground text-[9px] uppercase tracking-wider truncate">
+                    {l.name}
+                  </p>
+                  <p className="text-[6px] text-muted-foreground">
+                    {l.invite_code} · {l.member_count} member
+                    {l.member_count === 1 ? "" : "s"}
+                    {l.tier === "free" && ` / ${max}`}
+                    {atCap && " (full)"}
+                  </p>
+                </div>
+                <span
+                  className={`text-[6px] uppercase border px-1 py-0.5 ${
+                    l.tier === "premium"
+                      ? "text-pixel-gold border-pixel-gold"
+                      : "text-muted-foreground border-border"
+                  }`}
+                >
+                  {l.tier}
+                </span>
+                <button
+                  onClick={() => handleFlipTier(l.id, l.tier)}
+                  disabled={tierPendingId === l.id}
+                  className="h-8 px-3 pixel-border text-primary-foreground text-[6px] uppercase tracking-widest bg-foreground active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-40"
+                >
+                  {tierPendingId === l.id
+                    ? "..."
+                    : l.tier === "free"
+                      ? "Flip to Premium"
+                      : "Revert to Free"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
 
         <div className="space-y-4">
           <h2 className="text-foreground text-[8px] uppercase tracking-widest border-b border-border pb-2">

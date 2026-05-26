@@ -124,17 +124,25 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       });
       if (userErr) throw new Error(userErr.message);
 
-      // 3. Insert league_members row
-      const { error: memberErr } = await supabase.from("league_members").insert({
-        user_id: userId,
-        league_id: leagueId,
-        role: "member",
+      // 3. Join via RPC — enforces free-tier member cap server-side (Plan 04-02).
+      //    See supabase/migrations/20260526150000_phase4_join_rpc.sql. The RPC raises
+      //    NOT_AUTHENTICATED / INVALID_CODE / LEAGUE_FULL as Postgres exceptions; the
+      //    Supabase JS client surfaces them as `error.message`.
+      const { error: memberErr } = await supabase.rpc("join_league_by_code", {
+        p_code: inviteCode.trim().toUpperCase(),
       });
       if (memberErr) {
-        if (memberErr.message.includes("Nickname already taken")) {
+        const msg = memberErr.message ?? "";
+        if (msg.includes("LEAGUE_FULL")) {
+          throw new Error("This league is full. Ask the admin to upgrade.");
+        }
+        if (msg.includes("INVALID_CODE")) {
+          throw new Error("Invalid code. Ask your admin.");
+        }
+        if (msg.includes("Nickname already taken")) {
           throw new Error("Nickname taken in this league. Pick another.");
         }
-        throw new Error(memberErr.message);
+        throw new Error(msg || "Failed to join league");
       }
 
       // 4. Refresh session context
