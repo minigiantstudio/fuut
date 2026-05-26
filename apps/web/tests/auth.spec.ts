@@ -16,12 +16,19 @@ test.describe("Onboarding & auth", () => {
     await expect(page.getByText("Invalid code. Ask your admin.")).toBeVisible({ timeout: 10_000 });
   });
 
-  test("valid invite code advances to nickname step", async ({ page }) => {
+  test("valid invite code advances to email-verification step", async ({ page }) => {
     await page.goto("/");
     const codeInput = page.getByPlaceholder("CODE");
     await codeInput.fill(MOCK_INVITE_CODE);
     await page.getByRole("button", { name: /Join league/i }).click();
-    await expect(page.getByPlaceholder(/nickname/i)).toBeVisible({ timeout: 10_000 });
+    // After valid code, the join flow now requires identity verification before
+    // the nickname step — see Onboarding.tsx step "auth-email" (added when the
+    // password-based auth gate landed). The mock returns MOCK_LEAGUE so the
+    // leagueName below reflects the mocked league.
+    await expect(page.getByPlaceholder("name@example.com")).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText(/Identity verification required to join Test League/i),
+    ).toBeVisible();
   });
 
   test('"I played before" reveals the recovery flow', async ({ page }) => {
