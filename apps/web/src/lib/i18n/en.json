@@ -61,7 +61,7 @@
   "onboarding.league_created": "League created!",
   "onboarding.invite_code_label": "Invite code",
   "onboarding.share_invite": "Share invite link",
-  "onboarding.is_ready": "is ready. Share this code."
+  "onboarding.is_ready": "is ready. Share this code.",
 
   "predict.filter_all": "All",
   "predict.status_open": "OPEN",
@@ -107,7 +107,7 @@
   "enter_result.leaderboard_note": "Leaderboard updates automatically",
   "enter_result.cancel": "Cancel",
   "bonus.header": "Bonus +2pts",
-  "bonus.saved": "✓ Bonus saved!"
+  "bonus.saved": "✓ Bonus saved!",
 
   "bonus.will_var": "Will a goal be overturned by VAR?",
   "bonus.will_gk_score": "Will a goalkeeper score?",

@@ -61,7 +61,7 @@
   "onboarding.league_created": "¡Liga creada!",
   "onboarding.invite_code_label": "Código de invitación",
   "onboarding.share_invite": "Compartir enlace de invitación",
-  "onboarding.is_ready": "está lista. Comparte este código."
+  "onboarding.is_ready": "está lista. Comparte este código.",
 
   "predict.filter_all": "Todos",
   "predict.status_open": "ABIERTO",
@@ -107,7 +107,7 @@
   "enter_result.leaderboard_note": "La tabla se actualiza automáticamente",
   "enter_result.cancel": "Cancelar",
   "bonus.header": "Bonus +2pts",
-  "bonus.saved": "✓ ¡Bonus guardado!"
+  "bonus.saved": "✓ ¡Bonus guardado!",
 
   "bonus.will_var": "¿Se anulará un gol por VAR?",
   "bonus.will_gk_score": "¿Marcará un portero?",
