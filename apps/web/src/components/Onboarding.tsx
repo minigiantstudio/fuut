@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import trophyIcon from "@/assets/trophy.png";
 import { supabase } from "@/lib/supabase/client";
 import { useSession } from "@/contexts/SessionContext";
+import { useTranslation } from "@/lib/i18n";
 
 const avatarColors = [
   "bg-foreground", "bg-pixel-green", "bg-pixel-gold",
@@ -18,6 +19,7 @@ interface OnboardingProps {
 const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   const { refreshSession } = useSession();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery" | "create-name" | "create-nickname" | "create-email" | "create-confirm" | "auth-email" | "auth-password" | "auth-signup">(1);
   const [inviteCode, setInviteCode] = useState(prefilledCode ?? "");
   const [nickname, setNickname] = useState("");
@@ -65,7 +67,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       setIsRegistered(emailExists);
       setStep(emailExists ? "auth-password" : "auth-signup");
     } catch (e) {
-      setAuthError(e instanceof Error ? e.message : "Error checking email");
+      setAuthError(e instanceof Error ? e.message : t("onboarding.auth_error_email"));
     } finally {
       setAuthLoading(false);
     }
@@ -75,14 +77,14 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const { error } = isSignup 
+      const { error } = isSignup
         ? await supabase.auth.signUp({ email, password })
         : await supabase.auth.signInWithPassword({ email, password });
 
       if (error) throw error;
       setStep(nextStep);
     } catch (e) {
-      setAuthError(e instanceof Error ? e.message : "Authentication failed");
+      setAuthError(e instanceof Error ? e.message : t("onboarding.auth_failed"));
     } finally {
       setAuthLoading(false);
     }
@@ -98,7 +100,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     // RPC returns an array (SETOF). Empty array means no match.
     const league = Array.isArray(data) ? data[0] : data;
     if (error || !league?.id) {
-      setCodeError("Invalid code. Ask your admin.");
+      setCodeError(t("onboarding.invalid_code"));
       return;
     }
     setLeagueId(league.id);
@@ -113,7 +115,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     try {
       // 1. Get current user (should be authenticated by now)
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) throw new Error(authError?.message ?? "Not authenticated");
+      if (authError || !user) throw new Error(authError?.message ?? t("onboarding.not_authenticated"));
       const userId = user.id;
 
       // 2. Upsert user row (ensure nickname is set)
@@ -134,21 +136,21 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       if (memberErr) {
         const msg = memberErr.message ?? "";
         if (msg.includes("LEAGUE_FULL")) {
-          throw new Error("This league is full. Ask the admin to upgrade.");
+          throw new Error(t("onboarding.league_full"));
         }
         if (msg.includes("INVALID_CODE")) {
-          throw new Error("Invalid code. Ask your admin.");
+          throw new Error(t("onboarding.invalid_code"));
         }
         if (msg.includes("Nickname already taken")) {
-          throw new Error("Nickname taken in this league. Pick another.");
+          throw new Error(t("onboarding.nickname_taken"));
         }
-        throw new Error(msg || "Failed to join league");
+        throw new Error(msg || t("onboarding.failed_join"));
       }
 
       // 4. Refresh session context
       await refreshSession();
     } catch (e: unknown) {
-      setJoinError(e instanceof Error ? e.message : "Something went wrong");
+      setJoinError(e instanceof Error ? e.message : t("onboarding.error_generic"));
     } finally {
       setJoinLoading(false);
     }
@@ -161,7 +163,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     try {
       // 1. Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) throw new Error(authError?.message ?? "Not authenticated");
+      if (authError || !user) throw new Error(authError?.message ?? t("onboarding.not_authenticated"));
       const userId = user.id;
 
       // 2. Upsert user row
@@ -177,9 +179,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         p_name: newLeagueName.trim(),
       });
       if (rpcErr) throw new Error(rpcErr.message);
-      
+
       const league = Array.isArray(data) ? data[0] : data;
-      if (!league?.invite_code) throw new Error("Failed to create league");
+      if (!league?.invite_code) throw new Error(t("onboarding.failed_create"));
       const { invite_code: inviteCode } = league;
 
       // 4. Store invite code for confirmation screen BEFORE refreshSession
@@ -189,7 +191,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       // 5. Load session in background
       refreshSession();
     } catch (e: unknown) {
-      setCreateError(e instanceof Error ? e.message : "Something went wrong");
+      setCreateError(e instanceof Error ? e.message : t("onboarding.error_generic"));
     } finally {
       setCreateLoading(false);
     }
@@ -208,8 +210,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
           <div className="flex-1 flex flex-col items-center justify-center w-full space-y-8">
             <div className="space-y-2 text-center">
               <img src={trophyIcon} alt="Fuut 2026 Trophy" className="w-16 h-auto mx-auto" style={{ imageRendering: "pixelated" }} />
-              <h1 className="tracking-tight text-3xl text-pixel-green">Fuut 2026</h1>
-              <p className="text-muted-foreground font-mono text-base">World Cup 2026 · Prediction league</p>
+              <h1 className="tracking-tight text-3xl text-pixel-green">{t("app.title")}</h1>
+              <p className="text-muted-foreground font-mono text-base">{t("onboarding.subtitle")}</p>
             </div>
 
             <div className="flex items-center -space-x-1">
@@ -233,7 +235,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                     setCodeError(null);
                   }}
                   onKeyDown={(e) => e.key === "Enter" && validateCode()}
-                  placeholder="CODE"
+                  placeholder={t("onboarding.code_placeholder")}
                   className="w-full h-12 pixel-inset bg-card px-4 text-center text-[12px] tracking-[0.3em] text-foreground placeholder:text-muted-foreground placeholder:tracking-normal placeholder:text-[8px] focus:outline-none"
                   autoFocus
                 />
@@ -247,21 +249,21 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 disabled={!inviteCode.trim() || codeLoading}
                 className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-green-800 opacity-100"
               >
-                {codeLoading ? "Checking..." : "Join league"}
+                {codeLoading ? t("onboarding.checking") : t("onboarding.join_cta")}
               </button>
 
               <button
                 onClick={() => setStep("create-name")}
                 className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
               >
-                Create a league
+                {t("onboarding.create_a_league")}
               </button>
 
               <button
                 onClick={() => setStep("recovery")}
                 className="w-full h-10 text-[7px] text-muted-foreground"
               >
-                I played before
+                {t("onboarding.played_before")}
               </button>
             </div>
           </div>
@@ -277,8 +279,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Welcome back</h1>
-              <p className="text-[7px] text-muted-foreground">Enter your email for a magic link.</p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.welcome_back")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.magic_link_note")}</p>
             </div>
 
             {!recoverySent ? (
@@ -287,7 +289,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                   type="email"
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder={t("onboarding.recovery_email")}
                   className="w-full h-12 pixel-inset bg-card px-4 text-[8px] text-foreground placeholder:text-muted-foreground focus:outline-none"
                   autoFocus
                 />
@@ -296,14 +298,14 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                   disabled={!recoveryEmail.trim() || !recoveryEmail.includes("@")}
                   className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                 >
-                  Send magic link
+                  {t("onboarding.send_magic_link")}
                 </button>
               </div>
             ) : (
               <div className="pixel-border bg-card p-5 space-y-3 text-center">
                 <p className="text-[16px]">✉️</p>
-                <p className="text-[8px] text-foreground">Check your inbox</p>
-                <p className="text-[6px] text-muted-foreground">If linked, you'll get a magic link.</p>
+                <p className="text-[8px] text-foreground">{t("onboarding.check_inbox")}</p>
+                <p className="text-[6px] text-muted-foreground">{t("onboarding.magic_link_note")}</p>
               </div>
             )}
 
@@ -311,7 +313,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               onClick={() => { setRecoverySent(false); setRecoveryEmail(""); setStep(1); }}
               className="w-full h-10 text-[7px] text-muted-foreground"
             >
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -326,8 +328,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Name your league</h1>
-              <p className="text-[7px] text-muted-foreground">This is what your friends will see.</p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.name_your_league")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.league_name_hint")}</p>
             </div>
             <div className="space-y-3">
               <input
@@ -335,7 +337,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={newLeagueName}
                 onChange={(e) => setNewLeagueName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && newLeagueName.trim() && setStep("create-email")}
-                placeholder="League name..."
+                placeholder={t("onboarding.league_name_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -345,10 +347,10 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={!newLeagueName.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
             >
-              Next
+              {t("onboarding.next")}
             </button>
             <button onClick={() => { setNewLeagueName(""); setStep(1); }} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -363,8 +365,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Your email</h1>
-              <p className="text-[7px] text-muted-foreground">Identity verification required.</p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.your_email")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.identity_required")}</p>
             </div>
             <div className="space-y-3">
               <input
@@ -372,7 +374,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && checkEmail("create-nickname")}
-                placeholder="name@example.com"
+                placeholder={t("onboarding.email_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -382,11 +384,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={authLoading || !email.trim().includes("@")}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue"
             >
-              {authLoading ? "Checking..." : "Next"}
+              {authLoading ? t("onboarding.checking") : t("onboarding.next")}
             </button>
             {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
             <button onClick={() => setStep("create-name")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -403,8 +405,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Welcome back</h1>
-              <p className="text-[7px] text-muted-foreground">Enter your password for <span className="text-foreground">{email}</span></p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.welcome_back")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.welcome_back_password")} <span className="text-foreground">{email}</span></p>
             </div>
             <div className="space-y-3">
               <input
@@ -412,7 +414,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAuth(false, nextStep)}
-                placeholder="Password"
+                placeholder={t("onboarding.password_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -422,11 +424,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={authLoading || !password.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
             >
-              {authLoading ? "Verifying..." : "Login"}
+              {authLoading ? t("onboarding.verifying") : t("onboarding.login")}
             </button>
             {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
             <button onClick={() => setStep(isJoining ? "auth-email" : "create-email")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -443,8 +445,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Create account</h1>
-              <p className="text-[7px] text-muted-foreground">Set a password for <span className="text-foreground">{email}</span></p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.create_account")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.set_password_for")} <span className="text-foreground">{email}</span></p>
             </div>
             <div className="space-y-3">
               <input
@@ -452,7 +454,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && password.trim().length >= 6 && handleAuth(true, nextStep)}
-                placeholder="At least 6 characters"
+                placeholder={t("onboarding.confirm_password_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -462,11 +464,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={authLoading || password.trim().length < 6}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
             >
-              {authLoading ? "Creating..." : "Sign up"}
+              {authLoading ? t("onboarding.creating") : t("onboarding.signup")}
             </button>
             {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
             <button onClick={() => setStep(isJoining ? "auth-email" : "create-email")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -481,15 +483,15 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Your nickname</h1>
-              <p className="text-[7px] text-muted-foreground">How others see you in <span className="text-foreground">{newLeagueName}</span></p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.your_nickname")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.how_others_see")} <span className="text-foreground">{newLeagueName}</span></p>
             </div>
             <input
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && nickname.trim() && handleCreate()}
-              placeholder="Nickname..."
+              placeholder={t("onboarding.nickname_placeholder")}
               className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
               autoFocus
             />
@@ -498,11 +500,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={createLoading || !nickname.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
             >
-              {createLoading ? "Creating..." : "Create league"}
+              {createLoading ? t("onboarding.creating") : t("onboarding.create_league")}
             </button>
             {createError && <p className="text-[6px] text-pixel-red text-center">{createError}</p>}
             <button onClick={() => setStep("auth-password")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -533,16 +535,16 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2 text-center">
               <p className="text-2xl">🏆</p>
-              <h1 className="text-foreground text-sm">League created!</h1>
-              <p className="text-muted-foreground text-xs">{newLeagueName} is ready. Share this code.</p>
+              <h1 className="text-foreground text-sm">{t("onboarding.league_created")}</h1>
+              <p className="text-muted-foreground text-xs">{newLeagueName} {t("onboarding.is_ready")}</p>
             </div>
             <div className="pixel-border bg-card p-4 space-y-3 text-center">
-              <p className="text-[7px] text-muted-foreground uppercase">Invite code</p>
+              <p className="text-[7px] text-muted-foreground uppercase">{t("onboarding.invite_code_label")}</p>
               <div className="pixel-inset bg-background py-3 px-4 text-center">
                 <span className="text-[14px] tracking-[0.3em] text-foreground">{createdInviteCode}</span>
               </div>
               <button onClick={handleConfirmShare} className="flex items-center gap-1.5 mx-auto text-xs text-lime-700">
-                📤 Share invite link
+                📤 {t("onboarding.share_invite")}
               </button>
             </div>
             <button
@@ -550,7 +552,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={confirmLoading}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green disabled:opacity-60"
             >
-              {confirmLoading ? "Loading..." : "Start predicting"}
+              {confirmLoading ? t("onboarding.loading") : t("onboarding.start_predicting")}
             </button>
           </div>
         </div>
@@ -565,8 +567,8 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Your email</h1>
-              <p className="text-[7px] text-muted-foreground">Identity verification required to join <span className="text-foreground">{leagueName}</span>.</p>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.your_email")}</h1>
+              <p className="text-[7px] text-muted-foreground">{t("onboarding.identity_required")} <span className="text-foreground">{leagueName}</span></p>
             </div>
             <div className="space-y-3">
               <input
@@ -574,7 +576,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && checkEmail(2)}
-                placeholder="name@example.com"
+                placeholder={t("onboarding.email_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -584,11 +586,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={authLoading || !email.trim().includes("@")}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue"
             >
-              {authLoading ? "Checking..." : "Next"}
+              {authLoading ? t("onboarding.checking") : t("onboarding.next")}
             </button>
             {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
             <button onClick={() => setStep(1)} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -603,9 +605,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
           <div className="flex-1 flex flex-col justify-center w-full space-y-8">
             <div className="space-y-2">
-              <h1 className="text-[12px] text-foreground">Your nickname</h1>
+              <h1 className="text-[12px] text-foreground">{t("onboarding.your_nickname")}</h1>
               <p className="text-[7px] text-muted-foreground">
-                How others see you in <span className="text-foreground">{leagueName}</span>
+                {t("onboarding.how_others_see")} <span className="text-foreground">{leagueName}</span>
               </p>
             </div>
 
@@ -615,7 +617,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && nickname.trim() && setStep(3)}
-                placeholder="Nickname..."
+                placeholder={t("onboarding.nickname_placeholder")}
                 className="w-full h-12 pixel-inset bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base"
                 autoFocus
               />
@@ -626,11 +628,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               disabled={!nickname.trim()}
               className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
             >
-              Next
+              {t("onboarding.next")}
             </button>
 
             <button onClick={() => setStep("auth-password")} className="w-full h-10 text-[7px] text-muted-foreground">
-              ← Back
+              {t("onboarding.back")}
             </button>
           </div>
         </div>
@@ -645,9 +647,9 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
         <div className="flex-1 flex flex-col justify-center w-full space-y-8">
           <div className="space-y-2 text-center">
             <p className="text-2xl">⚽</p>
-            <h1 className="text-foreground text-sm">Almost there!</h1>
+            <h1 className="text-foreground text-sm">{t("onboarding.almost_there")}</h1>
             <p className="text-muted-foreground text-xs">
-              Ready to join <span className="text-foreground">{leagueName}</span> as <span className="text-foreground">{nickname}</span>?
+              {t("onboarding.ready_to_join")} <span className="text-foreground">{leagueName}</span> {t("onboarding.as")} <span className="text-foreground">{nickname}</span>?
             </p>
           </div>
 
@@ -656,12 +658,12 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
             disabled={joinLoading}
             className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
           >
-            {joinLoading ? "Joining..." : "Start predicting"}
+            {joinLoading ? t("onboarding.joining") : t("onboarding.start_predicting")}
           </button>
 
           {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
           <button onClick={() => setStep(2)} className="w-full h-10 text-[7px] text-muted-foreground">
-            ← Change nickname
+            {t("onboarding.change_nickname")}
           </button>
         </div>
       </div>

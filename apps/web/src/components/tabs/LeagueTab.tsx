@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { Session } from "@/lib/supabase/types";
 import ConnectivityCheck from "@/components/ConnectivityCheck";
+import { useTranslation } from "@/lib/i18n";
 
 interface MemberWithNickname {
   id: string;
@@ -18,17 +19,18 @@ interface LeagueTabProps {
   session: Session;
 }
 
-const StatusBadge = ({ role, isCurrentUser }: { role: string; isCurrentUser: boolean }) => {
+const StatusBadge = ({ role, isCurrentUser, labels }: { role: string; isCurrentUser: boolean; labels: { admin: string; you: string; active: string } }) => {
   if (role === "admin") {
-    return <span className="text-[6px] px-2 py-0.5 bg-pixel-blue text-primary-foreground border-2 border-foreground">ADMIN</span>;
+    return <span className="text-[6px] px-2 py-0.5 bg-pixel-blue text-primary-foreground border-2 border-foreground">{labels.admin}</span>;
   }
   if (isCurrentUser) {
-    return <span className="text-[6px] px-2 py-0.5 bg-pixel-green text-primary-foreground border-2 border-foreground">YOU</span>;
+    return <span className="text-[6px] px-2 py-0.5 bg-pixel-green text-primary-foreground border-2 border-foreground">{labels.you}</span>;
   }
-  return <span className="text-[6px] px-2 py-0.5 bg-muted text-muted-foreground border-2 border-foreground">ACTIVE</span>;
+  return <span className="text-[6px] px-2 py-0.5 bg-muted text-muted-foreground border-2 border-foreground">{labels.active}</span>;
 };
 
 const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [regenerateLoading, setRegenerateLoading] = useState(false);
@@ -96,12 +98,12 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
       {/* Invite code */}
       {league && (
         <div className="pixel-border bg-card p-4 space-y-3">
-          <p className="text-[7px] text-muted-foreground uppercase">Invite code</p>
+          <p className="text-[7px] text-muted-foreground uppercase">{t("league.invite_code_label")}</p>
           <div className="pixel-inset bg-background py-3 px-4 text-center">
             <span className="text-[14px] tracking-[0.3em] text-foreground">{league.invite_code}</span>
           </div>
           <button onClick={handleShare} className="flex items-center gap-1.5 mx-auto text-xs text-lime-700">
-            📤 Share invite link
+            📤 {t("league.share")}
           </button>
         </div>
       )}
@@ -124,7 +126,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
                     <span className="text-[6px] text-primary-foreground">{initials}</span>
                   </div>
                   <span className="text-xs text-foreground flex-1">{m.nickname}</span>
-                  <StatusBadge role={m.role} isCurrentUser={isMe} />
+                  <StatusBadge role={m.role} isCurrentUser={isMe} labels={{ admin: t("league.badge_admin"), you: t("league.badge_you"), active: t("league.badge_active") }} />
                 </div>
               );
             })}
@@ -165,13 +167,13 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
                     disabled={regenerateLoading}
                     className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-pixel-red disabled:opacity-40"
                   >
-                    {regenerateLoading ? "Regenerating..." : "Yes, regenerate"}
+                    {regenerateLoading ? t("league.regenerating") : t("league.confirm_regenerate")}
                   </button>
                   <button
                     onClick={() => { setShowRegenerateConfirm(false); setRegenerateError(null); }}
                     className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-foreground"
                   >
-                    Cancel
+                    {t("league.cancel")}
                   </button>
                 </div>
               </div>

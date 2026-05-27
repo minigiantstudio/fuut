@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface LockCountdownProps {
   kickoffAt: string;
@@ -20,6 +21,7 @@ function formatCountdown(ms: number): string {
 }
 
 const LockCountdown = ({ kickoffAt }: LockCountdownProps) => {
+  const { t } = useTranslation();
   const [remainingMs, setRemainingMs] = useState(() => getRemainingMs(kickoffAt));
 
   useEffect(() => {
@@ -42,7 +44,7 @@ const LockCountdown = ({ kickoffAt }: LockCountdownProps) => {
         <span
           className={`text-[5px] font-mono ${isCritical ? "text-pixel-red" : "text-pixel-gold"}`}
         >
-          ⏱ Locks in {formatCountdown(remainingMs)}
+          ⏱ {t("lock.locks_in")} {formatCountdown(remainingMs)}
         </span>
       </div>
 

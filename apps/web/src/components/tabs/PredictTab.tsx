@@ -9,6 +9,7 @@ import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
 import LockCountdown from "@/components/LockCountdown";
+import { useTranslation } from "@/lib/i18n";
 
 type MatchStatus = "open" | "saved" | "locked" | "needs_result";
 
@@ -22,14 +23,21 @@ interface PredictTabProps {
   session: Session;
 }
 
-const statusConfig: Record<MatchStatus, { label: string; className: string }> = {
-  open: { label: "OPEN", className: "bg-pixel-gold text-foreground" },
-  saved: { label: "SAVED", className: "bg-pixel-green text-primary-foreground" },
-  locked: { label: "LOCKED", className: "bg-muted text-muted-foreground" },
-  needs_result: { label: "RESULT?", className: "bg-pixel-gold text-foreground" },
+const statusClassName: Record<MatchStatus, string> = {
+  open: "bg-pixel-gold text-foreground",
+  saved: "bg-pixel-green text-primary-foreground",
+  locked: "bg-muted text-muted-foreground",
+  needs_result: "bg-pixel-gold text-foreground",
 };
 
 const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
+  const { t } = useTranslation();
+  const statusLabel: Record<MatchStatus, string> = {
+    open: t("predict.status_open"),
+    saved: t("predict.status_saved"),
+    locked: t("predict.status_locked"),
+    needs_result: t("predict.status_needs_result"),
+  };
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [resultMatchId, setResultMatchId] = useState<string | null>(null);
@@ -223,18 +231,19 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
           onClick={() => setActiveGroup("All")}
           className="flex items-center gap-1 text-[6px] text-pixel-red border border-pixel-red px-2 py-1"
         >
-          <X size={10} /> Clear filter
+          <X size={10} /> {t("predict.clear_filter")}
         </button>
       )}
 
       {filteredMatches.length === 0 ? (
         <div className="pixel-border bg-card p-6 text-center">
-          <p className="text-[8px] text-muted-foreground">No matches found</p>
+          <p className="text-[8px] text-muted-foreground">{t("predict.no_matches")}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {filteredMatches.map((match) => {
-            const { label, className } = statusConfig[match.uiStatus];
+            const label = statusLabel[match.uiStatus];
+            const className = statusClassName[match.uiStatus];
             const isLocked = match.uiStatus === "locked" || match.uiStatus === "needs_result";
             const homeVal = match.prediction?.home_score?.toString() ?? "";
             const awayVal = match.prediction?.away_score?.toString() ?? "";
@@ -290,7 +299,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         className="text-[6px] text-pixel-blue border border-pixel-blue px-2 py-0.5"
                         onClick={(e) => { e.stopPropagation(); setResultMatchId(match.id); }}
                       >
-                        ✎ Enter result
+                        {t("predict.enter_result")}
                       </button>
                     )}
                   </div>

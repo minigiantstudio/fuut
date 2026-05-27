@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface ScoredPrediction {
   id: string;
@@ -30,6 +31,7 @@ const PointsBadge = ({ points }: { points: number }) => {
 };
 
 const ResultsTab = ({ session }: ResultsTabProps) => {
+  const { t } = useTranslation();
   const { data: rawMatches = [], isLoading: isLoadingMatches } = useQuery<DbMatch[]>({
     queryKey: ["matches-finished"],
     queryFn: async () => {
@@ -76,7 +78,7 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
   return (
     <div className="py-5 space-y-4">
       <div>
-        <h1 className="text-foreground text-lg">📋 Results</h1>
+        <h1 className="text-foreground text-lg">{t("results.title")}</h1>
         <p className="text-[7px] text-muted-foreground mt-1">All finished matches</p>
       </div>
 
@@ -86,7 +88,7 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
         </div>
       ) : finishedMatches.length === 0 ? (
         <div className="pixel-border bg-card p-6 text-center">
-          <p className="text-[8px] text-muted-foreground">No results yet</p>
+          <p className="text-[8px] text-muted-foreground">{t("results.no_results")}</p>
           <p className="text-[6px] text-muted-foreground mt-2">Finished matches will appear here</p>
         </div>
       ) : (
@@ -134,8 +136,8 @@ const ResultsTab = ({ session }: ResultsTabProps) => {
           })}
 
           <div className="pixel-border-sm bg-muted p-3 flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">Total points</span>
-            <span className="text-[8px] text-pixel-green">+{totalPoints} pts</span>
+            <span className="text-muted-foreground text-xs">{t("results.total_points")}</span>
+            <span className="text-[8px] text-pixel-green">+{totalPoints} {t("results.points")}</span>
           </div>
         </div>
       )}

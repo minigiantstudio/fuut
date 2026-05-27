@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Star } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 // Fallback list used when matches.bonus_question is null in the DB.
 const BONUS_QUESTIONS = [
@@ -49,6 +50,7 @@ const BonusPrediction = ({
   onSave,
   disabled = false,
 }: BonusPredictionProps) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   // Optimistic local copy so the UI reflects clicks immediately even while the
   // upsert is in-flight. Synced from initialAnswer (parent prop) on each render
@@ -98,7 +100,7 @@ const BonusPrediction = ({
       >
         <span className="flex items-center gap-1">
           <Star size={8} className="shrink-0" />
-          Bonus +2pts
+          {t("bonus.header")}
         </span>
         <span>{expanded ? "▴" : "▾"}</span>
       </button>
@@ -116,7 +118,7 @@ const BonusPrediction = ({
                   : "bg-card text-foreground"
               } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Yes
+              {t("bonus.yes")}
             </button>
             <button
               onClick={(e) => handleAnswer(e, false)}
@@ -127,11 +129,11 @@ const BonusPrediction = ({
                   : "bg-card text-foreground"
               } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              No
+              {t("bonus.no")}
             </button>
           </div>
           {optimisticAnswer !== null && (
-            <p className="text-[6px] text-pixel-green text-center">✓ Bonus saved!</p>
+            <p className="text-[6px] text-pixel-green text-center">{t("bonus.saved")}</p>
           )}
         </div>
       )}
