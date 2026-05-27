@@ -88,3 +88,60 @@ export async function adminFinalizeMatch(input: FinalizeMatchInput): Promise<voi
     throw new Error(body.message ?? `HTTP ${res.status}`);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Plan 04-02: app-config + league tier admin helpers.
+// ---------------------------------------------------------------------------
+
+export type AppConfig = Record<string, unknown>;
+
+export async function getAppConfig(): Promise<AppConfig> {
+  const res = await adminFetch("/api/admin/app-config", { method: "GET" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: "Unknown error" }));
+    throw new Error(body.message ?? `HTTP ${res.status}`);
+  }
+  const data = (await res.json()) as { config: AppConfig };
+  return data.config;
+}
+
+export async function updateAppConfigKey(key: string, value: number): Promise<void> {
+  const res = await adminFetch(`/api/admin/app-config/${encodeURIComponent(key)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ value }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: "Unknown error" }));
+    throw new Error(body.message ?? `HTTP ${res.status}`);
+  }
+}
+
+export interface AdminLeague {
+  id: string;
+  name: string;
+  invite_code: string;
+  tier: "free" | "premium";
+  created_at: string;
+  member_count: number;
+}
+
+export async function listLeagues(): Promise<AdminLeague[]> {
+  const res = await adminFetch("/api/admin/leagues", { method: "GET" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: "Unknown error" }));
+    throw new Error(body.message ?? `HTTP ${res.status}`);
+  }
+  const data = (await res.json()) as { leagues: AdminLeague[] };
+  return data.leagues;
+}
+
+export async function setLeagueTier(id: string, tier: "free" | "premium"): Promise<void> {
+  const res = await adminFetch(`/api/admin/leagues/${encodeURIComponent(id)}/tier`, {
+    method: "POST",
+    body: JSON.stringify({ tier }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: "Unknown error" }));
+    throw new Error(body.message ?? `HTTP ${res.status}`);
+  }
+}
