@@ -10,9 +10,13 @@
 --   1. A SECURITY DEFINER RPC that returns the rest of the match row but only
 --      exposes bonus_question after now() >= reveal_at. It also returns
 --      reveal_at + is_bonus_revealed so the client can render the countdown.
---   2. A column-level REVOKE that strips bonus_question from anon + authenticated
---      so a direct `from('matches').select('bonus_question')` request fails.
---      Both PredictTab and ResultsTab are migrated onto the RPC in the same plan.
+--   2. A REAL column lockdown. A naive `REVOKE SELECT (bonus_question)` is a
+--      no-op here: Supabase grants table-wide SELECT on public.matches to anon
+--      + authenticated, and a whole-table grant implicitly covers every column,
+--      so the column-level revoke can't subtract from it. The only way to gate a
+--      single column is to revoke table SELECT entirely, then re-grant SELECT on
+--      every column EXCEPT bonus_question. PredictTab, ResultsTab and the admin
+--      dashboard are all migrated onto the RPC so they keep working.
 --
 -- The redaction calculation depends on the app_config row seeded by 04-01
 -- (key='bonus_reveal_lead_minutes', value=60). app_config stores jsonb scalars
@@ -32,6 +36,7 @@ RETURNS TABLE (
   is_final boolean,
   bonus_question text,
   bonus_result boolean,
+  is_manual_override boolean,
   reveal_at timestamptz,
   is_bonus_revealed boolean
 )
@@ -52,7 +57,12 @@ AS $$
     m.away_team,
     m.kickoff_at,
     m.stage,
-    m.group_name,
+    -- matches has no group_name column (the frontend DbMatch type declares it
+    -- but no migration ever added it — historically a phantom that came back
+    -- undefined from select('*')). Return NULL so the RPC shape still matches
+    -- the existing client type and the group filter behaves exactly as before.
+    -- Position must stay 6th to align with the RETURNS TABLE column order.
+    NULL::text AS group_name,
     m.home_score,
     m.away_score,
     m.is_final,
@@ -62,6 +72,7 @@ AS $$
       ELSE NULL
     END AS bonus_question,
     m.bonus_result,
+    m.is_manual_override,
     m.kickoff_at - (cfg.lead_minutes * interval '1 minute') AS reveal_at,
     (now() >= m.kickoff_at - (cfg.lead_minutes * interval '1 minute')) AS is_bonus_revealed
   FROM public.matches m
@@ -69,19 +80,37 @@ AS $$
   ORDER BY m.kickoff_at;
 $$;
 
--- Defense in depth: anon shouldn't be able to call this either since the only
--- consumers are logged-in app users (PredictTab + ResultsTab live behind the
--- session gate). Lock down to authenticated only.
+-- The redaction RPC is the only client-facing source of bonus_question, so it
+-- must be callable by every client role. The admin dashboard reads matches with
+-- the anon key (it carries its own HMAC token, not a Supabase session), so anon
+-- needs EXECUTE too. Redaction is identical regardless of caller, so exposing it
+-- to anon leaks nothing.
 REVOKE ALL ON FUNCTION public.get_matches_with_bonus() FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.get_matches_with_bonus() FROM anon;
+GRANT EXECUTE ON FUNCTION public.get_matches_with_bonus() TO anon;
 GRANT EXECUTE ON FUNCTION public.get_matches_with_bonus() TO authenticated;
 
--- Column-level REVOKE — without this the RPC redaction is theatre, since any
--- client could query `matches.bonus_question` directly through the existing
--- "Public matches read" RLS policy. The matches table itself stays publicly
--- readable; only the one sensitive column is gated.
-REVOKE SELECT (bonus_question) ON public.matches FROM anon;
-REVOKE SELECT (bonus_question) ON public.matches FROM authenticated;
--- service_role / postgres retain access (Supabase default grants on schema
--- public). The scoring engine writes via service_role and the RPC reads via
--- SECURITY DEFINER, so neither is affected.
+-- Real column lockdown for matches.bonus_question. A column-level
+-- `REVOKE SELECT (bonus_question)` does NOT work while a table-wide SELECT grant
+-- exists (the table grant implicitly covers all columns, present and future).
+-- So: revoke table SELECT, then re-grant SELECT on every column EXCEPT
+-- bonus_question. After this, a direct REST `matches?select=bonus_question`
+-- from anon/authenticated returns "permission denied for column"; the only path
+-- to the column is get_matches_with_bonus() (SECURITY DEFINER, runs as owner)
+-- which gates it on reveal time. Closes threat T-04-04.
+--
+-- NOTE: any future column added to public.matches must be added to this GRANT
+-- list or it will be unreadable by clients. This is the cost of column-level
+-- security and is intentional — bonus_question stays the lone exclusion.
+REVOKE SELECT ON public.matches FROM anon;
+REVOKE SELECT ON public.matches FROM authenticated;
+GRANT SELECT (
+  id, home_team, away_team, kickoff_at, stage,
+  home_score, away_score, is_final, bonus_result, is_manual_override
+) ON public.matches TO anon;
+GRANT SELECT (
+  id, home_team, away_team, kickoff_at, stage,
+  home_score, away_score, is_final, bonus_result, is_manual_override
+) ON public.matches TO authenticated;
+-- service_role / postgres retain full access (Supabase schema-level grants).
+-- The scoring engine writes via service_role and the RPC reads via SECURITY
+-- DEFINER, so neither is affected by the client-role lockdown.
