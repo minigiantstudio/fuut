@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/lib/supabase/client";
 import type { LeaderboardEntry, Session } from "@/lib/supabase/types";
 
@@ -32,6 +33,43 @@ const RankingTab = ({ session }: RankingTabProps) => {
   // namespaced per league to avoid cross-league bleed when multiple
   // RankingTabs would otherwise share a channel.
   useEffect(() => {
+    // Scoring feedback (D-15/D-16, SOCIAL-04): when a match is scored the
+    // scoring engine inserts a fresh snapshot row per league member. For the
+    // current user's row, surface a Sonner toast with the points earned this
+    // round and the new rank. pts_earned is derived by diffing the new total
+    // against the cached leaderboard (the realtime payload carries totals, not
+    // per-match deltas). The diff baseline updates after the invalidate refetch.
+    const maybeToastScored = (payload: { new?: Record<string, unknown> }) => {
+      const row = payload.new;
+      if (!row || row.user_id !== session.userId) return;
+
+      const cached = queryClient.getQueryData<LeaderboardEntry[]>([
+        "leaderboard",
+        session.leagueId,
+      ]);
+      // No baseline yet (toast would be meaningless) — skip, just let the
+      // invalidate below refresh the table.
+      if (!cached) return;
+
+      const prev = cached.find((e) => e.user_id === session.userId);
+      if (!prev) return;
+
+      const newTotal = Number(row.total_points ?? 0);
+      const ptsEarned = newTotal - prev.total_points;
+      // Nothing changed for this user (e.g. they had no prediction and rank held)
+      // — don't fire a noisy zero toast.
+      if (ptsEarned <= 0 && Number(row.rank_delta ?? 0) === 0) return;
+
+      const rank = Number(row.rank ?? prev.rank);
+      const rankDelta = Number(row.rank_delta ?? 0);
+      const movement =
+        rankDelta > 0 ? ` ↑${rankDelta}` : rankDelta < 0 ? ` ↓${Math.abs(rankDelta)}` : "";
+
+      toast.success(
+        `Match scored — you earned ${ptsEarned} pt${ptsEarned === 1 ? "" : "s"} (#${rank}${movement})`
+      );
+    };
+
     const channel = supabase.channel(`leaderboard-${session.leagueId}`)
       .on(
         "postgres_changes",
@@ -41,7 +79,8 @@ const RankingTab = ({ session }: RankingTabProps) => {
           table: "leaderboard_snapshots",
           filter: `league_id=eq.${session.leagueId}`,
         },
-        () => {
+        (payload) => {
+          maybeToastScored(payload);
           queryClient.invalidateQueries({ queryKey: ["leaderboard", session.leagueId] });
         }
       )
@@ -62,7 +101,7 @@ const RankingTab = ({ session }: RankingTabProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session.leagueId, queryClient]);
+  }, [session.leagueId, session.userId, queryClient]);
 
   return (
     <div className="py-5 space-y-4">
