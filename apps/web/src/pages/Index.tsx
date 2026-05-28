@@ -31,7 +31,7 @@ const Index = () => {
     );
   }
 
-  if (!session) {
+  if (!session || !session.leagueId || localStorage.getItem("onboardingInProgress") === "true") {
     return <Onboarding />;
   }
 

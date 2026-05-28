@@ -67,10 +67,8 @@ const JoinPage = () => {
     if (!leagueId) return;
     setJoinLoading(true);
     setJoinError(null);
-    const { error } = await supabase.from("league_members").insert({
-      user_id: session.userId,
-      league_id: leagueId,
-      role: "member",
+    const { error } = await supabase.rpc("join_league_by_code", {
+      p_code: code!.toUpperCase(),
     });
     if (error) {
       setJoinError(error.message);
