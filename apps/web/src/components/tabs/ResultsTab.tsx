@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
+import type { DbMatchWithBonus, DbPrediction, Session } from "@/lib/supabase/types";
 
 interface ScoredPrediction {
   id: string;
@@ -30,16 +30,17 @@ const PointsBadge = ({ points }: { points: number }) => {
 };
 
 const ResultsTab = ({ session }: ResultsTabProps) => {
-  const { data: rawMatches = [], isLoading: isLoadingMatches } = useQuery<DbMatch[]>({
+  const { data: rawMatches = [], isLoading: isLoadingMatches } = useQuery<DbMatchWithBonus[]>({
     queryKey: ["matches-finished"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("matches")
-        .select("id, home_team, away_team, home_score, away_score, kickoff_at, stage, bonus_question, bonus_result")
-        .eq("is_final", true)
-        .order("kickoff_at", { ascending: false });
+      // matches.bonus_question is REVOKEd from direct SELECT (04-03), so finished
+      // results must read it through the redaction RPC. Finished matches are
+      // always past kickoff, so bonus_question is unredacted for all of them.
+      const { data, error } = await supabase.rpc("get_matches_with_bonus");
       if (error) throw error;
-      return data ?? [];
+      return ((data ?? []) as DbMatchWithBonus[])
+        .filter((m) => m.is_final)
+        .sort((a, b) => new Date(b.kickoff_at).getTime() - new Date(a.kickoff_at).getTime());
     },
   });
 
