@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Star } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 // Fallback list used when matches.bonus_question is null in the DB.
 const BONUS_QUESTIONS = [
@@ -65,6 +66,7 @@ const BonusPrediction = ({
   onSave,
   disabled = false,
 }: BonusPredictionProps) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   // Optimistic local copy so the UI reflects clicks immediately even while the
   // upsert is in-flight. Synced from initialAnswer (parent prop) on each render
@@ -119,7 +121,7 @@ const BonusPrediction = ({
     return (
       <div className="mt-2" onClick={(e) => e.stopPropagation()}>
         <div className="w-full flex items-center gap-1 px-2 py-1.5 text-[6px] uppercase tracking-[0.3em] border-2 border-foreground bg-muted text-muted-foreground">
-          <span>🔒 Surprise bonus reveals in {formatReveal(remainingMs)}</span>
+          <span>🔒 {t("bonus.reveals_in")} {formatReveal(remainingMs)}</span>
         </div>
       </div>
     );
@@ -138,7 +140,7 @@ const BonusPrediction = ({
       >
         <span className="flex items-center gap-1">
           <Star size={8} className="shrink-0" />
-          Bonus +2pts
+          {t("bonus.header")}
         </span>
         <span>{expanded ? "▴" : "▾"}</span>
       </button>
@@ -156,7 +158,7 @@ const BonusPrediction = ({
                   : "bg-card text-foreground"
               } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Yes
+              {t("bonus.yes")}
             </button>
             <button
               onClick={(e) => handleAnswer(e, false)}
@@ -167,11 +169,11 @@ const BonusPrediction = ({
                   : "bg-card text-foreground"
               } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              No
+              {t("bonus.no")}
             </button>
           </div>
           {optimisticAnswer !== null && (
-            <p className="text-[6px] text-pixel-green text-center">✓ Bonus saved!</p>
+            <p className="text-[6px] text-pixel-green text-center">{t("bonus.saved")}</p>
           )}
         </div>
       )}

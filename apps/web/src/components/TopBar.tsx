@@ -1,6 +1,8 @@
 import { useState } from "react";
 import LeagueSwitcher from "./LeagueSwitcher";
+import LanguageToggle from "./LanguageToggle";
 import { useSession } from "@/contexts/SessionContext";
+import { useTranslation } from "@/lib/i18n";
 
 interface TopBarProps {
   onLogout?: () => void;
@@ -10,6 +12,7 @@ interface TopBarProps {
 
 const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) => {
   const { leagues } = useSession();
+  const { t } = useTranslation();
   const initials = nickname ? nickname.slice(0, 2).toUpperCase() : "??";
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const hasMultipleLeagues = leagues.length > 1;
@@ -30,15 +33,16 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
               <span className="text-[10px] font-bold text-accent">⚽ {leagueName}</span>
             )}
             <span className="text-foreground">·</span>
-            <span className="text-[8px] text-primary-foreground">Group stage</span>
+            <span className="text-[8px] text-primary-foreground">{t("app.group_stage")}</span>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             {onLogout && (
               <button
                 onClick={onLogout}
                 className="text-[8px] text-primary-foreground px-2 py-1 border-2 border-primary-foreground hover:bg-primary-foreground hover:text-foreground transition-colors pixel-press"
               >
-                Logout
+                {t("topbar.logout")}
               </button>
             )}
             <div className="w-8 h-8 bg-foreground flex items-center justify-center">
