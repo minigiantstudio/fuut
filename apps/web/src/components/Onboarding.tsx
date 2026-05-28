@@ -58,7 +58,10 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       // 1. Check if user already has an active session
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Already logged in, move to next step
+        const { data: profile } = await supabase.from("users").select("nickname").eq("id", user.id).single();
+        if (profile?.nickname) {
+          setNickname(profile.nickname);
+        }
         setStep(nextStep);
         return;
       }
@@ -77,15 +80,21 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
     }
   };
 
-  const handleAuth = async (isSignup: boolean, nextStep: "create-nickname" | 2) => {
+  const handleAuth = async (isSignup: boolean, nextStep: "create-nickname" | 2 | 3 ) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const { error } = isSignup
+      const { data, error } = isSignup
         ? await supabase.auth.signUp({ email, password })
         : await supabase.auth.signInWithPassword({ email, password });
 
       if (error) throw error;
+      if (data.user) {
+        const { data: profile } = await supabase.from("users").select("nickname").eq("id", data.user.id).single();
+        if (profile?.nickname) {
+          setNickname(profile.nickname);
+        }
+      }
       setStep(nextStep);
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : t("onboarding.auth_failed"));
@@ -406,7 +415,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   // Auth steps: Password (Login)
   if (step === "auth-password") {
     const isJoining = !!leagueId;
-    const nextStep = isJoining ? 2 : "create-nickname";
+    const nextStep = isJoining ? 3 : "create-nickname";
     return (
       <div className="min-h-screen bg-background flex justify-center">
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
@@ -649,7 +658,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
 
   // Step 3 — Almost there
   if (step === 3) {
-    console.log("[Onboarding] rendering step (final)");
     return (
       <div className="min-h-screen bg-background flex justify-center">
         <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
