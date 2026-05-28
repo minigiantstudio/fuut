@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 interface EnterResultProps {
   open: boolean;
@@ -44,6 +45,7 @@ const ScoreInput = ({
 );
 
 const EnterResult = ({ open, onClose, matchId, leagueId, home, away, onDone }: EnterResultProps) => {
+  const { t } = useTranslation();
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -78,18 +80,18 @@ const EnterResult = ({ open, onClose, matchId, leagueId, home, away, onDone }: E
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent side="bottom" className="rounded-none border-t-3 border-foreground px-6 pb-8 pt-6 max-w-[430px] mx-auto bg-background">
         <SheetHeader className="space-y-0 pb-1">
-          <SheetTitle className="sr-only">Enter result</SheetTitle>
+          <SheetTitle className="sr-only">{t("enter_result.title")}</SheetTitle>
         </SheetHeader>
 
         <div className="flex items-center justify-between text-center">
           <span className="text-[8px] text-foreground flex-1">{home}</span>
           <div className="flex flex-col items-center px-3">
-            <span className="text-[6px] text-muted-foreground">Final score</span>
+            <span className="text-[6px] text-muted-foreground">{t("enter_result.final_score")}</span>
           </div>
           <span className="text-[8px] text-foreground flex-1 text-right">{away}</span>
         </div>
 
-        <p className="text-center text-[7px] text-pixel-blue mt-1 mb-6">Enter final result</p>
+        <p className="text-center text-[7px] text-pixel-blue mt-1 mb-6">{t("enter_result.enter_final")}</p>
 
         <div className="flex items-center justify-center gap-10 mb-8">
           <ScoreInput label={home} value={homeScore} onChange={setHomeScore} />
@@ -104,15 +106,15 @@ const EnterResult = ({ open, onClose, matchId, leagueId, home, away, onDone }: E
           onClick={handleConfirm}
           disabled={loading}
         >
-          {loading ? "Saving..." : "Confirm result"}
+          {loading ? t("enter_result.saving") : t("enter_result.save")}
         </button>
 
         <button className="w-full py-2 mt-2 text-[7px] text-muted-foreground" onClick={onClose}>
-          Cancel
+          {t("enter_result.cancel")}
         </button>
 
         <p className="text-center text-[6px] text-muted-foreground mt-4">
-          Leaderboard updates automatically
+          {t("enter_result.leaderboard_note")}
         </p>
       </SheetContent>
     </Sheet>

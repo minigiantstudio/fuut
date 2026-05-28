@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "@/contexts/SessionContext";
+import { LanguageProvider } from "@/lib/i18n";
 import Index from "./pages/Index.tsx";
 import JoinPage from "./pages/Join.tsx";
 import AuthCallback from "./pages/AuthCallback.tsx";
@@ -14,6 +15,7 @@ import AdminDashboard from "./admin/AdminDashboard.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
+  <LanguageProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -34,6 +36,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </LanguageProvider>
 );
 
 export default App;

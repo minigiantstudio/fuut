@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import type { LeaderboardEntry, Session } from "@/lib/supabase/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface RankingTabProps {
   session: Session;
@@ -14,6 +15,7 @@ const MovementIndicator = ({ movement }: { movement: number }) => {
 };
 
 const RankingTab = ({ session }: RankingTabProps) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: leaderboard = [], isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["leaderboard", session.leagueId],
@@ -67,7 +69,7 @@ const RankingTab = ({ session }: RankingTabProps) => {
   return (
     <div className="py-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-foreground text-lg">🏆 Leaderboard</h1>
+        <h1 className="text-foreground text-lg">{t("ranking.title")}</h1>
         <span className="text-[7px] text-muted-foreground">{session.leagueName}</span>
       </div>
 
@@ -77,7 +79,7 @@ const RankingTab = ({ session }: RankingTabProps) => {
         </div>
       ) : leaderboard.length === 0 ? (
         <div className="pixel-border bg-card p-6 text-center">
-          <p className="text-[8px] text-muted-foreground">No scores yet</p>
+          <p className="text-[8px] text-muted-foreground">{t("ranking.no_scores")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -104,7 +106,7 @@ const RankingTab = ({ session }: RankingTabProps) => {
                 <MovementIndicator movement={m.rank_delta} />
 
                 <span className="text-[8px] text-foreground tabular-nums min-w-[45px] text-right">
-                  {m.total_points} pts
+                  {m.total_points} {t("ranking.pts")}
                 </span>
               </div>
             );
