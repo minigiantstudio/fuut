@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import trophyIcon from "@/assets/trophy.png";
 import { supabase } from "@/lib/supabase/client";
@@ -22,6 +22,10 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery" | "create-name" | "create-nickname" | "create-email" | "create-confirm" | "auth-email" | "auth-password" | "auth-signup">(1);
   const [inviteCode, setInviteCode] = useState(prefilledCode ?? "");
+  useEffect(() => {
+    localStorage.setItem("onboardingInProgress", "true");
+    return () => localStorage.removeItem("onboardingInProgress");
+  }, []);
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -127,9 +131,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       if (userErr) throw new Error(userErr.message);
 
       // 3. Join via RPC — enforces free-tier member cap server-side (Plan 04-02).
-      //    See supabase/migrations/20260526150000_phase4_join_rpc.sql. The RPC raises
-      //    NOT_AUTHENTICATED / INVALID_CODE / LEAGUE_FULL as Postgres exceptions; the
-      //    Supabase JS client surfaces them as `error.message`.
       const { error: memberErr } = await supabase.rpc("join_league_by_code", {
         p_code: inviteCode.trim().toUpperCase(),
       });
@@ -149,6 +150,12 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
 
       // 4. Refresh session context
       await refreshSession();
+      // Explicitly set the newly joined league as active
+      if (leagueId) {
+        localStorage.setItem("activeLeagueId", leagueId);
+      }
+      localStorage.removeItem("onboardingInProgress");
+      navigate("/");
     } catch (e: unknown) {
       setJoinError(e instanceof Error ? e.message : t("onboarding.error_generic"));
     } finally {
@@ -641,34 +648,38 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   }
 
   // Step 3 — Almost there
-  return (
-    <div className="min-h-screen bg-background flex justify-center">
-      <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
-        <div className="flex-1 flex flex-col justify-center w-full space-y-8">
-          <div className="space-y-2 text-center">
-            <p className="text-2xl">⚽</p>
-            <h1 className="text-foreground text-sm">{t("onboarding.almost_there")}</h1>
-            <p className="text-muted-foreground text-xs">
-              {t("onboarding.ready_to_join")} <span className="text-foreground">{leagueName}</span> {t("onboarding.as")} <span className="text-foreground">{nickname}</span>?
-            </p>
+  if (step === 3) {
+    console.log("[Onboarding] rendering step (final)");
+    return (
+      <div className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-[430px] flex flex-col px-6 py-12">
+          <div className="flex-1 flex flex-col justify-center w-full space-y-8">
+            <div className="space-y-2 text-center">
+              <p className="text-2xl">⚽</p>
+              <h1 className="text-foreground text-sm">{t("onboarding.almost_there")}</h1>
+              <p className="text-muted-foreground text-xs">
+                {t("onboarding.ready_to_join")} <span className="text-foreground">{leagueName}</span> {t("onboarding.as")} <span className="text-foreground">{nickname}</span>?
+              </p>
+            </div>
+
+            <button
+              onClick={handleComplete}
+              disabled={joinLoading}
+              className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
+            >
+              {joinLoading ? t("onboarding.joining") : t("onboarding.start_predicting")}
+            </button>
+
+            {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
+            <button onClick={() => setStep(2)} className="w-full h-10 text-[7px] text-muted-foreground">
+              {t("onboarding.change_nickname")}
+            </button>
           </div>
-
-          <button
-            onClick={handleComplete}
-            disabled={joinLoading}
-            className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-green"
-          >
-            {joinLoading ? t("onboarding.joining") : t("onboarding.start_predicting")}
-          </button>
-
-          {joinError && <p className="text-[6px] text-pixel-red text-center">{joinError}</p>}
-          <button onClick={() => setStep(2)} className="w-full h-10 text-[7px] text-muted-foreground">
-            {t("onboarding.change_nickname")}
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+  return null;
 };
 
 export default Onboarding;
