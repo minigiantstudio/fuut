@@ -73,6 +73,9 @@
   "predict.clear_filter": "Clear filter",
   "predict.final_label": "Final",
   "predict.stage_default": "Matchday 1",
+  "predict.peer_title": "League predictions",
+  "predict.peer_none": "No prediction",
+  "predict.peer_loading": "Loading predictions…",
 
   "lock.locks_in": "Locks in",
 
@@ -97,6 +100,15 @@
   "league.badge_you": "YOU",
   "league.badge_active": "ACTIVE",
   "league.member_since": "Member since",
+  "league.members_heading": "Members",
+  "league.manage_heading": "Manage",
+  "league.rename_placeholder": "League name",
+  "league.rename_save": "Save",
+  "league.rename_saving": "Saving…",
+  "league.remove_title": "Remove member?",
+  "league.remove_body": "They'll be removed from the league. Their predictions are kept.",
+  "league.confirm_remove": "Yes, remove",
+  "league.request_premium": "League full — Request premium",
 
   "enter_result.title": "Confirm result",
   "enter_result.saving": "Saving...",

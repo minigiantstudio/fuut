@@ -406,6 +406,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_match_predictions: {
+        Args: { p_league_id: string; p_match_id: string }
+        Returns: {
+          away_score: number
+          bonus_answer: boolean
+          home_score: number
+          nickname: string
+          points: number
+          role: string
+          user_id: string
+        }[]
+      }
       get_matches_with_bonus: {
         Args: never
         Returns: {
@@ -448,6 +460,14 @@ export type Database = {
         Returns: {
           invite_code: string
         }[]
+      }
+      remove_member: {
+        Args: { p_league_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      rename_league: {
+        Args: { p_league_id: string; p_new_name: string }
+        Returns: undefined
       }
     }
     Enums: {
