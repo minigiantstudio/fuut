@@ -68,10 +68,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!getAdminToken()) return;
     setMatchesLoading(true);
+    // matches.bonus_question is REVOKEd from direct client SELECT (04-03), so the
+    // admin reads through the redaction RPC. It already orders by kickoff_at asc.
+    // Future matches show a redacted (null) question, which is fine — the admin
+    // can only enter results for matches that have already been played.
     supabase
-      .from("matches")
-      .select("id, home_team, away_team, kickoff_at, stage, home_score, away_score, is_final, is_manual_override, bonus_question, bonus_result")
-      .order("kickoff_at", { ascending: true })
+      .rpc("get_matches_with_bonus")
       .then(({ data, error }) => {
         setMatchesLoading(false);
         if (error) {

@@ -36,6 +36,15 @@ export interface DbMatch {
   bonus_result: boolean | null;
 }
 
+// Shape returned by the get_matches_with_bonus() RPC. Same columns as DbMatch
+// plus the server-computed reveal fields. bonus_question is NULL here until
+// now() >= reveal_at — the column is REVOKEd from direct table SELECT, so this
+// RPC is the only client-facing source of it.
+export interface DbMatchWithBonus extends DbMatch {
+  reveal_at: string;
+  is_bonus_revealed: boolean;
+}
+
 export interface DbPrediction {
   id: string;
   user_id: string;

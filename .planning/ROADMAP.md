@@ -66,9 +66,9 @@
   3. Users can share ranking snapshots to WhatsApp/Telegram.
   4. League limits and premium features are enforced.
 **Plans**: 5 plans
-- [ ] 04-01-PLAN.md — Database foundation and curated bonus question catalog seeding.
-- [ ] 04-02-PLAN.md — Global Admin controls for reveal timing and league tier enforcement.
-- [ ] 04-03-PLAN.md — Micro-predictions UI with countdown reveal and live scoring feedback.
+- [x] 04-01-PLAN.md — Database foundation and curated bonus question catalog seeding.
+- [x] 04-02-PLAN.md — Global Admin controls for reveal timing and league tier enforcement.
+- [x] 04-03-PLAN.md — Micro-predictions UI with countdown reveal and live scoring feedback.
 - [ ] 04-04-PLAN.md — Peer visibility expansion and League Admin tools (rename/remove).
 - [ ] 04-05-PLAN.md — Shareable ranking snapshots with pixel-art PNG generation.
 **UI hint**: yes
@@ -92,5 +92,5 @@
 | 1. Foundation & Onboarding | 4/4 | Completed | 2026-04-20 |
 | 2. League & Prediction Core | 3/3 | Completed | 2026-05-06 |
 | 3. Scoring & Real-time Rankings | 4/4 | Completed | 2026-05-20 |
-| 4. Social & Bonus Predictions | 0/5 | Not started | - |
+| 4. Social & Bonus Predictions | 3/5 | In Progress | - |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |

@@ -7,13 +7,13 @@ import GroupFilter from "@/components/GroupFilter";
 import BonusPrediction from "@/components/BonusPrediction";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { DbMatch, DbPrediction, Session } from "@/lib/supabase/types";
+import type { DbMatchWithBonus, DbPrediction, Session } from "@/lib/supabase/types";
 import LockCountdown from "@/components/LockCountdown";
 import { useTranslation } from "@/lib/i18n";
 
 type MatchStatus = "open" | "saved" | "locked" | "needs_result";
 
-interface MatchWithStatus extends DbMatch {
+interface MatchWithStatus extends DbMatchWithBonus {
   uiStatus: MatchStatus;
   prediction: DbPrediction | null;
 }
@@ -53,15 +53,15 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
     return () => clearInterval(interval);
   }, []);
 
-  const { data: rawMatches = [] } = useQuery<DbMatch[]>({
+  const { data: rawMatches = [] } = useQuery<DbMatchWithBonus[]>({
     queryKey: ["matches"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("matches")
-        .select("*")
-        .order("kickoff_at", { ascending: true });
+      // get_matches_with_bonus redacts bonus_question until reveal_at and adds
+      // is_bonus_revealed/reveal_at. Direct SELECT on matches.bonus_question is
+      // REVOKEd, so this RPC is the only way the client gets that column.
+      const { data, error } = await supabase.rpc("get_matches_with_bonus");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as DbMatchWithBonus[];
     },
   });
 
@@ -311,6 +311,8 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                 <BonusPrediction
                   matchId={match.id}
                   bonusQuestion={match.bonus_question}
+                  isRevealed={match.is_bonus_revealed}
+                  revealAt={match.reveal_at}
                   initialAnswer={match.prediction?.bonus_answer ?? null}
                   // Lock at kickoff AND when no score prediction exists yet
                   // (predictions.home_score / away_score are NOT NULL in DB).

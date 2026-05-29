@@ -406,9 +406,36 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_matches_with_bonus: {
+        Args: never
+        Returns: {
+          away_score: number
+          away_team: string
+          bonus_question: string
+          bonus_result: boolean
+          group_name: string
+          home_score: number
+          home_team: string
+          id: string
+          is_bonus_revealed: boolean
+          is_final: boolean
+          is_manual_override: boolean
+          kickoff_at: string
+          reveal_at: string
+          stage: string
+        }[]
+      }
       is_any_league_admin: { Args: never; Returns: boolean }
       is_league_admin: { Args: { p_league_id: string }; Returns: boolean }
       is_league_member: { Args: { p_league_id: string }; Returns: boolean }
+      join_league_by_code: {
+        Args: { p_code: string }
+        Returns: {
+          league_id: string
+          league_name: string
+          member_role: string
+        }[]
+      }
       lookup_league_by_invite_code: {
         Args: { p_code: string }
         Returns: {
