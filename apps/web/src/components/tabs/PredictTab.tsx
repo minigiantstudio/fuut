@@ -5,6 +5,7 @@ import EnterResult from "@/components/EnterResult";
 import StageNav from "@/components/StageNav";
 import GroupFilter from "@/components/GroupFilter";
 import BonusPrediction from "@/components/BonusPrediction";
+import PeerPredictions from "@/components/PeerPredictions";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { DbMatchWithBonus, DbPrediction, Session } from "@/lib/supabase/types";
@@ -41,6 +42,8 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [resultMatchId, setResultMatchId] = useState<string | null>(null);
+  // Peer visibility (D-10): which SCORED card is expanded to show league picks.
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
   const [activeStage, setActiveStage] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState("All");
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,7 +106,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawMatches, predictionMap, tick]);
 
-  const getStageName = (match: DbMatch) => {
+  const getStageName = (match: DbMatchWithBonus) => {
     if (match.stage === "group") {
       return new Date(match.kickoff_at).toLocaleDateString("en-US", {
         month: "short",
@@ -248,11 +251,21 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
             const homeVal = match.prediction?.home_score?.toString() ?? "";
             const awayVal = match.prediction?.away_score?.toString() ?? "";
 
+            // SCORED matches (is_final) are tappable to reveal peer predictions
+            // (D-10); other locked cards (needs_result) stay inert.
+            const isScored = match.is_final;
+            const isExpanded = expandedMatchId === match.id;
             return (
               <div key={match.id}>
                 <div
-                  className={`pixel-border bg-card p-3 space-y-2 ${isLocked ? "opacity-50" : "cursor-pointer"}`}
-                  onClick={() => { if (!isLocked) setSelectedMatchId(match.id); }}
+                  className={`pixel-border bg-card p-3 space-y-2 ${isLocked && !isScored ? "opacity-50" : "cursor-pointer"}`}
+                  onClick={() => {
+                    if (isScored) {
+                      setExpandedMatchId(isExpanded ? null : match.id);
+                    } else if (!isLocked) {
+                      setSelectedMatchId(match.id);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-foreground text-xs flex-1 truncate">{match.home_team}</span>
@@ -302,6 +315,11 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         {t("predict.enter_result")}
                       </button>
                     )}
+                    {isScored && (
+                      <span className="text-[6px] text-muted-foreground">
+                        {isExpanded ? "▴" : "▾"} {t("predict.peer_title")}
+                      </span>
+                    )}
                   </div>
 
                   {(match.uiStatus === "open" || match.uiStatus === "saved") && (
@@ -323,6 +341,13 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   }
                   onSave={(answer) => handleBonusSave(match.id, answer)}
                 />
+                {isScored && isExpanded && (
+                  <PeerPredictions
+                    leagueId={session.leagueId}
+                    matchId={match.id}
+                    currentUserId={session.userId}
+                  />
+                )}
               </div>
             );
           })}

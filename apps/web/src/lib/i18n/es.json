@@ -73,6 +73,9 @@
   "predict.clear_filter": "Quitar filtro",
   "predict.final_label": "Final",
   "predict.stage_default": "Jornada 1",
+  "predict.peer_title": "Pronósticos de la liga",
+  "predict.peer_none": "Sin pronóstico",
+  "predict.peer_loading": "Cargando pronósticos…",
 
   "lock.locks_in": "Cierra en",
 
@@ -97,6 +100,15 @@
   "league.badge_you": "TÚ",
   "league.badge_active": "ACTIVO",
   "league.member_since": "Miembro desde",
+  "league.members_heading": "Miembros",
+  "league.manage_heading": "Administrar",
+  "league.rename_placeholder": "Nombre de la liga",
+  "league.rename_save": "Guardar",
+  "league.rename_saving": "Guardando…",
+  "league.remove_title": "¿Eliminar miembro?",
+  "league.remove_body": "Será eliminado de la liga. Se conservan sus pronósticos.",
+  "league.confirm_remove": "Sí, eliminar",
+  "league.request_premium": "Liga llena — Solicitar premium",
 
   "enter_result.title": "Confirmar resultado",
   "enter_result.saving": "Guardando...",
