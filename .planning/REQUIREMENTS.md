@@ -70,7 +70,7 @@
 | SCORE-04 | Phase 3 | Pending |
 | SOCIAL-01 | Phase 4 | Complete |
 | SOCIAL-02 | Phase 4 | Complete |
-| SOCIAL-03 | Phase 4 | Pending |
+| SOCIAL-03 | Phase 4 | Complete |
 | SOCIAL-04 | Phase 4 | Complete |
 | POLISH-01 | Phase 5 | Pending |
 | POLISH-02 | Phase 5 | Pending |

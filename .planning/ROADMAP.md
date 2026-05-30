@@ -70,7 +70,7 @@
 - [x] 04-02-PLAN.md — Global Admin controls for reveal timing and league tier enforcement.
 - [x] 04-03-PLAN.md — Micro-predictions UI with countdown reveal and live scoring feedback.
 - [x] 04-04-PLAN.md — Peer visibility expansion and League Admin tools (rename/remove).
-- [ ] 04-05-PLAN.md — Shareable ranking snapshots with pixel-art PNG generation.
+- [x] 04-05-PLAN.md — Shareable ranking snapshots with pixel-art PNG generation.
 **UI hint**: yes
 
 ### Phase 5: Global Polish & Tournament Readiness
@@ -92,5 +92,5 @@
 | 1. Foundation & Onboarding | 4/4 | Completed | 2026-04-20 |
 | 2. League & Prediction Core | 3/3 | Completed | 2026-05-06 |
 | 3. Scoring & Real-time Rankings | 4/4 | Completed | 2026-05-20 |
-| 4. Social & Bonus Predictions | 4/5 | In Progress | - |
+| 4. Social & Bonus Predictions | 5/5 | Completed | 2026-05-29 |
 | 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |

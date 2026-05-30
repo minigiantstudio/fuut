@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toPng } from "html-to-image";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/lib/supabase/client";
 import type { LeaderboardEntry, Session } from "@/lib/supabase/types";
 import { useTranslation } from "@/lib/i18n";
+import SnapshotCard, { type SnapshotPayload } from "@/components/SnapshotCard";
 
 interface RankingTabProps {
   session: Session;
@@ -18,6 +20,12 @@ const MovementIndicator = ({ movement }: { movement: number }) => {
 const RankingTab = ({ session }: RankingTabProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const snapshotRef = useRef<HTMLDivElement | null>(null);
+  const [sharing, setSharing] = useState(false);
+  // Fallback share dialog (desktop / no Web Share API)
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const { data: leaderboard = [], isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["leaderboard", session.leagueId],
     queryFn: async () => {
@@ -105,6 +113,100 @@ const RankingTab = ({ session }: RankingTabProps) => {
     };
   }, [session.leagueId, session.userId, queryClient]);
 
+  // Shareable snapshot payload (D-11/D-12 SOCIAL-03). Top-3 podium + the
+  // current user (if they're not already on the podium). Intentionally
+  // public-safe — no emails or per-user identifiers beyond nickname (T-04-07).
+  // inviteCode is omitted from the frozen payload so the public teaser fetches
+  // the LIVE invite_code from the league, which still works after a regenerate.
+  const snapshotPayload = useMemo<SnapshotPayload>(() => {
+    const me = leaderboard.find((m) => m.user_id === session.userId);
+    return {
+      leagueName: session.leagueName,
+      createdAt: new Date().toISOString(),
+      podium: leaderboard.slice(0, 3).map((m) => ({
+        rank: m.rank,
+        nickname: m.nickname,
+        total_points: m.total_points,
+      })),
+      you: me ? { rank: me.rank, nickname: me.nickname, total_points: me.total_points } : null,
+    };
+  }, [leaderboard, session.userId, session.leagueName]);
+
+  const handleShare = async () => {
+    if (!snapshotRef.current || sharing) return;
+    setSharing(true);
+    try {
+      // Wait for webfonts to be ready — otherwise html-to-image can serialize
+      // before glyphs paint, producing a blank/white capture on first invocation.
+      if (typeof document !== "undefined" && document.fonts && "ready" in document.fonts) {
+        await document.fonts.ready;
+      }
+      // 1. Capture the hidden snapshot div as a PNG (pixelRatio=2 for crispness).
+      const pngDataUrl = await toPng(snapshotRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        cacheBust: true,
+      });
+
+      // 2. Short token (12 hex chars ≈ 4.7e14 keyspace — fine for this scale).
+      const token = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`)
+        .replace(/-/g, "")
+        .slice(0, 12);
+
+      // 3. Persist the FROZEN payload. RLS requires created_by = auth.uid().
+      const { error } = await supabase.from("snapshot_tokens").insert({
+        token,
+        league_id: session.leagueId,
+        snapshot_payload: snapshotPayload,
+        created_by: session.userId,
+      });
+      if (error) throw error;
+
+      const url = `${window.location.origin}/s/${token}`;
+      const text = `${session.leagueName} — Fuut 2026`;
+
+      // 4. Web Share API path (D-13). Prefer sharing the file when supported.
+      const nav = navigator as Navigator & {
+        canShare?: (data: { files?: File[] }) => boolean;
+      };
+      if (typeof navigator.share === "function") {
+        try {
+          const blob = await (await fetch(pngDataUrl)).blob();
+          const file = new File([blob], "fuut-snapshot.png", { type: "image/png" });
+          if (nav.canShare?.({ files: [file] })) {
+            await navigator.share({ title: text, text, url, files: [file] });
+            return;
+          }
+          await navigator.share({ title: text, text, url });
+          return;
+        } catch (err) {
+          // user cancelled — fall through to fallback dialog
+          if ((err as { name?: string })?.name !== "AbortError") {
+            console.warn("navigator.share failed; showing fallback", err);
+          } else {
+            return;
+          }
+        }
+      }
+
+      // 5. Fallback: show the explicit-buttons dialog (WhatsApp/Telegram/Copy).
+      setShareUrl(url);
+      setCopied(false);
+    } catch (err) {
+      console.error("Snapshot share failed", err);
+      toast.error("Could not generate snapshot");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <div className="py-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -122,6 +224,13 @@ const RankingTab = ({ session }: RankingTabProps) => {
         </div>
       ) : (
         <div className="space-y-2">
+          <button
+            onClick={handleShare}
+            disabled={sharing || leaderboard.length === 0}
+            className="w-full text-center pixel-border bg-pixel-blue text-primary-foreground text-[8px] uppercase tracking-wider py-2.5 disabled:opacity-40"
+          >
+            {sharing ? t("ranking.sharing") : t("ranking.share")}
+          </button>
           {leaderboard.map((m) => {
             const isMe = m.user_id === session.userId;
             const initials = m.nickname.slice(0, 2).toUpperCase();
@@ -150,6 +259,60 @@ const RankingTab = ({ session }: RankingTabProps) => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Hidden snapshot capture target — laid out offscreen so html-to-image
+          can serialize it without affecting the on-screen layout. Kept opaque
+          and width-locked to produce a stable PNG. */}
+      <div
+        ref={snapshotRef}
+        aria-hidden="true"
+        style={{ position: "fixed", left: -9999, top: 0, width: 360, pointerEvents: "none" }}
+      >
+        <SnapshotCard
+          payload={snapshotPayload}
+          podiumLabel={t("snapshot.podium")}
+          youLabel={t("snapshot.you")}
+          capture
+        />
+      </div>
+
+      {/* Fallback share dialog (D-13) — shown when Web Share API isn't available. */}
+      {shareUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShareUrl(null)}>
+          <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-[10px] text-foreground">{t("snapshot.share_via")}</h3>
+            <div className="pixel-inset bg-background p-2 text-[7px] font-mono text-foreground break-all">{shareUrl}</div>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`${session.leagueName} — Fuut 2026 ${shareUrl}`)}`}
+                target="_blank" rel="noreferrer"
+                className="flex items-center justify-center pixel-border bg-pixel-green text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+              >
+                {t("snapshot.whatsapp")}
+              </a>
+              <a
+                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`${session.leagueName} — Fuut 2026`)}`}
+                target="_blank" rel="noreferrer"
+                className="flex items-center justify-center pixel-border bg-pixel-blue text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+              >
+                {t("snapshot.telegram")}
+              </a>
+            </div>
+            <button
+              onClick={handleCopy}
+              className="w-full pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+            >
+              {copied ? t("snapshot.copied") : t("snapshot.copy_link")}
+            </button>
+            <button
+              onClick={() => setShareUrl(null)}
+              className="w-full text-[7px] uppercase tracking-wider text-muted-foreground py-1"
+            >
+              {t("league.cancel")}
+            </button>
+          </div>
         </div>
       )}
     </div>
