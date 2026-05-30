@@ -11,6 +11,7 @@ import AuthCallback from "./pages/AuthCallback.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./admin/AdminLogin.tsx";
 import AdminDashboard from "./admin/AdminDashboard.tsx";
+import SnapshotPage from "./routes/Snapshot.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/join/:code" element={<JoinPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            {/* Public shareable ranking snapshot (SOCIAL-03, D-11). No auth — token is the access control. */}
+            <Route path="/s/:token" element={<SnapshotPage />} />
             {/* Admin subtree (DEC-018): env-var auth, separate from SessionContext */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
