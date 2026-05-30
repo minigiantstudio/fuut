@@ -136,6 +136,11 @@ const RankingTab = ({ session }: RankingTabProps) => {
     if (!snapshotRef.current || sharing) return;
     setSharing(true);
     try {
+      // Wait for webfonts to be ready — otherwise html-to-image can serialize
+      // before glyphs paint, producing a blank/white capture on first invocation.
+      if (typeof document !== "undefined" && document.fonts && "ready" in document.fonts) {
+        await document.fonts.ready;
+      }
       // 1. Capture the hidden snapshot div as a PNG (pixelRatio=2 for crispness).
       const pngDataUrl = await toPng(snapshotRef.current, {
         pixelRatio: 2,
