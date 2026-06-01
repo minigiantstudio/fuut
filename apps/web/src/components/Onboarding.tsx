@@ -230,17 +230,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               <p className="text-muted-foreground font-mono text-base">{t("onboarding.subtitle")}</p>
             </div>
 
-            <div className="flex items-center -space-x-1">
-              {placeholderInitials.map((init, i) => (
-                <div
-                  key={init}
-                  className={`w-8 h-8 ${avatarColors[i]} flex items-center justify-center text-[6px] text-primary-foreground border-2 border-background`}
-                >
-                  {init}
-                </div>
-              ))}
-            </div>
-
             <div className="w-full space-y-3">
               <div className="space-y-2">
                 <input
@@ -273,13 +262,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
                 className="w-full h-12 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-pixel-blue opacity-95"
               >
                 {t("onboarding.create_a_league")}
-              </button>
-
-              <button
-                onClick={() => setStep("recovery")}
-                className="w-full h-10 text-[7px] text-muted-foreground"
-              >
-                {t("onboarding.played_before")}
               </button>
             </div>
           </div>
