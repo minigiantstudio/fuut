@@ -82,7 +82,12 @@
   2. App is installable as a PWA.
   3. Load testing confirms stability for 200 concurrent users.
   4. CI/CD pipeline is fully operational.
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 05-01-PLAN.md — CI/CD pipelines (GitHub Actions: tsc/lint/Playwright + migration check).
+- [ ] 05-02-PLAN.md — PWA installable + offline app shell (vite-plugin-pwa + Workbox).
+- [ ] 05-03-PLAN.md — French locale + hardcoded-string sweep.
+- [ ] 05-04-PLAN.md — Retro theme refinement (replace Lovable-default OG, pixel-art consistency audit, design tokens doc).
+- [ ] 05-05-PLAN.md — Load readiness + performance (Lighthouse baseline, route splitting, k6 200-user load test).
 **UI hint**: yes
 
 ## Progress Table
@@ -93,4 +98,4 @@
 | 2. League & Prediction Core | 3/3 | Completed | 2026-05-06 |
 | 3. Scoring & Real-time Rankings | 4/4 | Completed | 2026-05-20 |
 | 4. Social & Bonus Predictions | 5/5 | Completed | 2026-05-29 |
-| 5. Global Polish & Tournament Readiness | 0/1 | Not started | - |
+| 5. Global Polish & Tournament Readiness | 0/5 | Planned | - |
