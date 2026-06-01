@@ -274,13 +274,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               >
                 {t("onboarding.create_a_league")}
               </button>
-
-              <button
-                onClick={() => setStep("recovery")}
-                className="w-full h-10 text-[7px] text-muted-foreground"
-              >
-                {t("onboarding.played_before")}
-              </button>
             </div>
           </div>
         </div>
