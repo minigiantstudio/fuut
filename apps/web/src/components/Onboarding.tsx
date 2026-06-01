@@ -230,17 +230,6 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               <p className="text-muted-foreground font-mono text-base">{t("onboarding.subtitle")}</p>
             </div>
 
-            <div className="flex items-center -space-x-1">
-              {placeholderInitials.map((init, i) => (
-                <div
-                  key={init}
-                  className={`w-8 h-8 ${avatarColors[i]} flex items-center justify-center text-[6px] text-primary-foreground border-2 border-background`}
-                >
-                  {init}
-                </div>
-              ))}
-            </div>
-
             <div className="w-full space-y-3">
               <div className="space-y-2">
                 <input
