@@ -223,7 +223,9 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       />
 
       <div className="space-y-1">
-        <h1 className="text-foreground text-lg">⚽ {isGroupFiltered ? activeGroup : activeStage}</h1>
+        <h1 className="text-foreground text-lg">
+          <span className="align-middle mr-2 relative -top-[3px]">⚽</span><span className="align-middle">{isGroupFiltered ? activeGroup : activeStage}</span>
+        </h1>
         <p className="text-[7px] text-muted-foreground">{subtitle}</p>
       </div>
 
@@ -232,7 +234,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       {isGroupFiltered && (
         <button
           onClick={() => setActiveGroup("All")}
-          className="flex items-center gap-1 text-[6px] text-pixel-red border border-pixel-red px-2 py-1"
+          className="flex items-center gap- text-[6px] text-pixel-red border border-pixel-red"
         >
           <X size={10} /> {t("predict.clear_filter")}
         </button>
