@@ -27,7 +27,7 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
                 onClick={() => setSwitcherOpen(true)}
                 className="flex items-center gap-1 text-[10px] font-bold text-accent"
               >
-                ⚽ {leagueName} <span className="text-[7px]">▾</span>
+                ⚽ {leagueName} <span className="text-[16px]">▾</span>
               </button>
             ) : (
               <span className="text-[10px] font-bold text-accent">⚽ {leagueName}</span>
