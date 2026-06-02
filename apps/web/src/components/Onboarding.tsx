@@ -523,8 +523,13 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
 
     const handleStartPredicting = async () => {
       setConfirmLoading(true);
-      await refreshSession();
-      navigate("/");
+      try {
+        await refreshSession();
+        localStorage.removeItem("onboardingInProgress");
+        navigate("/");
+      } finally {
+        setConfirmLoading(false);
+      }
     };
 
     return (
