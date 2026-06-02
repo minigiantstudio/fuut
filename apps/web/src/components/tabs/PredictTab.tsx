@@ -270,7 +270,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-foreground text-xs flex-1 truncate">{match.home_team}</span>
 
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1">
                       <input
                         type="number"
                         min={0}
@@ -280,7 +280,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         placeholder="–"
                         onChange={(e) => handleScoreChange(match.id, "home_score", e.target.value)}
                         onBlur={() => { blurTimeout.current = setTimeout(() => {}, 100); }}
-                        className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
+                        className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40 pointer-events-none"
                       />
                       <span className="text-[7px] text-muted-foreground">:</span>
                       <input
@@ -291,7 +291,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                         disabled={true}
                         placeholder="–"
                         onChange={(e) => handleScoreChange(match.id, "away_score", e.target.value)}
-                        className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40"
+                        className="w-8 h-8 pixel-inset bg-background text-center text-sm text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-40 pointer-events-none"
                       />
                     </div>
 
@@ -331,6 +331,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   bonusQuestion={match.bonus_question}
                   isRevealed={match.is_bonus_revealed}
                   revealAt={match.reveal_at}
+                  kickoffAt={match.kickoff_at}
                   initialAnswer={match.prediction?.bonus_answer ?? null}
                   // Lock at kickoff AND when no score prediction exists yet
                   // (predictions.home_score / away_score are NOT NULL in DB).

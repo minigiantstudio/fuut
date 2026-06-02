@@ -18,7 +18,7 @@ const GroupFilter = ({ groups = defaultGroups, active, onSelect, onChange }: Gro
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-9 h-9 flex items-center justify-center border-2 border-foreground bg-card text-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] pixel-press"

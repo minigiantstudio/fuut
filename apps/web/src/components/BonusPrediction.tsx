@@ -31,16 +31,6 @@ const fallbackQuestionIndex = (matchId: string, modulus: number) => {
   return acc;
 };
 
-// "Xh Ym" / "Ym" — mirrors LockCountdown.formatCountdown so the reveal
-// countdown reads identically to the existing lock vocabulary (D-08 / Phase 2 D-09).
-const formatReveal = (ms: number): string => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-};
-
 interface BonusPredictionProps {
   matchId: string;
   /** From the get_matches_with_bonus RPC. NULL while the bonus is unrevealed. */
@@ -49,6 +39,8 @@ interface BonusPredictionProps {
   isRevealed: boolean;
   /** Server-computed reveal_at timestamp (kickoff - lead time) for the countdown. */
   revealAt: string | null;
+  /** Kickoff timestamp to calculate the lead time. */
+  kickoffAt: string;
   /** Current persisted answer (or null if the user hasn't answered yet). */
   initialAnswer: boolean | null;
   /** Persist the answer. Parent is responsible for DB write + cache invalidation. */
@@ -62,6 +54,7 @@ const BonusPrediction = ({
   bonusQuestion,
   isRevealed,
   revealAt,
+  kickoffAt,
   initialAnswer,
   onSave,
   disabled = false,
@@ -72,16 +65,6 @@ const BonusPrediction = ({
   // upsert is in-flight. Synced from initialAnswer (parent prop) on each render
   // by using it as the seed and updating on click.
   const [optimisticAnswer, setOptimisticAnswer] = useState<boolean | null>(initialAnswer);
-
-  // Re-evaluate the reveal countdown on a 30s tick (matches LockCountdown's
-  // cadence). The server flag is_revealed is authoritative; this only drives the
-  // placeholder's "reveals in Xh Ym" label between data refetches.
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (isRevealed) return;
-    const id = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(id);
-  }, [isRevealed]);
 
   // Re-seed the optimistic copy when the persisted value changes from elsewhere
   // (e.g. after queryClient invalidation following another tab's edit).
@@ -114,14 +97,15 @@ const BonusPrediction = ({
   };
 
   // Pre-reveal (D-08): the server has redacted bonus_question, so render a
-  // locked placeholder with a countdown instead of the answerable card. The
-  // copy mirrors the Phase 2 D-09 lock vocabulary verbatim.
+  // locked placeholder with the reveal lead time instead of the answerable card.
   if (!isRevealed) {
-    const remainingMs = revealAt ? new Date(revealAt).getTime() - now : 0;
+    const leadMs = (revealAt && kickoffAt) ? new Date(kickoffAt).getTime() - new Date(revealAt).getTime() : 60 * 60 * 1000;
+    const minutes = Math.round(leadMs / 60000);
+
     return (
       <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-        <div className="w-full flex items-center gap-1 px-2 py-1.5 text-[6px] uppercase tracking-[0.3em] border-2 border-foreground bg-muted text-muted-foreground">
-          <span>🔒 {t("bonus.reveals_in")} {formatReveal(remainingMs)}</span>
+        <div className="w-full flex items-center gap-1 px-2 py-1.5 text-[6px] uppercase tracking-wider border-2 border-foreground bg-muted text-muted-foreground">
+          <span>🔒 {t("bonus.reveals_in", { minutes })}</span>
         </div>
       </div>
     );

@@ -46,6 +46,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useTranslation() {
   const { lang, setLang } = useContext(LanguageContext);
-  const t = (key: TranslationKey): string => strings[lang][key];
+  const t = (key: TranslationKey, variables?: Record<string, string | number>): string => {
+    let str = strings[lang][key];
+    if (variables) {
+      Object.entries(variables).forEach(([k, v]) => {
+        str = str.replace(`{{${k}}}`, String(v));
+      });
+    }
+    return str;
+  };
   return { t, lang, setLang };
 }

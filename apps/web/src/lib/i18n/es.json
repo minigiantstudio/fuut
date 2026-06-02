@@ -135,7 +135,7 @@
   "enter_result.cancel": "Cancelar",
   "bonus.header": "Bonus +2pts",
   "bonus.saved": "✓ ¡Bonus guardado!",
-  "bonus.reveals_in": "El bonus sorpresa se revela en",
+  "bonus.reveals_in": "El bonus sorpresa se revela {{minutes}} minutos antes del inicio",
 
   "bonus.will_var": "¿Se anulará un gol por VAR?",
   "bonus.will_gk_score": "¿Marcará un portero?",
