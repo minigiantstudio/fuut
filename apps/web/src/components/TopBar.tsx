@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";  
 import LeagueSwitcher from "./LeagueSwitcher";
 import LanguageToggle from "./LanguageToggle";
 import { useSession } from "@/contexts/SessionContext";
@@ -25,12 +26,17 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
             {hasMultipleLeagues ? (
               <button
                 onClick={() => setSwitcherOpen(true)}
-                className="flex items-center gap-1 text-[10px] font-bold text-accent"
+                className="flex items-center gap-2 text-[10px] font-bold text-accent"
               >
-                ⚽ {leagueName} <span className="text-[16px]">▾</span>
+                <span className="inline-block text-[14px] leading-none -translate-y-[2px]">⚽</span>
+                {leagueName}
+                <ChevronDown className="w-4 h-4" strokeWidth={3} />
               </button>
             ) : (
-              <span className="text-[10px] font-bold text-accent">⚽ {leagueName}</span>
+              <span className="flex items-center gap-2 text-[10px] font-bold text-accent">
+                <span className="inline-block text-[14px] leading-none -translate-y-[2px]">⚽</span>
+                {leagueName}
+              </span>
             )}
             <span className="text-foreground">·</span>
             <span className="text-[8px] text-primary-foreground">{t("app.group_stage")}</span>
