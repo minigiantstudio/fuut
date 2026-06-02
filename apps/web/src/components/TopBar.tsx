@@ -1,9 +1,12 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";  
+import { useState, useMemo } from "react";
+import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import LeagueSwitcher from "./LeagueSwitcher";
 import LanguageToggle from "./LanguageToggle";
 import { useSession } from "@/contexts/SessionContext";
 import { useTranslation } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase/client";
+import type { DbMatchWithBonus } from "@/lib/supabase/types";
 
 interface TopBarProps {
   onLogout?: () => void;
@@ -17,6 +20,31 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
   const initials = nickname ? nickname.slice(0, 2).toUpperCase() : "??";
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const hasMultipleLeagues = leagues.length > 1;
+
+  const { data: rawMatches = [] } = useQuery<DbMatchWithBonus[]>({
+    queryKey: ["matches"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_matches_with_bonus");
+      if (error) throw error;
+      return (data ?? []) as DbMatchWithBonus[];
+    },
+  });
+
+  const currentStage = useMemo(() => {
+    if (rawMatches.length === 0) return t("app.group_stage");
+    const now = new Date();
+    const nextMatch = rawMatches.find((m) => !m.is_final && new Date(m.kickoff_at) > now);
+    if (!nextMatch) return t("app.group_stage");
+
+    const knockoutMap: Record<string, string> = {
+      group: t("app.group_stage"),
+      r16: "Round of 16",
+      qf: "Quarter-finals",
+      sf: "Semi-finals",
+      final: "Final",
+    };
+    return knockoutMap[nextMatch.stage] || nextMatch.stage;
+  }, [rawMatches, t]);
 
   return (
     <>
@@ -39,7 +67,7 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
               </span>
             )}
             <span className="text-foreground">·</span>
-            <span className="text-[8px] text-primary-foreground">{t("app.group_stage")}</span>
+            <span className="text-[8px] text-primary-foreground">{currentStage}</span>
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle />
