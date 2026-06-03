@@ -23,8 +23,11 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "recovery" | "create-name" | "create-nickname" | "create-email" | "create-confirm" | "auth-email" | "auth-password" | "auth-signup">(1);
   const [inviteCode, setInviteCode] = useState(prefilledCode ?? "");
   useEffect(() => {
-    localStorage.setItem("onboardingInProgress", "true");
-    return () => localStorage.removeItem("onboardingInProgress");
+    // Tab-scoped (sessionStorage, not localStorage): this flag means "THIS tab is
+    // mid-onboarding". Using localStorage leaked the flag into other tabs — e.g. a
+    // magic-link tab — which then wrongly rendered Onboarding over an authed session.
+    sessionStorage.setItem("onboardingInProgress", "true");
+    return () => sessionStorage.removeItem("onboardingInProgress");
   }, []);
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
@@ -163,7 +166,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       if (leagueId) {
         localStorage.setItem("activeLeagueId", leagueId);
       }
-      localStorage.removeItem("onboardingInProgress");
+      sessionStorage.removeItem("onboardingInProgress");
       navigate("/");
     } catch (e: unknown) {
       setJoinError(e instanceof Error ? e.message : t("onboarding.error_generic"));
@@ -543,7 +546,7 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
       setConfirmLoading(true);
       try {
         await refreshSession();
-        localStorage.removeItem("onboardingInProgress");
+        sessionStorage.removeItem("onboardingInProgress");
         navigate("/");
       } finally {
         setConfirmLoading(false);

@@ -13,6 +13,17 @@ const VALID_TYPES: ReadonlySet<OtpType> = new Set([
 // This avoids the race where navigate("/") renders Index before the context
 // has loaded the user's league, briefly showing onboarding.
 function hardRedirect(path: string) {
+  // Completing an auth callback means onboarding is definitively over. Clear the
+  // `onboardingInProgress` flag from BOTH stores: sessionStorage is the current
+  // (tab-scoped) home, and localStorage is cleared defensively to purge any stale
+  // value written by older builds. Otherwise Index could render Onboarding over
+  // an already-authenticated session.
+  try {
+    localStorage.removeItem("onboardingInProgress");
+    sessionStorage.removeItem("onboardingInProgress");
+  } catch {
+    /* ignore storage errors */
+  }
   window.location.replace(path);
 }
 

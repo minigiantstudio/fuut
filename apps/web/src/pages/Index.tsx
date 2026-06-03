@@ -15,6 +15,14 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("predict");
   const navigate = useNavigate();
 
+  // One-time cleanup: older builds stored `onboardingInProgress` in localStorage,
+  // where it could get stuck across tabs (e.g. a magic-link tab) and wrongly force
+  // the Onboarding screen. It's now tab-scoped in sessionStorage, so purge any
+  // stale localStorage copy on mount.
+  useEffect(() => {
+    localStorage.removeItem("onboardingInProgress");
+  }, []);
+
   // Detect password recovery links — Supabase lands on / with #access_token&type=recovery.
   // Redirect immediately to the reset-password page so the user sees the form.
   useEffect(() => {
@@ -44,7 +52,7 @@ const Index = () => {
     );
   }
 
-  if (!session || !session.leagueId || localStorage.getItem("onboardingInProgress") === "true") {
+  if (!session || !session.leagueId || sessionStorage.getItem("onboardingInProgress") === "true") {
     return <Onboarding />;
   }
 
