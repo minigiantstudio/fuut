@@ -13,9 +13,6 @@ const VALID_TYPES: ReadonlySet<OtpType> = new Set([
   "email",
 ]);
 
-// GoTrue's `{{ .RedirectTo }}` may render as an absolute URL (the configured site_url)
-// when no emailRedirectTo is passed. react-router's navigate() expects a path, so
-// strip same-origin absolute URLs to their pathname and refuse cross-origin ones.
 function safeNextPath(raw: string | null): string {
   if (!raw) return "/";
   if (raw.startsWith("/")) return raw;
@@ -28,6 +25,13 @@ function safeNextPath(raw: string | null): string {
   }
 }
 
+// Parse params from the URL hash fragment (#access_token=...&type=...)
+// Supabase implicit-flow emails land here instead of query params.
+function getHashParams(): URLSearchParams {
+  const hash = window.location.hash.slice(1); // strip leading #
+  return new URLSearchParams(hash);
+}
+
 const AuthCallback = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -35,31 +39,53 @@ const AuthCallback = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // StrictMode runs effects twice in dev; verifyOtp is single-use, so guard it.
     if (ranRef.current) return;
     ranRef.current = true;
 
+    // --- PKCE flow: token arrives as ?token_hash=...&type=... ---
     const tokenHash = params.get("token_hash");
-    const rawType = params.get("type");
-    const next = safeNextPath(params.get("next"));
+    const rawType   = params.get("type");
+    const next      = safeNextPath(params.get("next"));
 
-    if (!tokenHash || !rawType || !VALID_TYPES.has(rawType as OtpType)) {
-      setError("Invalid or expired link.");
+    if (tokenHash && rawType && VALID_TYPES.has(rawType as OtpType)) {
+      supabase.auth
+        .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
+        .then(({ error: verifyError }) => {
+          if (verifyError) { setError(verifyError.message); return; }
+          // Recovery links should land on reset-password, not home
+          if (rawType === "recovery") {
+            navigate("/reset-password", { replace: true });
+          } else {
+            navigate(next, { replace: true });
+          }
+        })
+        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
       return;
     }
 
-    supabase.auth
-      .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
-      .then(({ error: verifyError }) => {
-        if (verifyError) {
-          setError(verifyError.message);
-          return;
-        }
-        navigate(next, { replace: true });
-      })
-      .catch((e) => {
-        setError(e instanceof Error ? e.message : "Verification failed.");
-      });
+    // --- Implicit flow: token arrives in the URL hash #access_token=...&type=... ---
+    const hashParams   = getHashParams();
+    const accessToken  = hashParams.get("access_token");
+    const refreshToken = hashParams.get("refresh_token");
+    const hashType     = hashParams.get("type");
+
+    if (accessToken && refreshToken) {
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error: sessionError }) => {
+          if (sessionError) { setError(sessionError.message); return; }
+          if (hashType === "recovery") {
+            navigate("/reset-password", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
+        })
+        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
+      return;
+    }
+
+    // Nothing matched
+    setError("Invalid or expired link.");
   }, [params, navigate]);
 
   return (
