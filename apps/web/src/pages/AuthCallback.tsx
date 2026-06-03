@@ -53,17 +53,16 @@ const AuthCallback = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         subscription.unsubscribe();
+        clearTimeout(timeout);
         navigate("/reset-password", { replace: true });
-      } else if (event === "SIGNED_IN" && session) {
-        subscription.unsubscribe();
-        navigate(next, { replace: true });
+        return;
       }
-    });
-
-    // Also check immediately — the session may already be set synchronously
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      // Supabase v2 fires INITIAL_SESSION (not SIGNED_IN) when it restores
+      // a session from detectSessionInUrl processing the hash on init.
+      // Also handle SIGNED_IN for cases where verifyOtp triggers it.
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
         subscription.unsubscribe();
+        clearTimeout(timeout);
         navigate(next, { replace: true });
       }
     });
