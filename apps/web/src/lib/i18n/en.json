@@ -79,6 +79,9 @@
   "predict.peer_loading": "Loading predictions…",
 
   "lock.locks_in": "Locks in",
+  "lock.days": "Days",
+  "match_detail.title": "Match prediction",
+  "match_detail.save": "Save prediction",
 
   "ranking.title": "🏆 Leaderboard",
   "ranking.no_scores": "No scores yet",

@@ -79,6 +79,9 @@
   "predict.peer_loading": "Cargando pronósticos…",
 
   "lock.locks_in": "Cierra en",
+  "lock.days": "Días",
+  "match_detail.title": "Pronóstico del partido",
+  "match_detail.save": "Guardar pronóstico",
 
   "ranking.title": "🏆 Tabla",
   "ranking.no_scores": "Sin puntajes aún",

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useTranslation } from "@/lib/i18n";
 
 interface MatchDetailProps {
   open: boolean;
@@ -51,6 +52,7 @@ const MatchDetail = ({
   kickoffAt,
   onSave,
 }: MatchDetailProps) => {
+  const { t } = useTranslation();
   const [homeScore, setHomeScore] = useState(initialHome);
   const [awayScore, setAwayScore] = useState(initialAway);
 
@@ -63,8 +65,8 @@ const MatchDetail = ({
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const days = Math.floor(hours / 24);
 
-  const countdown = hours > 23 
-    ? `${days} Days` 
+  const countdown = hours > 23
+    ? `${days} ${t("lock.days")}`
     : `${hours}h ${minutes}m`;
 
   const handleSave = () => {
@@ -76,7 +78,7 @@ const MatchDetail = ({
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent side="bottom" className="rounded-none border-t-3 border-foreground px-6 pb-8 pt-6 max-w-[430px] mx-auto bg-background">
         <SheetHeader className="space-y-0 pb-1">
-          <SheetTitle className="sr-only">Match prediction</SheetTitle>
+          <SheetTitle className="sr-only">{t("match_detail.title")}</SheetTitle>
         </SheetHeader>
 
         <div className=" text-center items-center justify-between text-center">
@@ -86,7 +88,7 @@ const MatchDetail = ({
         </div>
 
         <p className="text-center text-[7px] text-muted-foreground mt-1 mb-6">
-          ⏱ Locks in {countdown}
+          ⏱ {t("lock.locks_in")} {countdown}
         </p>
 
         <div className="flex items-center justify-center gap-10 mb-8">
@@ -99,7 +101,7 @@ const MatchDetail = ({
           className="w-full py-3 pixel-border text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all bg-lime-600"
           onClick={handleSave}
         >
-          Save prediction
+          {t("match_detail.save")}
         </button>
       </SheetContent>
     </Sheet>
