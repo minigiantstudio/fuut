@@ -425,6 +425,12 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
               {authLoading ? t("onboarding.verifying") : t("onboarding.login")}
             </button>
             {authError && <p className="text-[6px] text-pixel-red text-center">{authError}</p>}
+            <button
+              onClick={() => { setRecoveryEmail(email); setStep("recovery"); }}
+              className="w-full h-8 text-[7px] text-pixel-blue underline underline-offset-2"
+            >
+              {t("onboarding.forgot_password")}
+            </button>
             <button onClick={() => setStep(isJoining ? "auth-email" : "create-email")} className="w-full h-10 text-[7px] text-muted-foreground">
               {t("onboarding.back")}
             </button>
