@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { TabId } from "@/components/BottomNav";
 import PredictTab from "@/components/tabs/PredictTab";
@@ -12,6 +13,18 @@ import { supabase } from "@/lib/supabase/client";
 const Index = () => {
   const { session, loading } = useSession();
   const [activeTab, setActiveTab] = useState<TabId>("predict");
+  const navigate = useNavigate();
+
+  // Detect password recovery links — Supabase lands on / with #access_token&type=recovery.
+  // Redirect immediately to the reset-password page so the user sees the form.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        navigate("/reset-password", { replace: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
