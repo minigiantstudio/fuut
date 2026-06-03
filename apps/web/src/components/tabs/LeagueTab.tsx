@@ -214,7 +214,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
             </div>
           )}
           <p className="text-[7px] text-muted-foreground mt-1">
-            {members.length} member{members.length !== 1 ? "s" : ""}
+            {members.length} {members.length !== 1 ? t("league.member_other") : t("league.member_one")}
             {league?.tier === "free" ? ` / ${freeMax}` : ""}
           </p>
         </div>
@@ -296,9 +296,9 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
           {showRegenerateConfirm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
               <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-4">
-                <h3 className="text-[10px] text-foreground">Regenerate invite code?</h3>
+                <h3 className="text-[10px] text-foreground">{t("league.regen_confirm_title")}</h3>
                 <p className="text-[7px] text-muted-foreground">
-                  The current code <span className="text-foreground font-mono">{league?.invite_code}</span> will stop working immediately. Friends with the old link will need the new code.
+                  <span className="text-foreground font-mono">{league?.invite_code}</span> — {t("league.regen_confirm_body")}
                 </p>
                 {regenerateError && (
                   <p className="text-[6px] text-pixel-red">{regenerateError}</p>
@@ -352,11 +352,13 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
         </div>
       )}
 
-      {/* Backend connectivity */}
-      <div className="space-y-2">
-        <h2 className="text-[8px] text-foreground">🔌 Backend</h2>
-        <ConnectivityCheck />
-      </div>
+      {/* Backend connectivity — dev-only, hidden unless ?debug=1 in URL */}
+      {new URLSearchParams(window.location.search).get("debug") === "1" && (
+        <div className="space-y-2">
+          <h2 className="text-[8px] text-foreground">🔌 Backend</h2>
+          <ConnectivityCheck />
+        </div>
+      )}
     </div>
   );
 };
