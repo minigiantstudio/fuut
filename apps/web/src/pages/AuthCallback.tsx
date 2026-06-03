@@ -5,12 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 type OtpType = "magiclink" | "signup" | "recovery" | "email_change" | "invite" | "email";
 
 const VALID_TYPES: ReadonlySet<OtpType> = new Set([
-  "magiclink",
-  "signup",
-  "recovery",
-  "email_change",
-  "invite",
-  "email",
+  "magiclink", "signup", "recovery", "email_change", "invite", "email",
 ]);
 
 function safeNextPath(raw: string | null): string {
@@ -20,16 +15,7 @@ function safeNextPath(raw: string | null): string {
     const url = new URL(raw, window.location.origin);
     if (url.origin !== window.location.origin) return "/";
     return url.pathname + url.search + url.hash;
-  } catch {
-    return "/";
-  }
-}
-
-// Parse params from the URL hash fragment (#access_token=...&type=...)
-// Supabase implicit-flow emails land here instead of query params.
-function getHashParams(): URLSearchParams {
-  const hash = window.location.hash.slice(1); // strip leading #
-  return new URLSearchParams(hash);
+  } catch { return "/"; }
 }
 
 const AuthCallback = () => {
@@ -42,50 +28,56 @@ const AuthCallback = () => {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    // --- PKCE flow: token arrives as ?token_hash=...&type=... ---
+    const next = safeNextPath(params.get("next"));
+
+    // ── Path 1: PKCE flow — token_hash arrives as a query param ──────────────
+    // This is the newer flow. Manually verify the OTP token.
     const tokenHash = params.get("token_hash");
     const rawType   = params.get("type");
-    const next      = safeNextPath(params.get("next"));
 
     if (tokenHash && rawType && VALID_TYPES.has(rawType as OtpType)) {
       supabase.auth
         .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
         .then(({ error: verifyError }) => {
           if (verifyError) { setError(verifyError.message); return; }
-          // Recovery links should land on reset-password, not home
-          if (rawType === "recovery") {
-            navigate("/reset-password", { replace: true });
-          } else {
-            navigate(next, { replace: true });
-          }
+          navigate(rawType === "recovery" ? "/reset-password" : next, { replace: true });
         })
         .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
       return;
     }
 
-    // --- Implicit flow: token arrives in the URL hash #access_token=...&type=... ---
-    const hashParams   = getHashParams();
-    const accessToken  = hashParams.get("access_token");
-    const refreshToken = hashParams.get("refresh_token");
-    const hashType     = hashParams.get("type");
+    // ── Path 2: Implicit flow — Supabase client auto-consumed the hash ────────
+    // detectSessionInUrl:true already called setSession() from the #access_token
+    // hash before this component mounted. Listen for the resulting auth event,
+    // or check if a session is already active right now.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        subscription.unsubscribe();
+        navigate("/reset-password", { replace: true });
+      } else if (event === "SIGNED_IN" && session) {
+        subscription.unsubscribe();
+        navigate(next, { replace: true });
+      }
+    });
 
-    if (accessToken && refreshToken) {
-      supabase.auth
-        .setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ error: sessionError }) => {
-          if (sessionError) { setError(sessionError.message); return; }
-          if (hashType === "recovery") {
-            navigate("/reset-password", { replace: true });
-          } else {
-            navigate("/", { replace: true });
-          }
-        })
-        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
-      return;
-    }
+    // Also check immediately — the session may already be set synchronously
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        subscription.unsubscribe();
+        navigate(next, { replace: true });
+      }
+    });
 
-    // Nothing matched
-    setError("Invalid or expired link.");
+    // Timeout — if nothing fires after 8 seconds, show error
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe();
+      setError("Invalid or expired link.");
+    }, 8000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [params, navigate]);
 
   return (
@@ -99,7 +91,10 @@ const AuthCallback = () => {
             </a>
           </>
         ) : (
-          <p className="text-muted-foreground text-sm">Signing you in…</p>
+          <>
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-muted-foreground text-sm">Signing you in…</p>
+          </>
         )}
       </div>
     </div>
