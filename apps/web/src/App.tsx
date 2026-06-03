@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/lib/i18n";
 import Index from "./pages/Index.tsx";
 import JoinPage from "./pages/Join.tsx";
 import AuthCallback from "./pages/AuthCallback.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./admin/AdminLogin.tsx";
 import AdminDashboard from "./admin/AdminDashboard.tsx";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/join/:code" element={<JoinPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* Public shareable ranking snapshot (SOCIAL-03, D-11). No auth — token is the access control. */}
             <Route path="/s/:token" element={<SnapshotPage />} />
             {/* Admin subtree (DEC-018): env-var auth, separate from SessionContext */}
