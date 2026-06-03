@@ -214,7 +214,12 @@ const Onboarding = ({ prefilledCode }: OnboardingProps) => {
   };
 
   const handleSendRecovery = async () => {
-    await supabase.auth.signInWithOtp({ email: recoveryEmail });
+    await supabase.auth.signInWithOtp({
+      email: recoveryEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
     setRecoverySent(true);
   };
 

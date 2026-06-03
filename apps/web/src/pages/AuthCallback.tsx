@@ -69,7 +69,7 @@ const AuthCallback = () => {
           <>
             <p className="text-pixel-red text-sm">{error}</p>
             <a href="/" className="text-[8px] uppercase tracking-wider text-muted-foreground underline">
-              Back to home
+              ← Home
             </a>
           </>
         ) : (
