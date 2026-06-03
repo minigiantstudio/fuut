@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase/client";
+import { useSession } from "@/contexts/SessionContext";
 
 type OtpType = "magiclink" | "signup" | "recovery" | "email_change" | "invite" | "email";
 
@@ -21,6 +22,7 @@ function safeNextPath(raw: string | null): string {
 const AuthCallback = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { refreshSession } = useSession();
   const ranRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,9 +40,14 @@ const AuthCallback = () => {
     if (tokenHash && rawType && VALID_TYPES.has(rawType as OtpType)) {
       supabase.auth
         .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
-        .then(({ error: verifyError }) => {
+        .then(async ({ error: verifyError }) => {
           if (verifyError) { setError(verifyError.message); return; }
-          navigate(rawType === "recovery" ? "/reset-password" : next, { replace: true });
+          if (rawType === "recovery") {
+            navigate("/reset-password", { replace: true });
+          } else {
+            await refreshSession();
+            navigate(next, { replace: true });
+          }
         })
         .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
       return;
@@ -63,7 +70,7 @@ const AuthCallback = () => {
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
         subscription.unsubscribe();
         clearTimeout(timeout);
-        navigate(next, { replace: true });
+        refreshSession().then(() => navigate(next, { replace: true }));
       }
     });
 
