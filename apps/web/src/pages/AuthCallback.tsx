@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase/client";
-import { useSession } from "@/contexts/SessionContext";
 
 type OtpType = "magiclink" | "signup" | "recovery" | "email_change" | "invite" | "email";
 
@@ -9,20 +8,16 @@ const VALID_TYPES: ReadonlySet<OtpType> = new Set([
   "magiclink", "signup", "recovery", "email_change", "invite", "email",
 ]);
 
-function safeNextPath(raw: string | null): string {
-  if (!raw) return "/";
-  if (raw.startsWith("/")) return raw;
-  try {
-    const url = new URL(raw, window.location.origin);
-    if (url.origin !== window.location.origin) return "/";
-    return url.pathname + url.search + url.hash;
-  } catch { return "/"; }
+// After auth succeeds we do a hard redirect (not React Router navigate) so that
+// SessionContext initialises fresh with the session already in localStorage.
+// This avoids the race where navigate("/") renders Index before the context
+// has loaded the user's league, briefly showing onboarding.
+function hardRedirect(path: string) {
+  window.location.replace(path);
 }
 
 const AuthCallback = () => {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
-  const { refreshSession } = useSession();
   const ranRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,51 +25,37 @@ const AuthCallback = () => {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    const next = safeNextPath(params.get("next"));
-
-    // ── Path 1: PKCE flow — token_hash arrives as a query param ──────────────
-    // This is the newer flow. Manually verify the OTP token.
+    // ── Path 1: PKCE flow — token_hash in query params ────────────────────────
     const tokenHash = params.get("token_hash");
     const rawType   = params.get("type");
 
     if (tokenHash && rawType && VALID_TYPES.has(rawType as OtpType)) {
       supabase.auth
         .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
-        .then(async ({ error: verifyError }) => {
+        .then(({ error: verifyError }) => {
           if (verifyError) { setError(verifyError.message); return; }
-          if (rawType === "recovery") {
-            navigate("/reset-password", { replace: true });
-          } else {
-            await refreshSession();
-            navigate(next, { replace: true });
-          }
+          hardRedirect(rawType === "recovery" ? "/reset-password" : "/");
         })
         .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
       return;
     }
 
-    // ── Path 2: Implicit flow — Supabase client auto-consumed the hash ────────
-    // detectSessionInUrl:true already called setSession() from the #access_token
-    // hash before this component mounted. Listen for the resulting auth event,
-    // or check if a session is already active right now.
+    // ── Path 2: Implicit flow — detectSessionInUrl already consumed the hash ──
+    // Listen for the INITIAL_SESSION / SIGNED_IN event fired by the client.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         subscription.unsubscribe();
         clearTimeout(timeout);
-        navigate("/reset-password", { replace: true });
+        hardRedirect("/reset-password");
         return;
       }
-      // Supabase v2 fires INITIAL_SESSION (not SIGNED_IN) when it restores
-      // a session from detectSessionInUrl processing the hash on init.
-      // Also handle SIGNED_IN for cases where verifyOtp triggers it.
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
         subscription.unsubscribe();
         clearTimeout(timeout);
-        refreshSession().then(() => navigate(next, { replace: true }));
+        hardRedirect("/");
       }
     });
 
-    // Timeout — if nothing fires after 8 seconds, show error
     const timeout = setTimeout(() => {
       subscription.unsubscribe();
       setError("Invalid or expired link.");
@@ -84,7 +65,7 @@ const AuthCallback = () => {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, [params, navigate]);
+  }, [params]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
