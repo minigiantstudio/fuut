@@ -6,6 +6,7 @@ export interface LeagueSummary {
   leagueId: string;
   leagueName: string;
   role: string;
+  inviteCode: string;
 }
 
 interface SessionContextValue {
@@ -70,18 +71,22 @@ async function loadUserContext(
 
   const { data: memberships, error: membershipErr } = await supabase
     .from("league_members")
-    .select("id, role, joined_at, leagues(id, name)")
+    .select("id, role, joined_at, leagues(id, name, invite_code)")
     .eq("user_id", userId)
     .order("joined_at", { ascending: true });
   console.debug("[loadUserContext] memberships:", memberships, "err:", membershipErr);
 
   const leagues: LeagueSummary[] = (memberships ?? [])
     .filter((m) => m.leagues)
-    .map((m) => ({
-      leagueId: (m.leagues as { id: string; name: string }).id,
-      leagueName: (m.leagues as { id: string; name: string }).name,
-      role: m.role,
-    }));
+    .map((m) => {
+      const lg = m.leagues as { id: string; name: string; invite_code: string };
+      return {
+        leagueId: lg.id,
+        leagueName: lg.name,
+        role: m.role,
+        inviteCode: lg.invite_code,
+      };
+    });
 
   if (leagues.length === 0) return { session: null, leagues: [] };
 

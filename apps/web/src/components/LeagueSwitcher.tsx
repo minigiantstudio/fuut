@@ -33,10 +33,15 @@ const LeagueSwitcher = ({ open, onClose }: LeagueSwitcherProps) => {
                 onClick={() => handleSelect(league.leagueId)}
                 className="flex items-center justify-between px-4 py-3 w-full text-left hover:bg-muted transition-colors"
               >
-                <span className={`text-xs ${isActive ? "text-pixel-green font-bold" : "text-foreground"}`}>
-                  {league.leagueName}
+                <span className="flex flex-col gap-0.5 min-w-0">
+                  <span className={`text-xs truncate ${isActive ? "text-pixel-green font-bold" : "text-foreground"}`}>
+                    {league.leagueName}
+                  </span>
+                  <span className="text-[6px] text-muted-foreground font-mono tracking-wider">
+                    #{league.inviteCode}
+                  </span>
                 </span>
-                <span className="text-[6px] text-muted-foreground uppercase">
+                <span className="text-[6px] text-muted-foreground uppercase shrink-0">
                   {league.role === "admin" ? "ADMIN" : "MEMBER"}
                 </span>
               </button>
