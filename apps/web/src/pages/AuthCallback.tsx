@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase/client";
 
@@ -9,16 +9,11 @@ const VALID_TYPES: ReadonlySet<OtpType> = new Set([
 ]);
 
 // After auth succeeds we do a hard redirect (not React Router navigate) so that
-// SessionContext initialises fresh with the session already in localStorage.
-// This avoids the race where navigate("/") renders Index before the context
-// has loaded the user's league, briefly showing onboarding.
+// SessionContext initialises fresh with the session already in storage, avoiding
+// the race where navigate("/") renders Index before the league has loaded.
 function hardRedirect(path: string) {
-  // Completing an auth callback means onboarding is definitively over. Clear the
-  // `onboardingInProgress` flag from BOTH stores: sessionStorage is the current
-  // (tab-scoped) home, and localStorage is cleared defensively to purge any stale
-  // value written by older builds. Otherwise Index could render Onboarding over
-  // an already-authenticated session.
   try {
+    // Completing an auth callback means onboarding is definitively over.
     localStorage.removeItem("onboardingInProgress");
     sessionStorage.removeItem("onboardingInProgress");
   } catch {
@@ -27,60 +22,108 @@ function hardRedirect(path: string) {
   window.location.replace(path);
 }
 
+type Phase = "loading" | "confirm" | "verifying";
+
 const AuthCallback = () => {
   const [params] = useSearchParams();
   const ranRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("loading");
+
+  const tokenHash = params.get("token_hash");
+  const rawType = params.get("type");
+  const isPkce = !!(tokenHash && rawType && VALID_TYPES.has(rawType as OtpType));
+  const isRecovery = rawType === "recovery";
+
+  // Verify the one-time token. Triggered by an explicit user click (not on load)
+  // so that email scanners / link prefetchers — which GET the link to inspect it —
+  // don't silently consume the single-use token before the human arrives.
+  const runVerify = useCallback(async () => {
+    if (!tokenHash || !rawType) return;
+    setPhase("verifying");
+    setError(null);
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: rawType as OtpType,
+    });
+    if (verifyError) {
+      setError(verifyError.message);
+      setPhase("confirm"); // let them retry / re-request
+      return;
+    }
+    hardRedirect(isRecovery ? "/reset-password" : "/");
+  }, [tokenHash, rawType, isRecovery]);
 
   useEffect(() => {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    // ── Path 1: PKCE flow — token_hash in query params ────────────────────────
-    const tokenHash = params.get("token_hash");
-    const rawType   = params.get("type");
-
-    if (tokenHash && rawType && VALID_TYPES.has(rawType as OtpType)) {
-      supabase.auth
-        .verifyOtp({ token_hash: tokenHash, type: rawType as OtpType })
-        .then(({ error: verifyError }) => {
-          if (verifyError) { setError(verifyError.message); return; }
-          hardRedirect(rawType === "recovery" ? "/reset-password" : "/");
-        })
-        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
+    // ── PKCE flow (?token_hash=…): gate behind a click to defeat prefetch ──
+    if (isPkce) {
+      setPhase("confirm");
       return;
     }
 
-    // ── Path 2: Implicit flow — tokens in URL hash (#access_token=...) ──
-    const hashParams   = new URLSearchParams(window.location.hash.slice(1));
-    const accessToken  = hashParams.get("access_token");
-    const refreshToken = hashParams.get("refresh_token");
-    const hashType     = hashParams.get("type");
+    // ── Implicit flow (#access_token=… in the hash) ──
+    // The Supabase client has detectSessionInUrl:true, so by the time this effect
+    // runs it has ALREADY consumed the hash and will emit an auth event. We can't
+    // read window.location.hash here (it's gone) — we listen for the event instead.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        cleanup();
+        hardRedirect("/reset-password");
+        return;
+      }
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        cleanup();
+        hardRedirect("/");
+      }
+    });
 
-    if (accessToken && refreshToken) {
-      supabase.auth
-        .setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ error: sessionError }) => {
-          if (sessionError) { setError(sessionError.message); return; }
-          hardRedirect(hashType === "recovery" ? "/reset-password" : "/");
-        })
-        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
-      return;
+    const timeout = setTimeout(() => {
+      cleanup();
+      setError("Invalid or expired link.");
+    }, 8000);
+
+    function cleanup() {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
     }
 
-    // ── Path 3: Timeout (no valid token found in query or hash) ──
-    setError("Invalid or expired link.");
-  }, [params]);
+    return cleanup;
+  }, [isPkce]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center space-y-3">
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="text-center space-y-4 max-w-[320px]">
         {error ? (
           <>
+            <p className="text-2xl">⚠️</p>
             <p className="text-pixel-red text-sm">{error}</p>
-            <a href="/" className="text-[8px] uppercase tracking-wider text-muted-foreground underline">
+            <p className="text-[7px] text-muted-foreground">
+              Links can only be used once and expire after a while. Request a new one from the login screen.
+            </p>
+            <a href="/" className="inline-block text-[8px] uppercase tracking-wider text-muted-foreground underline">
               ← Home
             </a>
+          </>
+        ) : phase === "confirm" ? (
+          <>
+            <p className="text-2xl">{isRecovery ? "🔑" : "⚽"}</p>
+            <h1 className="text-[12px] text-foreground">
+              {isRecovery ? "Reset your password" : "Confirm sign in"}
+            </h1>
+            <p className="text-[7px] text-muted-foreground">
+              {isRecovery
+                ? "Tap below to set a new password for your account."
+                : "Tap below to finish signing in."}
+            </p>
+            <button
+              onClick={runVerify}
+              className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-[8px] uppercase tracking-wider active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+            >
+              {isRecovery ? "Reset password" : "Continue"}
+            </button>
           </>
         ) : (
           <>
