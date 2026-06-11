@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./admin/AdminLogin.tsx";
 import AdminDashboard from "./admin/AdminDashboard.tsx";
 import SnapshotPage from "./routes/Snapshot.tsx";
+import PWAUpdater from "@/components/PWAUpdater";
 
 // Caching defaults so tab switches are instant (data stays fresh for 30s, cached
 // for 5min) instead of re-running every query on each remount. refetchOnWindowFocus
@@ -36,6 +37,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PWAUpdater />
       <BrowserRouter>
         <SessionProvider>
           <Routes>
