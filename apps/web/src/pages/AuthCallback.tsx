@@ -51,31 +51,25 @@ const AuthCallback = () => {
       return;
     }
 
-    // ── Path 2: Implicit flow — detectSessionInUrl already consumed the hash ──
-    // Listen for the INITIAL_SESSION / SIGNED_IN event fired by the client.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        subscription.unsubscribe();
-        clearTimeout(timeout);
-        hardRedirect("/reset-password");
-        return;
-      }
-      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-        subscription.unsubscribe();
-        clearTimeout(timeout);
-        hardRedirect("/");
-      }
-    });
+    // ── Path 2: Implicit flow — tokens in URL hash (#access_token=...) ──
+    const hashParams   = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken  = hashParams.get("access_token");
+    const refreshToken = hashParams.get("refresh_token");
+    const hashType     = hashParams.get("type");
 
-    const timeout = setTimeout(() => {
-      subscription.unsubscribe();
-      setError("Invalid or expired link.");
-    }, 8000);
+    if (accessToken && refreshToken) {
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error: sessionError }) => {
+          if (sessionError) { setError(sessionError.message); return; }
+          hardRedirect(hashType === "recovery" ? "/reset-password" : "/");
+        })
+        .catch((e) => setError(e instanceof Error ? e.message : "Verification failed."));
+      return;
+    }
 
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
+    // ── Path 3: Timeout (no valid token found in query or hash) ──
+    setError("Invalid or expired link.");
   }, [params]);
 
   return (
