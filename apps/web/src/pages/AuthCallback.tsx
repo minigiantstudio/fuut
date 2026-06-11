@@ -57,6 +57,14 @@ const AuthCallback = () => {
     const refreshToken = hashParams.get("refresh_token");
     const hashType     = hashParams.get("type");
 
+    // Check for error response from Supabase (e.g., expired magic link)
+    const errorCode = hashParams.get("error_code");
+    const errorDesc = hashParams.get("error_description");
+    if (errorCode || errorDesc) {
+      setError(errorDesc ? decodeURIComponent(errorDesc) : "Authentication failed.");
+      return;
+    }
+
     if (accessToken && refreshToken) {
       supabase.auth
         .setSession({ access_token: accessToken, refresh_token: refreshToken })
@@ -68,7 +76,7 @@ const AuthCallback = () => {
       return;
     }
 
-    // ── Path 3: Timeout (no valid token found in query or hash) ──
+    // ── Path 3: No valid token or error found in query or hash ──
     setError("Invalid or expired link.");
   }, [params]);
 
