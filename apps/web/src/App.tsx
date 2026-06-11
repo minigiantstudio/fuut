@@ -14,7 +14,21 @@ import AdminLogin from "./admin/AdminLogin.tsx";
 import AdminDashboard from "./admin/AdminDashboard.tsx";
 import SnapshotPage from "./routes/Snapshot.tsx";
 
-const queryClient = new QueryClient();
+// Caching defaults so tab switches are instant (data stays fresh for 30s, cached
+// for 5min) instead of re-running every query on each remount. refetchOnWindowFocus
+// is off on purpose: in this app a focus-triggered refetch can collide with the
+// Supabase auth client's token refresh and stall requests. Realtime invalidation
+// (RankingTab) and post-mutation invalidateQueries still force fresh fetches.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <LanguageProvider>
