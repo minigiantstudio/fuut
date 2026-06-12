@@ -48,7 +48,7 @@ const TopBar = ({ onLogout, leagueName = "Fuut 2026", nickname }: TopBarProps) =
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 h-[var(--topbar-height)] border-b-3 border-foreground flex items-center justify-center bg-green-800">
+      <header className="fixed top-0 left-0 right-0 z-50 h-[var(--topbar-height)] border-b-3 border-foreground flex items-end justify-center bg-green-800" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="w-full max-w-[430px] px-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {hasMultipleLeagues ? (
