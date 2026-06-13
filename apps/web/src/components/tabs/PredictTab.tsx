@@ -253,13 +253,14 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
             // SCORED matches (is_final) are tappable to reveal peer predictions
             // (D-10); other locked cards (needs_result) stay inert.
             const isScored = match.is_final;
+            const canShowPeers = isScored || isLocked;
             const isExpanded = expandedMatchId === match.id;
             return (
               <div key={match.id}>
                 <div
-                  className={`pixel-border bg-card p-3 space-y-2 ${isLocked && !isScored ? "opacity-50" : "cursor-pointer"}`}
+                  className={`pixel-border bg-card p-3 space-y-2 ${isLocked && !canShowPeers ? "opacity-50" : "cursor-pointer"}`}
                   onClick={() => {
-                    if (isScored) {
+                    if (canShowPeers) {
                       setExpandedMatchId(isExpanded ? null : match.id);
                     } else if (!isLocked) {
                       setSelectedMatchId(match.id);
@@ -306,7 +307,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                       {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
                       {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                     </span>
-                    {isScored && (
+                    {canShowPeers && (
                       <span className="text-[6px] text-muted-foreground">
                         {isExpanded ? "▴" : "▾"} {t("predict.peer_title")}
                       </span>
@@ -333,7 +334,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   }
                   onSave={(answer) => handleBonusSave(match.id, answer)}
                 />
-                {isScored && isExpanded && (
+                {canShowPeers && isExpanded && (
                   <PeerPredictions
                     leagueId={session.leagueId}
                     matchId={match.id}
