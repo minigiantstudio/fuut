@@ -1,7 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MatchDetail from "@/components/MatchDetail";
-import EnterResult from "@/components/EnterResult";
 import StageNav from "@/components/StageNav";
 import GroupFilter from "@/components/GroupFilter";
 import BonusPrediction from "@/components/BonusPrediction";
@@ -41,7 +40,6 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   };
   const queryClient = useQueryClient();
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
-  const [resultMatchId, setResultMatchId] = useState<string | null>(null);
   // Peer visibility (D-10): which SCORED card is expanded to show league picks.
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
   const [activeStage, setActiveStage] = useState<string>("");
@@ -212,7 +210,6 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
   };
 
   const selectedMatch = selectedMatchId ? matches.find((m) => m.id === selectedMatchId) ?? null : null;
-  const resultMatch = resultMatchId ? matches.find((m) => m.id === resultMatchId) ?? null : null;
 
   return (
     <div className="py-5 space-y-4">
@@ -309,14 +306,6 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                       {new Date(match.kickoff_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·{" "}
                       {new Date(match.kickoff_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                     </span>
-                    {isAdmin && match.uiStatus === "needs_result" && (
-                      <button
-                        className="text-[6px] text-pixel-blue border border-pixel-blue px-2 py-0.5"
-                        onClick={(e) => { e.stopPropagation(); setResultMatchId(match.id); }}
-                      >
-                        {t("predict.enter_result")}
-                      </button>
-                    )}
                     {isScored && (
                       <span className="text-[6px] text-muted-foreground">
                         {isExpanded ? "▴" : "▾"} {t("predict.peer_title")}
@@ -381,24 +370,6 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
             );
             queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
             setSelectedMatchId(null);
-          }}
-        />
-      )}
-
-      {resultMatch && (
-        <EnterResult
-          open={!!resultMatch}
-          onClose={() => setResultMatchId(null)}
-          matchId={resultMatch.id}
-          leagueId={session.leagueId}
-          home={resultMatch.home_team}
-          away={resultMatch.away_team}
-          memberCount={0}
-          onConfirm={() => {}}
-          onDone={() => {
-            setResultMatchId(null);
-            queryClient.invalidateQueries({ queryKey: ["matches"] });
-            queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
           }}
         />
       )}

@@ -61,9 +61,8 @@
 | Screen | Purpose | Entry points | Exit actions | Key reusable components |
 |---|---|---|---|---|
 | **Onboarding** | Capture nickname (and optional email) to create a local session | First app load with no session in `localStorage` | Submits → lands on Predict tab | `Onboarding` |
-| **Predict (tab)** | Browse fixtures by stage/group and enter score predictions + bonus | Default tab after onboarding; bottom nav "Predict" | Tap row → Match Detail; tap "Enter result" (admin) → Enter Result modal | `StageNav`, `GroupFilter`, `BonusPrediction`, score input row |
+| **Predict (tab)** | Browse fixtures by stage/group and enter score predictions + bonus | Default tab after onboarding; bottom nav "Predict" | Tap row → Match Detail | `StageNav`, `GroupFilter`, `BonusPrediction`, score input row |
 | **Match Detail** | Full-screen editor for a single match prediction | Tap a non-locked, non-needs-result match card | Save → returns to Predict with status "saved"; Close → discards | `MatchDetail` |
-| **Enter Result (admin modal)** | Admin enters the official final score | Admin taps "✎ Enter result" on a `needs_result` card | Confirm → match becomes `locked`; Close → no change | `EnterResult` |
 | **Ranking (tab)** | Show league leaderboard with movement and points | Bottom nav "Ranking" | None (read-only) | Leaderboard row, `MovementIndicator` |
 | **Results (tab)** | Show completed matchday with user's points per match | Bottom nav "Results" | None (read-only) | Result row, `PointsBadge` |
 | **League (tab)** | League context + admin mode toggle | Bottom nav "League" | Toggling admin changes Predict tab capabilities; Logout clears session | `LeagueTab` |
@@ -83,12 +82,6 @@
 6. Adjusts home/away scores → **Save** → match status becomes `saved`, returns to list.
 7. (Optional) Expands **Bonus Prediction** under the match → answers Yes/No.
 8. Switches to **Ranking** or **Results** to see standings.
-
-### Secondary flow — Admin enters official result
-1. League tab → toggle admin ON.
-2. Predict tab → finds a card with status `needs_result` → "✎ Enter result" button is now visible.
-3. Taps it → **Enter Result** modal → enters official score → Confirm.
-4. Card becomes `locked` (read-only, dimmed).
 
 ### Secondary flow — Logout
 1. Top bar → **Logout** → `localStorage` session cleared → Onboarding screen.
@@ -135,7 +128,6 @@
   - On blur, if both scores are filled and not locked, status auto-promotes from `open` → `saved`.
 - **Modals & overlays**
   - **Match Detail**: full bottom sheet/dialog, dismiss via Close, Save commits.
-  - **Enter Result** (admin): modal dialog, Confirm locks the match irreversibly (in current prototype).
   - **Bonus Prediction**: inline expand/collapse inside the card — not a modal.
 - **Feedback**
   - Status badge per card: `OPEN` (gold), `SAVED` (green), `LOCKED` (muted), `RESULT?` (gold).
