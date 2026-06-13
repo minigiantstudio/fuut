@@ -41,6 +41,7 @@ progress:
 - **DEC-020** (04-03): Bonus questions are redacted server-side. `matches.bonus_question` is REVOKEd from `anon`/`authenticated` (table-revoke + per-column re-grant, since column-revoke alone is a no-op) and reachable only via the `get_matches_with_bonus()` RPC, which gates it on reveal time. All client readers (PredictTab, ResultsTab, AdminDashboard) use the RPC. Closes threat T-04-04.
 - **DEC-021** (04-04): Peer predictions come from the `get_match_predictions()` RPC, which returns rows only once a match `is_final` (D-09). League rename/remove are admin-only SECURITY DEFINER RPCs (`rename_league`, `remove_member`; self-removal blocked) since leagues/league_members have no client UPDATE/DELETE policy. `ADMIN_CONTACT_EMAIL` lives in `app_config` (public read) and drives the D-22 "Request premium" mailto.
 - **DEC-022** (04-05): Snapshot persistence skips an API wrapper — `snapshot_tokens` RLS (authenticated INSERT scoped to `auth.uid()`, public SELECT by token) covers create + read. Web client calls supabase directly. Public `/s/:token` teaser route lives in the SPA; per-route OG tags are best-effort client-side (proper social previews need a Vercel edge function — listed as follow-up).
+- **DEC-023**: Changed peer prediction visibility. Users can now see peer picks as soon as a match starts (`kickoff_at <= now()`), rather than waiting for `is_final`. This is implemented via an update to the `get_match_predictions` RPC and the `PredictTab` UI logic.
 
 ### Todos
 
