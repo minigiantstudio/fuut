@@ -42,7 +42,7 @@
 
     --nav-height: 4.5rem;
     --topbar-height: calc(3.5rem + env(safe-area-inset-top, 0px));
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 1rem);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 8%;
@@ -131,5 +131,5 @@ input:focus, textarea:focus {
 }
 
 .pb-safe {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+  padding-bottom: max(1rem, var(--safe-bottom));
 }
