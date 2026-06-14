@@ -38,7 +38,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setActiveLeague } = useSession();
+  const { setActiveLeague, refreshSession } = useSession();
 
   // Rename
   const [isRenaming, setIsRenaming] = useState(false);
@@ -74,7 +74,8 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
       if (!league?.id) throw new Error("Failed to create league");
       setNewLeagueName("");
       setShowCreateLeague(false);
-      // Switch to the new league
+      // Reload leagues so the new one is in context, then switch to it
+      await refreshSession();
       setActiveLeague(league.id);
     } catch (e: unknown) {
       setCreateError(e instanceof Error ? e.message : "Something went wrong");
