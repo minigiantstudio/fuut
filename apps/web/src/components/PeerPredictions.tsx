@@ -28,7 +28,7 @@ interface PeerPredictionsProps {
 const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsProps) => {
   const { t } = useTranslation();
 
-  const { data: rows = [], isLoading } = useQuery<PeerPrediction[]>({
+  const { data: rows = [], isLoading, isError } = useQuery<PeerPrediction[]>({
     queryKey: ["match-predictions", leagueId, matchId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_match_predictions", {
@@ -38,6 +38,7 @@ const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsPr
       if (error) throw error;
       return (data ?? []) as PeerPrediction[];
     },
+    retry: 0,
   });
 
   const sorted = useMemo(() => {
@@ -55,6 +56,10 @@ const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsPr
       <p className="text-[6px] uppercase tracking-wider text-muted-foreground">{t("predict.peer_title")}</p>
       {isLoading ? (
         <p className="text-[6px] text-muted-foreground">{t("predict.peer_loading")}</p>
+      ) : isError ? (
+        <p className="text-[6px] text-muted-foreground">{t("predict.peer_loading")}</p>
+      ) : sorted.length === 0 ? (
+        <p className="text-[6px] text-muted-foreground">—</p>
       ) : (
         sorted.map((p) => {
           const isMe = p.user_id === currentUserId;
