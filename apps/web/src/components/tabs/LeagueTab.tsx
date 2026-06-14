@@ -5,6 +5,7 @@ import { Pencil, Trash2, Check, X, ShieldCheck, ShieldOff } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Session } from "@/lib/supabase/types";
 import ConnectivityCheck from "@/components/ConnectivityCheck";
+import { useSession } from "@/contexts/SessionContext";
 import { useTranslation } from "@/lib/i18n";
 
 interface MemberWithNickname {
@@ -37,6 +38,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { setActiveLeague } = useSession();
 
   // Rename
   const [isRenaming, setIsRenaming] = useState(false);
@@ -54,6 +56,32 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
   const [dialogTarget, setDialogTarget] = useState<MemberWithNickname | null>(null);
   const [dialogLoading, setDialogLoading] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
+
+  // Create new league
+  const [showCreateLeague, setShowCreateLeague] = useState(false);
+  const [newLeagueName, setNewLeagueName] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const handleCreateLeague = async () => {
+    if (!newLeagueName.trim()) return;
+    setCreateLoading(true);
+    setCreateError(null);
+    try {
+      const { data, error } = await supabase.rpc("create_league", { p_name: newLeagueName.trim() });
+      if (error) throw new Error(error.message);
+      const league = Array.isArray(data) ? data[0] : data;
+      if (!league?.id) throw new Error("Failed to create league");
+      setNewLeagueName("");
+      setShowCreateLeague(false);
+      // Switch to the new league
+      setActiveLeague(league.id);
+    } catch (e: unknown) {
+      setCreateError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   // Delete league
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -301,6 +329,47 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
           </div>
         </div>
       )}
+
+      {/* Create new league */}
+      <div className="space-y-2">
+        <h2 className="text-[8px] text-foreground">➕ New league</h2>
+        {showCreateLeague ? (
+          <div className="pixel-border bg-card p-4 space-y-3">
+            <input
+              autoFocus
+              value={newLeagueName}
+              onChange={(e) => setNewLeagueName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && newLeagueName.trim()) handleCreateLeague(); if (e.key === "Escape") { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); } }}
+              maxLength={50}
+              placeholder="League name"
+              className="w-full pixel-inset bg-background px-2 py-1.5 text-sm text-foreground"
+            />
+            {createError && <p className="text-[6px] text-pixel-red">{createError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreateLeague}
+                disabled={createLoading || !newLeagueName.trim()}
+                className="flex-1 h-10 pixel-border bg-pixel-green text-primary-foreground text-[7px] uppercase tracking-wider disabled:opacity-40"
+              >
+                {createLoading ? "Creating…" : "Create"}
+              </button>
+              <button
+                onClick={() => { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); }}
+                className="flex-1 h-10 pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider"
+              >
+                {t("league.cancel")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowCreateLeague(true)}
+            className="w-full text-center pixel-border bg-card text-foreground text-[8px] uppercase tracking-wider py-2.5"
+          >
+            + Create new league
+          </button>
+        )}
+      </div>
 
       {/* Danger zone — delete league */}
       {isAdmin && (
