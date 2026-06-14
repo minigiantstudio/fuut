@@ -345,7 +345,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
       <MobileSheet
         open={showCreateLeague}
         onClose={() => { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); }}
-        title="New league"
+        title={t("league.create_title")}
       >
         <div className="space-y-3">
           <input
@@ -433,7 +433,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
               disabled={dialogLoading}
               className="w-full h-12 pixel-border bg-pixel-red text-primary-foreground text-xs uppercase tracking-wider disabled:opacity-40"
             >
-              {dialogLoading ? "…" : dialogConfig.cta}
+              {dialogConfig.cta}
             </button>
             <button
               onClick={() => { setDialogType(null); setDialogTarget(null); setDialogError(null); }}
@@ -449,7 +449,7 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
       <MobileSheet
         open={showDeleteConfirm}
         onClose={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
-        title={t("league.danger_heading")}
+        title={t("league.delete_league")}
       >
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">

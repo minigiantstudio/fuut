@@ -108,6 +108,7 @@
   "results.total_points": "Total points",
 
   "league.title": "🛡 League",
+  "league.create_title": "New league",
   "league.invite_code_label": "Invite code",
   "league.share": "Share",
   "league.regenerate": "Regenerate",
