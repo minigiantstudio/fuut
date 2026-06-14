@@ -7,6 +7,7 @@ import type { Session } from "@/lib/supabase/types";
 import ConnectivityCheck from "@/components/ConnectivityCheck";
 import { useSession } from "@/contexts/SessionContext";
 import { useTranslation } from "@/lib/i18n";
+import MobileSheet from "@/components/MobileSheet";
 
 interface MemberWithNickname {
   id: string;
@@ -333,44 +334,45 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
 
       {/* Create new league */}
       <div className="space-y-2">
-        <h2 className="text-[8px] text-foreground">➕ New league</h2>
-        {showCreateLeague ? (
-          <div className="pixel-border bg-card p-4 space-y-3">
-            <input
-              autoFocus
-              value={newLeagueName}
-              onChange={(e) => setNewLeagueName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && newLeagueName.trim()) handleCreateLeague(); if (e.key === "Escape") { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); } }}
-              maxLength={50}
-              placeholder="League name"
-              className="w-full pixel-inset bg-background px-2 py-1.5 text-sm text-foreground"
-            />
-            {createError && <p className="text-[6px] text-pixel-red">{createError}</p>}
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreateLeague}
-                disabled={createLoading || !newLeagueName.trim()}
-                className="flex-1 h-10 pixel-border bg-pixel-green text-primary-foreground text-[7px] uppercase tracking-wider disabled:opacity-40"
-              >
-                {createLoading ? "Creating…" : "Create"}
-              </button>
-              <button
-                onClick={() => { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); }}
-                className="flex-1 h-10 pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider"
-              >
-                {t("league.cancel")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowCreateLeague(true)}
-            className="w-full text-center pixel-border bg-card text-foreground text-[8px] uppercase tracking-wider py-2.5"
-          >
-            + Create new league
-          </button>
-        )}
+        <button
+          onClick={() => setShowCreateLeague(true)}
+          className="w-full text-center pixel-border bg-card text-foreground text-[8px] uppercase tracking-wider py-3"
+        >
+          + Create new league
+        </button>
       </div>
+
+      <MobileSheet
+        open={showCreateLeague}
+        onClose={() => { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); }}
+        title="New league"
+      >
+        <div className="space-y-3">
+          <input
+            autoFocus
+            value={newLeagueName}
+            onChange={(e) => setNewLeagueName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && newLeagueName.trim()) handleCreateLeague(); }}
+            maxLength={50}
+            placeholder="League name"
+            className="w-full pixel-inset bg-background px-3 py-3 text-sm text-foreground"
+          />
+          {createError && <p className="text-xs text-pixel-red">{createError}</p>}
+          <button
+            onClick={handleCreateLeague}
+            disabled={createLoading || !newLeagueName.trim()}
+            className="w-full h-12 pixel-border bg-pixel-green text-primary-foreground text-xs uppercase tracking-wider disabled:opacity-40"
+          >
+            {createLoading ? "Creating…" : "Create"}
+          </button>
+          <button
+            onClick={() => { setShowCreateLeague(false); setNewLeagueName(""); setCreateError(null); }}
+            className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-xs uppercase tracking-wider"
+          >
+            {t("league.cancel")}
+          </button>
+        </div>
+      </MobileSheet>
 
       {/* Danger zone — delete league */}
       {isAdmin && (
@@ -389,69 +391,87 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
       )}
 
       {/* ── Regenerate confirmation ── */}
-      {showRegenerateConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-4">
-            <h3 className="text-[10px] text-foreground">{t("league.regen_confirm_title")}</h3>
-            <p className="text-[7px] text-muted-foreground">
-              <span className="text-foreground font-mono">{league?.invite_code}</span> — {t("league.regen_confirm_body")}
-            </p>
-            {regenerateError && <p className="text-[6px] text-pixel-red">{regenerateError}</p>}
-            <div className="flex gap-3">
-              <button onClick={handleRegenerate} disabled={regenerateLoading}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-pixel-red disabled:opacity-40">
-                {regenerateLoading ? t("league.regenerating") : t("league.confirm_regenerate")}
-              </button>
-              <button onClick={() => { setShowRegenerateConfirm(false); setRegenerateError(null); }}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-foreground">
-                {t("league.cancel")}
-              </button>
-            </div>
-          </div>
+      <MobileSheet
+        open={showRegenerateConfirm}
+        onClose={() => { setShowRegenerateConfirm(false); setRegenerateError(null); }}
+        title={t("league.regen_confirm_title")}
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            <span className="text-foreground font-mono">{league?.invite_code}</span>
+            {" — "}{t("league.regen_confirm_body")}
+          </p>
+          {regenerateError && <p className="text-xs text-pixel-red">{regenerateError}</p>}
+          <button
+            onClick={handleRegenerate}
+            disabled={regenerateLoading}
+            className="w-full h-12 pixel-border bg-pixel-red text-primary-foreground text-xs uppercase tracking-wider disabled:opacity-40"
+          >
+            {regenerateLoading ? t("league.regenerating") : t("league.confirm_regenerate")}
+          </button>
+          <button
+            onClick={() => { setShowRegenerateConfirm(false); setRegenerateError(null); }}
+            className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-xs uppercase tracking-wider"
+          >
+            {t("league.cancel")}
+          </button>
         </div>
-      )}
+      </MobileSheet>
 
       {/* ── Member action dialog (remove / promote / demote) ── */}
-      {dialogType && dialogConfig && dialogTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-4">
-            <h3 className="text-[10px] text-foreground">{dialogConfig.title}</h3>
-            <p className="text-[7px] text-muted-foreground">{dialogConfig.body}</p>
-            {dialogError && <p className="text-[6px] text-pixel-red">{dialogError}</p>}
-            <div className="flex gap-3">
-              <button onClick={handleDialogConfirm} disabled={dialogLoading}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-pixel-red disabled:opacity-40">
-                {dialogConfig.cta}
-              </button>
-              <button onClick={closeDialog}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-foreground">
-                {t("league.cancel")}
-              </button>
-            </div>
+      <MobileSheet
+        open={!!dialogConfig}
+        onClose={() => { setDialogType(null); setDialogTarget(null); setDialogError(null); }}
+        title={dialogConfig?.title ?? ""}
+      >
+        {dialogConfig && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{dialogConfig.body}</p>
+            {dialogError && <p className="text-xs text-pixel-red">{dialogError}</p>}
+            <button
+              onClick={handleDialogConfirm}
+              disabled={dialogLoading}
+              className="w-full h-12 pixel-border bg-pixel-red text-primary-foreground text-xs uppercase tracking-wider disabled:opacity-40"
+            >
+              {dialogLoading ? "…" : dialogConfig.cta}
+            </button>
+            <button
+              onClick={() => { setDialogType(null); setDialogTarget(null); setDialogError(null); }}
+              className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-xs uppercase tracking-wider"
+            >
+              {t("league.cancel")}
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </MobileSheet>
 
       {/* ── Delete league confirmation ── */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-4">
-            <h3 className="text-[10px] text-pixel-red">{t("league.delete_title")}</h3>
-            <p className="text-[7px] text-muted-foreground">{t("league.delete_body")}</p>
-            {deleteError && <p className="text-[6px] text-pixel-red">{deleteError}</p>}
-            <div className="flex gap-3">
-              <button onClick={handleDeleteLeague} disabled={deleteLoading}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-pixel-red disabled:opacity-40">
-                {deleteLoading ? t("league.deleting") : t("league.confirm_delete")}
-              </button>
-              <button onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
-                className="flex-1 h-10 pixel-border text-primary-foreground text-[7px] uppercase tracking-wider bg-foreground">
-                {t("league.cancel")}
-              </button>
-            </div>
-          </div>
+      <MobileSheet
+        open={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+        title={t("league.danger_heading")}
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            <span className="text-foreground">{leagueName}</span>
+            {" — "}{t("league.delete_body")}
+          </p>
+          {deleteError && <p className="text-xs text-pixel-red">{deleteError}</p>}
+          <button
+            onClick={handleDeleteLeague}
+            disabled={deleteLoading}
+            className="w-full h-12 pixel-border bg-pixel-red text-primary-foreground text-xs uppercase tracking-wider disabled:opacity-40"
+          >
+            {deleteLoading ? t("league.deleting") : t("league.confirm_delete")}
+          </button>
+          <button
+            onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+            className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-xs uppercase tracking-wider"
+          >
+            {t("league.cancel")}
+          </button>
         </div>
-      )}
+      </MobileSheet>
 
       {/* Backend connectivity — dev-only, hidden unless ?debug=1 in URL */}
       {new URLSearchParams(window.location.search).get("debug") === "1" && (

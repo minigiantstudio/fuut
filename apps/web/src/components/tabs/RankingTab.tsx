@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/lib/supabase/client";
 import type { LeaderboardEntry, Session } from "@/lib/supabase/types";
 import { useTranslation } from "@/lib/i18n";
+import MobileSheet from "@/components/MobileSheet";
 import SnapshotCard, { type SnapshotPayload } from "@/components/SnapshotCard";
 
 interface RankingTabProps {
@@ -279,42 +280,47 @@ const RankingTab = ({ session }: RankingTabProps) => {
       </div>
 
       {/* Fallback share dialog (D-13) — shown when Web Share API isn't available. */}
-      {shareUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShareUrl(null)}>
-          <div className="w-full max-w-[320px] mx-4 pixel-border bg-card p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-[10px] text-foreground">{t("snapshot.share_via")}</h3>
-            <div className="pixel-inset bg-background p-2 text-[7px] font-mono text-foreground break-all">{shareUrl}</div>
+      <MobileSheet
+        open={!!shareUrl}
+        onClose={() => setShareUrl(null)}
+        title={t("snapshot.share_via")}
+      >
+        {shareUrl && (
+          <div className="space-y-3">
+            <div className="pixel-inset bg-background p-2 text-xs font-mono text-foreground break-all">
+              {shareUrl}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(`${session.leagueName} — Fuut 2026 ${shareUrl}`)}`}
                 target="_blank" rel="noreferrer"
-                className="flex items-center justify-center pixel-border bg-pixel-green text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+                className="flex items-center justify-center pixel-border bg-pixel-green text-primary-foreground text-xs uppercase tracking-wider h-12"
               >
                 {t("snapshot.whatsapp")}
               </a>
               <a
                 href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`${session.leagueName} — Fuut 2026`)}`}
                 target="_blank" rel="noreferrer"
-                className="flex items-center justify-center pixel-border bg-pixel-blue text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+                className="flex items-center justify-center pixel-border bg-pixel-blue text-primary-foreground text-xs uppercase tracking-wider h-12"
               >
                 {t("snapshot.telegram")}
               </a>
             </div>
             <button
               onClick={handleCopy}
-              className="w-full pixel-border bg-foreground text-primary-foreground text-[7px] uppercase tracking-wider py-2"
+              className="w-full h-12 pixel-border bg-foreground text-primary-foreground text-xs uppercase tracking-wider"
             >
               {copied ? t("snapshot.copied") : t("snapshot.copy_link")}
             </button>
             <button
               onClick={() => setShareUrl(null)}
-              className="w-full text-[7px] uppercase tracking-wider text-muted-foreground py-1"
+              className="w-full text-xs text-muted-foreground py-2"
             >
               {t("league.cancel")}
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </MobileSheet>
     </div>
   );
 };
