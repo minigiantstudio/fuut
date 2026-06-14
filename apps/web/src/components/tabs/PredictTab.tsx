@@ -166,7 +166,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
     const updatedHome = field === "home_score" ? numVal : existing?.home_score ?? null;
     const updatedAway = field === "away_score" ? numVal : existing?.away_score ?? null;
 
-    await supabase.from("predictions").upsert(
+    const { error } = await supabase.from("predictions").upsert(
       {
         user_id: session.userId,
         league_id: session.leagueId,
@@ -178,6 +178,10 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       },
       { onConflict: "user_id,league_id,match_id" }
     );
+    if (error) {
+      console.error("Failed to save prediction:", error.message);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
   };
 
@@ -195,7 +199,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       );
       return;
     }
-    await supabase.from("predictions").upsert(
+    const { error: bonusErr } = await supabase.from("predictions").upsert(
       {
         user_id: session.userId,
         league_id: session.leagueId,
@@ -206,6 +210,10 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       },
       { onConflict: "user_id,league_id,match_id" }
     );
+    if (bonusErr) {
+      console.error("Failed to save bonus prediction:", bonusErr.message);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
   };
 
@@ -357,7 +365,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
           initialAway={selectedMatch.prediction?.away_score ?? 0}
           kickoffAt={selectedMatch.kickoff_at}
           onSave={async (homeScore, awayScore) => {
-            await supabase.from("predictions").upsert(
+            const { error: saveErr } = await supabase.from("predictions").upsert(
               {
                 user_id: session.userId,
                 league_id: session.leagueId,
@@ -369,6 +377,10 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
               },
               { onConflict: "user_id,league_id,match_id" }
             );
+            if (saveErr) {
+              console.error("Failed to save prediction:", saveErr.message);
+              return;
+            }
             queryClient.invalidateQueries({ queryKey: ["predictions", session.userId, session.leagueId] });
             setSelectedMatchId(null);
           }}
