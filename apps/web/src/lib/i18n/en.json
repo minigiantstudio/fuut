@@ -154,6 +154,13 @@
   "league.scoring_rules_bonus_correct": "2 pts • Correct Answer",
   "league.scoring_rules_bonus_example": "Example: Predict \"Yes\", Result \"Yes\" → 2 pts",
   "league.scoring_rules_max": "💡 Max per match: 5 pts (3 match + 2 bonus)",
+  "league.scoring_rules_scenarios": "📊 Full Examples",
+  "league.scoring_rules_scenario_match_only": "Match Prediction Only",
+  "league.scoring_rules_scenario_match_only_example": "France vs Italy • Predict 2-1 (Exact) → 3 pts",
+  "league.scoring_rules_scenario_bonus_only": "Bonus Prediction Only",
+  "league.scoring_rules_scenario_bonus_only_example": "Predict \"Red card?\" as \"Yes\" (Correct) → 2 pts",
+  "league.scoring_rules_scenario_both": "Both Match & Bonus",
+  "league.scoring_rules_scenario_both_example": "Predict 2-1 (Exact) + \"Yes\" (Correct) → 5 pts total",
 
   "bonus.header": "Bonus +2pts",
   "bonus.saved": "✓ Bonus saved!",

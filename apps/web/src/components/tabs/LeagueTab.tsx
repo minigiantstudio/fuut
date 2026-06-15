@@ -312,6 +312,23 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
             <div className="border-t-2 border-foreground pt-2 text-muted-foreground">
               <p className="text-[6px]">{t("league.scoring_rules_max")}</p>
             </div>
+            <div className="border-t-2 border-foreground pt-2 space-y-2">
+              <p className="text-foreground font-bold text-[7px]">{t("league.scoring_rules_scenarios")}</p>
+              <div className="space-y-1.5">
+                <div className="bg-background px-2 py-1.5 border-2 border-foreground">
+                  <p className="text-foreground font-bold text-[6px]">1. {t("league.scoring_rules_scenario_match_only")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_match_only_example")}</p>
+                </div>
+                <div className="bg-background px-2 py-1.5 border-2 border-foreground">
+                  <p className="text-foreground font-bold text-[6px]">2. {t("league.scoring_rules_scenario_bonus_only")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_bonus_only_example")}</p>
+                </div>
+                <div className="bg-background px-2 py-1.5 border-2 border-pixel-gold">
+                  <p className="text-foreground font-bold text-[6px]">3. {t("league.scoring_rules_scenario_both")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_both_example")}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
