@@ -346,6 +346,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
                   <PeerPredictions
                     leagueId={session.leagueId}
                     matchId={match.id}
+                    bonusQuestion={match.bonus_question}
                     currentUserId={session.userId}
                   />
                 )}
