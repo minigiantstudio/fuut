@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 import { useTranslation } from "@/lib/i18n";
+import { getBonusQuestion } from "@/lib/bonus";
 
 interface PeerPrediction {
   user_id: string;
@@ -16,6 +17,7 @@ interface PeerPrediction {
 interface PeerPredictionsProps {
   leagueId: string;
   matchId: string;
+  bonusQuestion: string | null;
   currentUserId: string;
 }
 
@@ -25,8 +27,10 @@ interface PeerPredictionsProps {
  * returns an empty set until the match is_final, so this never leaks live picks.
  * Sort order: current user first, then admin, then alphabetical by nickname.
  */
-const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsProps) => {
+const PeerPredictions = ({ leagueId, matchId, bonusQuestion, currentUserId }: PeerPredictionsProps) => {
   const { t } = useTranslation();
+
+  const question = useMemo(() => getBonusQuestion(matchId, bonusQuestion), [matchId, bonusQuestion]);
 
   const { data: rows = [], isLoading, isError } = useQuery<PeerPrediction[]>({
     queryKey: ["match-predictions", leagueId, matchId],
@@ -53,7 +57,10 @@ const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsPr
 
   return (
     <div className="mt-1 p-2 border-2 border-foreground bg-background space-y-1.5">
-      <p className="text-[6px] uppercase tracking-wider text-muted-foreground">{t("predict.peer_title")}</p>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-[6px] uppercase tracking-wider text-muted-foreground">{t("predict.peer_title")}</p>
+        <p className="text-[7px] text-foreground font-medium leading-tight">{question}</p>
+      </div>
       {isLoading ? (
         <p className="text-[6px] text-muted-foreground">{t("predict.peer_loading")}</p>
       ) : isError ? (
@@ -69,16 +76,25 @@ const PeerPredictions = ({ leagueId, matchId, currentUserId }: PeerPredictionsPr
               key={p.user_id}
               className={`flex items-center justify-between gap-2 px-1.5 py-1 ${isMe ? "bg-pixel-gold/20" : ""}`}
             >
-              <span className="text-[7px] text-foreground flex-1 truncate">
-                {p.nickname}
-                {p.role === "admin" && <span className="text-pixel-blue"> ★</span>}
-              </span>
-              <span className="text-[7px] text-foreground tabular-nums">
-                {hasPrediction ? `${p.home_score}–${p.away_score}` : t("predict.peer_none")}
-              </span>
-              <span className="text-[6px] text-pixel-green tabular-nums min-w-[28px] text-right">
-                {hasPrediction ? `+${p.points ?? 0}` : ""}
-              </span>
+              <div className="flex-1 truncate">
+                <span className="text-[7px] text-foreground">
+                  {p.nickname}
+                  {p.role === "admin" && <span className="text-pixel-blue"> ★</span>}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 tabular-nums">
+                <span className="text-[7px] text-foreground">
+                  {hasPrediction ? `${p.home_score}–${p.away_score}` : t("predict.peer_none")}
+                  {p.bonus_answer !== null && (
+                    <span className="ml-1 text-muted-foreground">
+                      [{p.bonus_answer ? t("bonus.yes") : t("bonus.no")}]
+                    </span>
+                  )}
+                </span>
+                <span className="text-[6px] text-pixel-green min-w-[28px] text-right">
+                  {hasPrediction ? `+${p.points ?? 0}` : ""}
+                </span>
+              </div>
             </div>
           );
         })

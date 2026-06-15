@@ -1,35 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Star } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
-
-// Fallback list used when matches.bonus_question is null in the DB.
-const BONUS_QUESTIONS = [
-  "Will there be a pitch invader?",
-  "Will the coach get a yellow card?",
-  "Will a goal be overturned by VAR?",
-  "Will there be a red card?",
-  "Will there be a goal in stoppage time?",
-  "Will a goalkeeper score?",
-  "Will there be an own goal?",
-  "Will the first goal be a header?",
-  "Will there be a penalty?",
-  "Will a substitute score?",
-];
-
-/**
- * Deterministic positive index from a matchId string.
- * Matches use UUIDs, so the original `parseInt(matchId)` produced NaN and the
- * fallback question was always `undefined`. Sum the char codes instead so any
- * stable id (UUID, numeric string, etc.) maps to a stable slot.
- */
-const fallbackQuestionIndex = (matchId: string, modulus: number) => {
-  if (modulus <= 0) return 0;
-  let acc = 0;
-  for (let i = 0; i < matchId.length; i++) {
-    acc = (acc + matchId.charCodeAt(i)) % modulus;
-  }
-  return acc;
-};
+import { getBonusQuestion } from "@/lib/bonus";
 
 interface BonusPredictionProps {
   matchId: string;
@@ -73,8 +45,7 @@ const BonusPrediction = ({
   }, [initialAnswer]);
 
   const question = useMemo(() => {
-    if (bonusQuestion) return bonusQuestion;
-    return BONUS_QUESTIONS[fallbackQuestionIndex(matchId, BONUS_QUESTIONS.length)];
+    return getBonusQuestion(matchId, bonusQuestion);
   }, [bonusQuestion, matchId]);
 
   const handleToggle = (e: React.MouseEvent) => {
