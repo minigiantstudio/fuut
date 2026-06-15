@@ -41,6 +41,9 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
   const queryClient = useQueryClient();
   const { setActiveLeague, refreshSession } = useSession();
 
+  // Scoring rules expand/collapse
+  const [showScoringRules, setShowScoringRules] = useState(false);
+
   // Rename
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
@@ -270,6 +273,65 @@ const LeagueTab = ({ isAdmin, session }: LeagueTabProps) => {
           </button>
         </div>
       )}
+
+      {/* Scoring Rules */}
+      <div className="space-y-2">
+        <button
+          onClick={() => setShowScoringRules(!showScoringRules)}
+          className="w-full text-left pixel-border bg-card px-4 py-3 flex items-center justify-between hover:opacity-80 transition-opacity"
+        >
+          <span className="text-foreground text-xs font-bold">{t("league.scoring_rules_title")}</span>
+          <span className="text-muted-foreground text-lg">{showScoringRules ? "−" : "+"}</span>
+        </button>
+        {showScoringRules && (
+          <div className="pixel-border bg-card p-4 space-y-3 text-[7px]">
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <p className="text-foreground font-bold">{t("league.scoring_rules_match")}</p>
+                <div className="ml-2 space-y-1.5">
+                  <div className="text-muted-foreground">
+                    <p className="font-mono text-[6px]">{t("league.scoring_rules_exact")}</p>
+                    <p className="text-[6px] italic">{t("league.scoring_rules_exact_example")}</p>
+                  </div>
+                  <div className="text-muted-foreground">
+                    <p className="font-mono text-[6px]">{t("league.scoring_rules_outcome")}</p>
+                    <p className="text-[6px] italic">{t("league.scoring_rules_outcome_example")}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1 border-t-2 border-foreground pt-2">
+                <p className="text-foreground font-bold">{t("league.scoring_rules_bonus")}</p>
+                <div className="ml-2 space-y-1.5">
+                  <div className="text-muted-foreground">
+                    <p className="font-mono text-[6px]">{t("league.scoring_rules_bonus_correct")}</p>
+                    <p className="text-[6px] italic">{t("league.scoring_rules_bonus_example")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="border-t-2 border-foreground pt-2 text-muted-foreground">
+              <p className="text-[6px]">{t("league.scoring_rules_max")}</p>
+            </div>
+            <div className="border-t-2 border-foreground pt-2 space-y-2">
+              <p className="text-foreground font-bold text-[7px]">{t("league.scoring_rules_scenarios")}</p>
+              <div className="space-y-1.5">
+                <div className="bg-background px-2 py-1.5 border-2 border-foreground">
+                  <p className="text-foreground font-bold text-[6px]">1. {t("league.scoring_rules_scenario_match_only")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_match_only_example")}</p>
+                </div>
+                <div className="bg-background px-2 py-1.5 border-2 border-foreground">
+                  <p className="text-foreground font-bold text-[6px]">2. {t("league.scoring_rules_scenario_bonus_only")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_bonus_only_example")}</p>
+                </div>
+                <div className="bg-background px-2 py-1.5 border-2 border-pixel-gold">
+                  <p className="text-foreground font-bold text-[6px]">3. {t("league.scoring_rules_scenario_both")}</p>
+                  <p className="text-muted-foreground text-[6px] italic">{t("league.scoring_rules_scenario_both_example")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Members list */}
       <div className="space-y-2">
