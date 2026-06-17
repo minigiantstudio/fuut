@@ -10,7 +10,7 @@ interface MatchDetailProps {
   initialHome?: number;
   initialAway?: number;
   kickoffAt: string;
-  onSave: (homeScore: number, awayScore: number) => void;
+  onSave: (homeScore: number, awayScore: number) => Promise<void>;
 }
 
 const ScoreSelector = ({
@@ -69,9 +69,8 @@ const MatchDetail = ({
     ? `${days} ${t("lock.days")}`
     : `${hours}h ${minutes}m`;
 
-  const handleSave = () => {
-    onSave(homeScore, awayScore);
-    onClose();
+  const handleSave = async () => {
+    await onSave(homeScore, awayScore);
   };
 
   return (
