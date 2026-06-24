@@ -15,6 +15,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    // PKCE flow: magic links carry token_hash as a query param (not #hash),
+    // and AuthCallback gates exchange behind a button click — defeating email
+    // scanners (Gmail, Outlook Safe Links) that pre-fetch URLs and silently
+    // consume implicit-flow tokens before the user taps.
+    flowType: "pkce",
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
     lock: noOpLock,
   },
