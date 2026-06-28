@@ -112,6 +112,7 @@ const PredictTab = ({ isAdmin = false, session }: PredictTabProps) => {
       }) + " Matches";
     }
     const knockoutMap: Record<string, string> = {
+      r32: "Round of 32",
       r16: "Round of 16",
       qf: "Quarter-finals",
       sf: "Semi-finals",
